@@ -1,0 +1,14 @@
+import { z } from 'zod'
+
+export const GroomedItemSchema = z.object({
+  title: z.string().min(1),
+  problem: z.string().min(1),
+  acceptanceCriteria: z.array(z.string().min(1)).min(1).max(10),
+  estimate: z.enum(['XS', 'S', 'M', 'L', 'XL']),
+  priority: z.string().regex(/^(HIGH|MEDIUM|LOW)\s*[—–-]\s*.+/, 'Priority must be "LEVEL — rationale" format'),
+  tags: z.array(z.string()).min(1).max(10),
+})
+
+export const GroomedItemsSchema = z.array(GroomedItemSchema).min(1)
+
+export type GroomedItem = z.infer<typeof GroomedItemSchema>

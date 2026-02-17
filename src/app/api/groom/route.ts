@@ -1,131 +1,95 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
-
-// Rate limiting storage (in production, use Redis or a database)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
+import { checkRateLimit, getMaxItems, resolveUserTier } from '@/lib/rate-limit'
+import { GroomedItemsSchema, type GroomedItem } from '@/lib/schemas'
 
 interface GroomRequest {
-  items: string
-  format: 'text' | 'csv' | 'json'
+  items: string[]
+  context?: string
 }
 
-interface GroomedItem {
-  title: string
-  problem: string
-  priority: 'P0' | 'P1' | 'P2' | 'P3'
-  effort: 'S' | 'M' | 'L' | 'XL'
-  category: string
-  dependencies: string
-}
+const MODEL = 'claude-3-5-haiku-20241022'
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || 'your-api-key-here',
+  apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
-function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for')
-  const realIP = request.headers.get('x-real-ip')
-  
-  if (forwarded) {
-    return forwarded.split(',')[0].trim()
-  }
-  
-  if (realIP) {
-    return realIP
-  }
-  
-  return 'unknown'
+const GROOMING_PROMPT = `You are an expert product manager and scrum master. Transform messy backlog items into well-structured, actionable work items.
+
+For each item, provide:
+1. **title**: Clean, actionable title
+2. **problem**: Why this matters — the problem statement (1-2 sentences)
+3. **acceptanceCriteria**: Array of 2-4 testable acceptance criteria
+4. **estimate**: T-shirt size: XS (< 1 day), S (1-2 days), M (3-5 days), L (1-2 weeks), XL (2+ weeks)
+5. **priority**: "HIGH", "MEDIUM", or "LOW" with a brief rationale in format "LEVEL — rationale"
+6. **tags**: Array of 1-3 suggested labels/categories (e.g., "bug", "feature", "security", "ux", "performance", "tech-debt")
+
+Be opinionated. Make realistic estimates.
+
+Return ONLY a valid JSON array, no markdown fences or explanation:
+[{"title":"...","problem":"...","acceptanceCriteria":["..."],"estimate":"M","priority":"HIGH — rationale","tags":["bug"]}]`
+
+function parseClaudeJson(text: string): unknown {
+  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+  return JSON.parse(cleaned)
 }
-
-function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
-  const now = Date.now()
-  const dayInMs = 24 * 60 * 60 * 1000
-  
-  const existing = rateLimitStore.get(ip)
-  
-  if (!existing || now > existing.resetTime) {
-    rateLimitStore.set(ip, { count: 1, resetTime: now + dayInMs })
-    return { allowed: true, remaining: 2 }
-  }
-  
-  if (existing.count >= 3) {
-    return { allowed: false, remaining: 0 }
-  }
-  
-  existing.count++
-  return { allowed: true, remaining: 3 - existing.count }
-}
-
-const GROOMING_PROMPT = `You are an expert product manager and scrum master. Your job is to take messy, unclear backlog items and transform them into well-groomed, actionable work items.
-
-For each item, you must provide:
-1. **Title**: Clear, actionable title (what needs to be done)
-2. **Problem Statement**: Why this work matters (the problem it solves)  
-3. **Priority**: P0 (critical/blocking), P1 (high), P2 (medium), P3 (low)
-4. **Effort**: S (1-2 days), M (3-5 days), L (1-2 weeks), XL (2+ weeks - should be broken down)
-5. **Category**: Bug Fix, Feature, Tech Debt, Documentation, etc.
-6. **Dependencies**: What else needs to be done first, or "None"
-
-Be opinionated and practical. Don't hedge. Make decisions about priority and effort based on typical software development scenarios.
-
-Return ONLY a valid JSON array of objects, no other text or explanation:
-
-[
-  {
-    "title": "Fix authentication login bug",
-    "problem": "Users cannot log in due to session timeout issues affecting user retention",
-    "priority": "P0",
-    "effort": "M", 
-    "category": "Bug Fix",
-    "dependencies": "None"
-  }
-]
-
-Input backlog items:`
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  const requestId = crypto.randomUUID()
+
   try {
+    const body: GroomRequest = await request.json()
+
+    if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
+      return NextResponse.json({ error: 'No backlog items provided. Send { items: string[] }' }, { status: 400 })
+    }
+
+    // Resolve tier from license key
+    const licenseKey = request.headers.get('x-license-key')
+    const tier = await resolveUserTier(licenseKey)
+
     // Rate limiting
-    const clientIP = getClientIP(request)
-    const rateLimit = checkRateLimit(clientIP)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+               request.headers.get('x-real-ip') || 
+               'unknown'
+    const rateCheck = await checkRateLimit(ip, tier)
     
-    if (!rateLimit.allowed) {
+    if (!rateCheck.allowed) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded. Free tier allows 3 sessions per day.' },
+        { error: 'Daily request limit reached. Upgrade to Pro for unlimited requests.', tier: rateCheck.tier },
         { status: 429 }
       )
     }
 
-    const body: GroomRequest = await request.json()
-    
-    if (!body.items || !body.items.trim()) {
+    const maxItems = getMaxItems(tier)
+    const cleanItems = body.items.filter(i => i.trim())
+
+    if (cleanItems.length === 0) {
+      return NextResponse.json({ error: 'All items were empty' }, { status: 400 })
+    }
+
+    if (cleanItems.length > maxItems) {
       return NextResponse.json(
-        { error: 'No backlog items provided' },
+        { error: `${tier} tier limited to ${maxItems} items per request. You sent ${cleanItems.length}. Upgrade for more.` },
         { status: 400 }
       )
     }
 
-    // Count items (rough estimate by lines)
-    const itemCount = body.items.split('\n').filter(line => line.trim()).length
-    
-    if (itemCount > 10) {
-      return NextResponse.json(
-        { error: 'Free tier limited to 10 items per session' },
-        { status: 400 }
-      )
-    }
+    const items = cleanItems.slice(0, maxItems)
+    const contextLine = body.context ? `\n\nProject context: ${body.context}` : ''
+    const itemsList = items.map((item, i) => `${i + 1}. ${item}`).join('\n')
 
-    // Call Claude API
     const response = await anthropic.messages.create({
-      model: 'claude-3-5-haiku-20241022',
-      max_tokens: 2000,
+      model: MODEL,
+      max_tokens: 4000,
+      temperature: 0.3,
       messages: [
         {
           role: 'user',
-          content: `${GROOMING_PROMPT}\n\n${body.items}`
+          content: `${GROOMING_PROMPT}${contextLine}\n\nBacklog items:\n${itemsList}`
         }
       ],
-      temperature: 0.3,
     })
 
     const content = response.content[0]
@@ -133,47 +97,69 @@ export async function POST(request: NextRequest) {
       throw new Error('Unexpected response type from Claude')
     }
 
+    // Parse and validate
     let groomedItems: GroomedItem[]
+    let parsed: unknown
     try {
-      groomedItems = JSON.parse(content.text)
-    } catch (parseError) {
+      parsed = parseClaudeJson(content.text)
+    } catch {
       console.error('Failed to parse Claude response:', content.text)
       throw new Error('Failed to parse grooming results')
     }
 
-    // Validate the response structure
-    if (!Array.isArray(groomedItems)) {
-      throw new Error('Invalid response format from AI')
-    }
+    const validation = GroomedItemsSchema.safeParse(parsed)
+    if (validation.success) {
+      groomedItems = validation.data
+    } else {
+      // Retry once with correction prompt
+      console.warn('Validation failed, retrying:', validation.error.issues)
+      const retryResponse = await anthropic.messages.create({
+        model: MODEL,
+        max_tokens: 4000,
+        temperature: 0.1,
+        messages: [
+          { role: 'user', content: `${GROOMING_PROMPT}${contextLine}\n\nBacklog items:\n${itemsList}` },
+          { role: 'assistant', content: content.text },
+          { role: 'user', content: `Your response had validation errors: ${JSON.stringify(validation.error.issues)}. Fix and return valid JSON array. Priority must be "HIGH — rationale", "MEDIUM — rationale", or "LOW — rationale". Estimate must be XS/S/M/L/XL. Return ONLY the JSON array.` }
+        ],
+      })
 
-    for (const item of groomedItems) {
-      if (!item.title || !item.problem || !item.priority || !item.effort || !item.category) {
-        throw new Error('Incomplete grooming results from AI')
-      }
-    }
+      const retryContent = retryResponse.content[0]
+      if (retryContent.type !== 'text') throw new Error('Retry failed')
 
-    return NextResponse.json(
-      { 
-        items: groomedItems,
-        remaining: rateLimit.remaining - 1
-      },
-      { 
-        status: 200,
-        headers: {
-          'X-RateLimit-Remaining': String(rateLimit.remaining - 1),
-          'X-RateLimit-Limit': '3'
+      try {
+        const retryParsed = parseClaudeJson(retryContent.text)
+        const retryValidation = GroomedItemsSchema.safeParse(retryParsed)
+        if (retryValidation.success) {
+          groomedItems = retryValidation.data
+        } else {
+          console.error('Retry validation also failed:', retryValidation.error.issues)
+          return NextResponse.json(
+            { error: 'AI output failed validation after retry', details: retryValidation.error.issues },
+            { status: 502 }
+          )
         }
+      } catch {
+        throw new Error('Failed to parse retry response')
       }
-    )
+    }
+
+    return NextResponse.json({
+      items: groomedItems,
+      _meta: {
+        requestId,
+        model: MODEL,
+        latencyMs: Date.now() - startTime,
+        promptVersion: '1.0',
+        tier,
+      }
+    }, { status: 200 })
 
   } catch (error) {
     console.error('API Error:', error)
-    
-    if (error instanceof Error && error.message.includes('API key')) {
-      return NextResponse.json(
-        { error: 'Service temporarily unavailable' },
-        { status: 503 }
-      )
+
+    if (error instanceof Anthropic.APIError) {
+      return NextResponse.json({ error: 'AI service temporarily unavailable' }, { status: 503 })
     }
 
     return NextResponse.json(
@@ -184,12 +170,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json(
-    { 
-      message: 'Backlog Groomer API',
-      endpoints: {
-        'POST /api/groom': 'Groom backlog items'
-      }
-    }
-  )
+  return NextResponse.json({
+    message: 'Refine Backlog API',
+    usage: 'POST /api/groom with { items: string[], context?: string }',
+    limit: '5 items per request (free tier), 25 (Pro), 50 (Team)',
+  })
 }

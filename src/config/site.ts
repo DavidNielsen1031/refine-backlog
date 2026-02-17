@@ -1,14 +1,14 @@
 export const siteConfig = {
-  name: "Backlog Groomer",
-  tagline: "Paste your messy backlog. Get it back clean.",
-  description: "AI-powered backlog grooming that turns chaos into clarity. Clean, prioritized, and ready to sprint.",
+  name: "Refine Backlog",
+  tagline: "Paste your messy backlog. Get it back refined.",
+  description: "AI-powered backlog refinement that turns chaos into clarity. Clean, prioritized, and ready to sprint.",
   
   hero: {
     badge: "Free tier available",
-    title: "Paste your messy backlog.\nGet it back clean.",
-    subtitle: "Turn your chaotic project backlog into a clean, prioritized list ready for sprint planning. No more analysis paralysis.",
-    cta: { text: "Try It Free", href: "#groomer" },
-    secondaryCta: { text: "View Example", href: "#example" },
+    title: "Your backlog is a mess.\nFix it in 30 seconds.",
+    subtitle: "AI-powered refinement that turns vague ideas into sprint-ready stories with priorities, estimates, and acceptance criteria.",
+    cta: { text: "Refine My Backlog — Free", href: "#refiner" },
+    secondaryCta: { text: "See It In Action", href: "#example" },
   },
   
   features: [
@@ -19,8 +19,8 @@ export const siteConfig = {
     },
     {
       icon: "Target",
-      title: "Opinionated Grooming",
-      description: "Not just cleanup - adds problem statements, effort estimates, and priorities."
+      title: "Opinionated Refinement",
+      description: "Not just cleanup — adds problem statements, effort estimates, and priorities."
     },
     {
       icon: "Download",
@@ -115,24 +115,36 @@ export const siteConfig = {
   
   faq: [
     {
-      q: "How does the AI grooming work?",
-      a: "We use Claude AI to analyze your backlog items, deduplicate similar tasks, add clear problem statements, estimate effort (S/M/L/XL), assign priorities (P0-P3), categorize work, and identify dependencies."
+      q: "What is backlog refinement?",
+      a: "Backlog refinement is the process of reviewing, clarifying, and organizing product backlog items so they are ready for sprint planning. It involves adding detail, estimates, priorities, and acceptance criteria to user stories and tasks. Refine Backlog automates this entire process using AI."
     },
     {
-      q: "What formats can I import?",
-      a: "Plain text (one item per line), CSV exports from Jira/Linear/GitHub, or JSON. Just paste directly into the text area."
+      q: "How does AI backlog refinement work?",
+      a: "Refine Backlog uses Claude AI to analyze your raw backlog items, deduplicate similar tasks, add clear problem statements, estimate effort using t-shirt sizing (S/M/L/XL), assign priorities (P0-P3), categorize work, and identify dependencies. You paste your items and get structured, sprint-ready stories back in seconds."
+    },
+    {
+      q: "How much does Refine Backlog cost?",
+      a: "Refine Backlog offers three plans: Free (10 items per session, 3 sessions/month, no signup required), Pro at $9/month (100 items per session, unlimited sessions), and Team at $29/month (500 items per session, team sharing & collaboration). No long-term contracts — cancel anytime."
+    },
+    {
+      q: "Can I import from Jira, Linear, or GitHub?",
+      a: "Yes. Refine Backlog accepts plain text (one item per line), CSV exports from Jira, Linear, and GitHub Issues, or JSON format. Just paste directly into the text area. You can also export results as CSV compatible with all major project management tools."
     },
     {
       q: "Is my data secure?",
-      a: "Yes. We don't store your backlog data. Processing happens in real-time and results are returned directly to your browser."
+      a: "Yes. We don't store your backlog data. Processing happens in real-time and results are returned directly to your browser. No data is retained after your session."
     },
     {
-      q: "Can I export back to my tools?",
-      a: "Absolutely. We provide CSV exports compatible with Jira, Linear, GitHub Issues, and most project management tools."
+      q: "What's the difference between Pro and Team?",
+      a: "Pro ($9/month) is designed for individual product managers and includes 100 items per session with unlimited sessions. Team ($29/month) adds team sharing & collaboration, custom export templates, bulk processing, and dedicated support with 500 items per session."
     },
     {
       q: "What's the difference between effort sizes?",
-      a: "S (Small): 1-2 days, M (Medium): 3-5 days, L (Large): 1-2 weeks, XL (Extra Large): 2+ weeks or should be broken down."
+      a: "S (Small): 1-2 days, one person, straightforward change. M (Medium): 3-5 days, some complexity. L (Large): 1-2 weeks, cross-functional work. XL (Extra Large): 2+ weeks, should probably be broken down into smaller items."
+    },
+    {
+      q: "Do I need to create an account?",
+      a: "No. The free tier works instantly with no signup required. Just paste your backlog items and get results. You only need an account if you upgrade to Pro or Team for higher limits."
     }
   ],
   
@@ -143,8 +155,8 @@ export const siteConfig = {
       { text: "Support", href: "/support" }
     ],
     social: [
-      { name: "Twitter", href: "https://twitter.com/backloggroomer", icon: "Twitter" },
-      { name: "GitHub", href: "https://github.com/backloggroomer", icon: "GitHub" }
+      { name: "Twitter", href: "https://twitter.com/refinebacklog", icon: "Twitter" },
+      { name: "GitHub", href: "https://github.com/refinebacklog", icon: "GitHub" }
     ]
   }
 }

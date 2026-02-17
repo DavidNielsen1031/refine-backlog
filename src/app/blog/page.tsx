@@ -1,0 +1,88 @@
+import { Metadata } from "next"
+import Link from "next/link"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { ArrowRight } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: "Blog — Refine Backlog",
+  description: "Tips, best practices, and insights on backlog refinement, sprint planning, and product management. Learn how AI-powered tools can save your team hours every sprint.",
+  alternates: {
+    canonical: "https://refinebacklog.com/blog",
+  },
+}
+
+const posts = [
+  {
+    slug: "clean-up-messy-backlog-5-minutes",
+    title: "How to Clean Up a Messy Product Backlog in 5 Minutes",
+    description: "Your backlog has 200+ items and nobody knows what half of them mean. Here's how to fix that fast.",
+    date: "2026-02-16",
+    readTime: "5 min read",
+    tags: ["Backlog Refinement", "Productivity"],
+  },
+  {
+    slug: "ai-powered-backlog-refinement",
+    title: "AI-Powered Backlog Refinement: Save Hours of Sprint Planning",
+    description: "How AI is changing the way product teams prepare for sprints — and why manual refinement is becoming obsolete.",
+    date: "2026-02-15",
+    readTime: "6 min read",
+    tags: ["AI", "Sprint Planning"],
+  },
+  {
+    slug: "backlog-refinement-best-practices",
+    title: "The Product Manager's Guide to Backlog Refinement Best Practices",
+    description: "Everything you need to run effective refinement sessions, from preparation to prioritization frameworks.",
+    date: "2026-02-14",
+    readTime: "7 min read",
+    tags: ["Best Practices", "Product Management"],
+  },
+]
+
+export default function BlogIndex() {
+  return (
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-4xl px-6 lg:px-8 py-24">
+        <div className="mb-16">
+          <Link href="/" className="text-emerald-400 hover:underline text-sm mb-4 inline-block">
+            ← Back to Refine Backlog
+          </Link>
+          <h1 className="text-4xl font-bold font-space-grotesk mb-4">Blog</h1>
+          <p className="text-lg text-muted-foreground">
+            Practical advice on backlog refinement, sprint planning, and shipping better products.
+          </p>
+        </div>
+
+        <div className="space-y-6">
+          {posts.map((post) => (
+            <Link key={post.slug} href={`/blog/${post.slug}`}>
+              <Card className="border-border/50 bg-card/30 backdrop-blur hover:bg-card/50 transition-all duration-300 group cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-sm text-muted-foreground">{post.date}</span>
+                    <span className="text-muted-foreground/30">·</span>
+                    <span className="text-sm text-muted-foreground">{post.readTime}</span>
+                  </div>
+                  <h2 className="text-xl font-semibold mb-2 group-hover:text-emerald-400 transition-colors">
+                    {post.title}
+                  </h2>
+                  <p className="text-muted-foreground mb-4">{post.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      {post.tags.map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                      ))}
+                    </div>
+                    <span className="text-emerald-400 text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Read more <ArrowRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </main>
+  )
+}

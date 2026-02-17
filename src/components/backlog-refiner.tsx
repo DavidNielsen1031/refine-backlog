@@ -52,7 +52,7 @@ export function BacklogGroomer() {
       })
 
       const data = await response.json()
-      if (!response.ok) throw new Error(data.error || "Failed to groom backlog")
+      if (!response.ok) throw new Error(data.error || "Failed to refine backlog")
       setResults(data.items)
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unexpected error occurred")
@@ -111,7 +111,7 @@ export function BacklogGroomer() {
   }
 
   return (
-    <section id="groomer" className="py-24 sm:py-32">
+    <section id="refiner" className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="text-center mb-12">

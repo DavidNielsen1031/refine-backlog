@@ -15,7 +15,7 @@ export function FAQSection() {
             Frequently Asked Questions
           </h2>
           <p className="text-lg text-muted-foreground">
-            Everything you need to know about Backlog Groomer
+            Everything you need to know about Refine Backlog
           </p>
         </div>
 
@@ -40,7 +40,7 @@ export function FAQSection() {
           <p className="text-muted-foreground">
             Still have questions?{" "}
             <a 
-              href="mailto:support@backloggroomer.com" 
+              href="mailto:support@refinebacklog.com" 
               className="text-emerald-400 hover:underline"
             >
               Contact our support team

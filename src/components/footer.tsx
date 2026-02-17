@@ -64,16 +64,16 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <a 
-                  href="#groomer"
+                  href="#refiner"
                   className="text-sm text-muted-foreground hover:text-emerald-400 transition-colors"
                   onClick={(e) => {
                     e.preventDefault()
-                    document.getElementById('groomer')?.scrollIntoView({ 
+                    document.getElementById('refiner')?.scrollIntoView({ 
                       behavior: 'smooth' 
                     })
                   }}
                 >
-                  Try Free
+                  Refine My Backlog
                 </a>
               </li>
               <li>
@@ -88,6 +88,14 @@ export function Footer() {
                   }}
                 >
                   View Example
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="/blog"
+                  className="text-sm text-muted-foreground hover:text-emerald-400 transition-colors"
+                >
+                  Blog
                 </a>
               </li>
               <li>

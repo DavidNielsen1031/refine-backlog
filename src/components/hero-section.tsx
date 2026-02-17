@@ -7,7 +7,7 @@ import { ArrowRight, Sparkles } from "lucide-react"
 
 export function HeroSection() {
   const scrollToGroomer = () => {
-    document.getElementById('groomer')?.scrollIntoView({ 
+    document.getElementById('refiner')?.scrollIntoView({ 
       behavior: 'smooth' 
     })
   }

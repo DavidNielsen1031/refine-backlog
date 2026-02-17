@@ -1,16 +1,51 @@
 "use client"
 
+import { useState } from "react"
+import { track } from '@vercel/analytics'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { siteConfig } from "@/config/site"
-import { Check, Star } from "lucide-react"
+import { Check, Star, Loader2 } from "lucide-react"
 
 export function PricingSection() {
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
+
   const scrollToGroomer = () => {
-    document.getElementById('groomer')?.scrollIntoView({ 
+    document.getElementById('refiner')?.scrollIntoView({ 
       behavior: 'smooth' 
     })
+  }
+
+  const handleCheckout = async (plan: 'pro' | 'team') => {
+    setLoadingPlan(plan)
+    
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          plan,
+          priceId: plan === 'pro' ? 'price_pro' : 'price_team'
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url
+      } else {
+        throw new Error(data.error || 'Failed to create checkout session')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Something went wrong. Please try again or contact support.')
+    } finally {
+      setLoadingPlan(null)
+    }
   }
 
   return (
@@ -75,9 +110,20 @@ export function PricingSection() {
                       ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
                       : 'bg-muted hover:bg-muted/80'
                   }`}
-                  onClick={plan.name === 'Free' ? scrollToGroomer : undefined}
-                  disabled={plan.name === 'Team'}
+                  onClick={
+                    plan.name === 'Free' 
+                      ? scrollToGroomer 
+                      : plan.name === 'Pro'
+                      ? () => handleCheckout('pro')
+                      : plan.name === 'Team'
+                      ? () => handleCheckout('team')
+                      : undefined
+                  }
+                  disabled={loadingPlan !== null}
                 >
+                  {loadingPlan === plan.name.toLowerCase() && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   {plan.cta}
                 </Button>
                 
@@ -89,7 +135,7 @@ export function PricingSection() {
                 
                 {plan.name === 'Pro' && (
                   <p className="text-xs text-center text-muted-foreground">
-                    Coming soon • Join waitlist
+                    Instant access • Cancel anytime
                   </p>
                 )}
                 

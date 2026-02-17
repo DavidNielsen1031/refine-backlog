@@ -17,10 +17,10 @@ export function FeaturesSection() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center mb-16">
           <h2 className="text-section-title font-space-grotesk mb-4">
-            Why Choose Backlog Groomer?
+            Why Choose Refine Backlog?
           </h2>
           <p className="text-lg text-muted-foreground">
-            Stop wasting time in endless grooming meetings. Get your backlog cleaned and prioritized in seconds.
+            Stop wasting hours in refinement meetings. Get your backlog cleaned and prioritized in seconds.
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export function FeaturesSection() {
         <div className="mt-16 grid md:grid-cols-3 gap-8 text-center">
           <div className="space-y-2">
             <div className="text-2xl font-bold text-emerald-400">10x</div>
-            <div className="text-sm text-muted-foreground">Faster than manual grooming</div>
+            <div className="text-sm text-muted-foreground">Faster than manual refinement</div>
           </div>
           <div className="space-y-2">
             <div className="text-2xl font-bold text-emerald-400">95%</div>
