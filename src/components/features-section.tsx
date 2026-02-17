@@ -51,19 +51,19 @@ export function FeaturesSection() {
           })}
         </div>
 
-        {/* Additional benefits */}
+        {/* Built for the weekly grind */}
         <div className="mt-16 grid md:grid-cols-3 gap-8 text-center">
           <div className="space-y-2">
-            <div className="text-2xl font-bold text-emerald-400">10x</div>
-            <div className="text-sm text-muted-foreground">Faster than manual refinement</div>
+            <div className="text-lg font-semibold text-emerald-400">Consistent Quality</div>
+            <div className="text-sm text-muted-foreground">Same structured format every sprint, every time.</div>
           </div>
           <div className="space-y-2">
-            <div className="text-2xl font-bold text-emerald-400">95%</div>
-            <div className="text-sm text-muted-foreground">Accuracy in prioritization</div>
+            <div className="text-lg font-semibold text-emerald-400">Ready in Seconds</div>
+            <div className="text-sm text-muted-foreground">Paste 5–50 items, get results before your coffee cools.</div>
           </div>
           <div className="space-y-2">
-            <div className="text-2xl font-bold text-emerald-400">Zero</div>
-            <div className="text-sm text-muted-foreground">Setup time required</div>
+            <div className="text-lg font-semibold text-emerald-400">Your Starting Point</div>
+            <div className="text-sm text-muted-foreground">AI drafts. Your team reviews and decides.</div>
           </div>
         </div>
       </div>
