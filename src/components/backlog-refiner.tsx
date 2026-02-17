@@ -15,6 +15,15 @@ interface GroomedItem {
   estimate: string
   priority: string
   tags: string[]
+  assumptions?: string[]
+}
+
+function toGherkin(ac: string): string {
+  const lower = ac.toLowerCase()
+  if (lower.startsWith('given') || lower.startsWith('when') || lower.startsWith('then')) {
+    return ac
+  }
+  return `Then ${ac.charAt(0).toLowerCase() + ac.slice(1)}`
 }
 
 export function BacklogGroomer() {
@@ -24,6 +33,7 @@ export function BacklogGroomer() {
   const [results, setResults] = useState<GroomedItem[]>([])
   const [error, setError] = useState("")
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
+  const [showGherkin, setShowGherkin] = useState(false)
 
   const handleGroom = async () => {
     if (!input.trim()) {
@@ -65,7 +75,10 @@ export function BacklogGroomer() {
     const md = results.map(item => {
       const ac = item.acceptanceCriteria.map(c => `  - [ ] ${c}`).join("\n")
       const tags = item.tags.map(t => `\`${t}\``).join(", ")
-      return `## ${item.title}\n\n**Problem:** ${item.problem}\n\n**Priority:** ${item.priority}\n**Estimate:** ${item.estimate}\n**Tags:** ${tags}\n\n**Acceptance Criteria:**\n${ac}`
+      const assumptions = item.assumptions && item.assumptions.length > 0
+        ? `\n\n**Assumptions/Open Questions:**\n${item.assumptions.map(a => `  - ❓ ${a}`).join("\n")}`
+        : ''
+      return `## ${item.title}\n\n**Problem:** ${item.problem}\n\n**Priority:** ${item.priority}\n**Estimate:** ${item.estimate}\n**Tags:** ${tags}\n\n**Acceptance Criteria:**\n${ac}${assumptions}`
     }).join("\n\n---\n\n")
 
     await navigator.clipboard.writeText(md)
@@ -186,9 +199,22 @@ Example:
           {results.length > 0 && (
             <div className="mt-8 space-y-4">
               <div className="flex justify-between items-center">
-                <h3 className="text-xl font-semibold text-emerald-400">
-                  ✨ Refined Results ({results.length} items)
-                </h3>
+                <div>
+                  <h3 className="text-xl font-semibold text-emerald-400">
+                    ✨ Refined Results ({results.length} items)
+                  </h3>
+                  <div className="flex items-center gap-2 mt-2">
+                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showGherkin}
+                        onChange={(e) => setShowGherkin(e.target.checked)}
+                        className="rounded border-border"
+                      />
+                      Show Gherkin format
+                    </label>
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={copyMarkdown}>
                     {copySuccess === "md" ? (
@@ -210,10 +236,10 @@ Example:
                       <h4 className="font-semibold text-lg">{item.title}</h4>
                       <div className="flex gap-2 flex-shrink-0">
                         <Badge className={getPriorityColor(item.priority)}>
-                          {item.priority.split(" — ")[0]}
+                          Priority: {item.priority.split(" — ")[0].charAt(0) + item.priority.split(" — ")[0].slice(1).toLowerCase()}
                         </Badge>
                         <Badge className={getEstimateColor(item.estimate)}>
-                          {item.estimate}
+                          Effort: {item.estimate}
                         </Badge>
                       </div>
                     </div>
@@ -234,7 +260,7 @@ Example:
                         {item.acceptanceCriteria.map((ac, i) => (
                           <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                             <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                            {ac}
+                            {showGherkin ? toGherkin(ac) : ac}
                           </li>
                         ))}
                       </ul>
@@ -247,13 +273,27 @@ Example:
                         </Badge>
                       ))}
                     </div>
+
+                    {item.assumptions && item.assumptions.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-border/30">
+                        <span className="text-xs font-medium text-muted-foreground/70">Needs clarification:</span>
+                        <ul className="mt-1 space-y-0.5">
+                          {item.assumptions.map((assumption, i) => (
+                            <li key={i} className="text-xs text-muted-foreground/60 flex items-start gap-1.5">
+                              <span className="text-yellow-400/60 mt-0.5">?</span>
+                              {assumption}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
 
               {results.length > 0 && (
                 <p className="text-xs text-muted-foreground/70 text-center mt-6 italic">
-                  AI-generated refinement is a starting point. Review with your team before committing to sprint planning.
+                  This is a first draft to accelerate refinement. Your team should review, debate, and adjust before sprint planning.
                 </p>
               )}
             </div>

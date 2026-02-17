@@ -7,6 +7,7 @@ export const GroomedItemSchema = z.object({
   estimate: z.enum(['XS', 'S', 'M', 'L', 'XL']),
   priority: z.string().regex(/^(HIGH|MEDIUM|LOW)\s*[—–-]\s*.+/, 'Priority must be "LEVEL — rationale" format'),
   tags: z.array(z.string()).min(1).max(10),
+  assumptions: z.array(z.string()).max(2).optional(),
 })
 
 export const GroomedItemsSchema = z.array(GroomedItemSchema).min(1)

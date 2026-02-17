@@ -23,11 +23,12 @@ For each item, provide:
 4. **estimate**: T-shirt size: XS (< 1 day), S (1-2 days), M (3-5 days), L (1-2 weeks), XL (2+ weeks)
 5. **priority**: "HIGH", "MEDIUM", or "LOW" with a brief rationale in format "LEVEL — rationale"
 6. **tags**: Array of 1-3 suggested labels/categories (e.g., "bug", "feature", "security", "ux", "performance", "tech-debt")
+7. **assumptions**: Array of 0-2 assumptions or open questions that should be clarified before implementation (optional — only include if genuinely ambiguous)
 
 Be opinionated. Make realistic estimates.
 
 Return ONLY a valid JSON array, no markdown fences or explanation:
-[{"title":"...","problem":"...","acceptanceCriteria":["..."],"estimate":"M","priority":"HIGH — rationale","tags":["bug"]}]`
+[{"title":"...","problem":"...","acceptanceCriteria":["..."],"estimate":"M","priority":"HIGH — rationale","tags":["bug"],"assumptions":["Assumes export is for current view only, not historical data"]}]`
 
 function parseClaudeJson(text: string): unknown {
   const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()

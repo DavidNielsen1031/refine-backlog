@@ -24,6 +24,7 @@ const afterItems = [
     estimate: "M" as const,
     priority: "HIGH",
     tags: ["bug", "auth", "critical"],
+    assumptions: ["Confirm whether token refresh applies to all auth methods or OAuth only"],
   },
   {
     title: "Implement Dashboard Analytics Overview",
@@ -36,6 +37,7 @@ const afterItems = [
     estimate: "L" as const,
     priority: "MEDIUM",
     tags: ["feature", "analytics", "ux"],
+    assumptions: [] as string[],
   },
   {
     title: "Update REST API Documentation",
@@ -48,6 +50,7 @@ const afterItems = [
     estimate: "S" as const,
     priority: "MEDIUM",
     tags: ["docs", "developer-experience"],
+    assumptions: [] as string[],
   },
 ]
 
@@ -124,7 +127,7 @@ export function ExampleSection() {
                       <h4 className="font-semibold text-sm">{item.title}</h4>
                       <div className="flex gap-1 flex-shrink-0">
                         <Badge className={getPriorityColor(item.priority)}>
-                          {item.priority}
+                          Priority: {item.priority.charAt(0) + item.priority.slice(1).toLowerCase()}
                         </Badge>
                         <Badge className={getEstimateColor(item.estimate)}>
                           Effort: {item.estimate}
@@ -150,6 +153,19 @@ export function ExampleSection() {
                         <Badge key={i} variant="outline" className="text-xs">{tag}</Badge>
                       ))}
                     </div>
+                    {item.assumptions && item.assumptions.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-border/30">
+                        <span className="text-xs font-medium text-muted-foreground/70">Needs clarification:</span>
+                        <ul className="mt-1 space-y-0.5">
+                          {item.assumptions.map((assumption: string, i: number) => (
+                            <li key={i} className="text-xs text-muted-foreground/60 flex items-start gap-1.5">
+                              <span className="text-yellow-400/60 mt-0.5">?</span>
+                              {assumption}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

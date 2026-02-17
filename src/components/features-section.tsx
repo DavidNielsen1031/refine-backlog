@@ -52,18 +52,21 @@ export function FeaturesSection() {
         </div>
 
         {/* Built for the weekly grind */}
-        <div className="mt-16 grid md:grid-cols-3 gap-8 text-center">
-          <div className="space-y-2">
-            <div className="text-lg font-semibold text-emerald-400">Consistent Quality</div>
-            <div className="text-sm text-muted-foreground">Same structured format every sprint, every time.</div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-lg font-semibold text-emerald-400">Ready in Seconds</div>
-            <div className="text-sm text-muted-foreground">Paste 5–50 items, get results before your coffee cools.</div>
-          </div>
-          <div className="space-y-2">
-            <div className="text-lg font-semibold text-emerald-400">Your Starting Point</div>
-            <div className="text-sm text-muted-foreground">AI drafts. Your team reviews and decides.</div>
+        <div className="mt-16">
+          <h3 className="text-lg font-semibold text-center text-muted-foreground mb-8">Built for the Weekly Grind</h3>
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div className="space-y-2">
+              <div className="text-lg font-semibold text-emerald-400">Consistent Structure</div>
+              <div className="text-sm text-muted-foreground">Same clear format every sprint — title, problem, acceptance criteria, effort, and priority.</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-lg font-semibold text-emerald-400">Fast First Draft</div>
+              <div className="text-sm text-muted-foreground">Paste 5–50 items and get structured stories before refinement starts.</div>
+            </div>
+            <div className="space-y-2">
+              <div className="text-lg font-semibold text-emerald-400">Your Starting Point</div>
+              <div className="text-sm text-muted-foreground">AI drafts. Your team reviews, debates, and decides.</div>
+            </div>
           </div>
         </div>
       </div>
