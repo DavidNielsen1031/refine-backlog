@@ -5,8 +5,8 @@ export const siteConfig = {
   
   hero: {
     badge: "Free tier available",
-    title: "Your backlog is a mess.\nFix it in 30 seconds.",
-    subtitle: "AI-powered refinement that turns vague ideas into sprint-ready stories with priorities, estimates, and acceptance criteria.",
+    title: "Turn messy backlogs into\nsprint-ready stories.",
+    subtitle: "Paste rough backlog items. Get structured user stories with acceptance criteria, effort estimates, and priority suggestions in 30 seconds.",
     cta: { text: "Refine My Backlog — Free", href: "#refiner" },
     secondaryCta: { text: "See It In Action", href: "#example" },
   },
@@ -15,7 +15,7 @@ export const siteConfig = {
     {
       icon: "Zap",
       title: "Lightning Fast",
-      description: "Process 100+ backlog items in under 30 seconds with Claude AI."
+      description: "Refine up to 50 backlog items per request in under 30 seconds."
     },
     {
       icon: "Target",
@@ -29,8 +29,8 @@ export const siteConfig = {
     },
     {
       icon: "Shield",
-      title: "No Login Required",
-      description: "Free tier works instantly. Paste and go, zero friction."
+      title: "No Signup Required",
+      description: "Free tier requires no signup. Paste and go, zero friction."
     }
   ],
   
@@ -75,10 +75,10 @@ export const siteConfig = {
       price: 0,
       description: "Perfect for small backlogs",
       features: [
-        "10 items per session",
-        "3 sessions per month", 
-        "Basic CSV export",
-        "No signup required"
+        "5 items per request",
+        "3 requests per day", 
+        "CSV export",
+        "Free tier requires no signup"
       ],
       cta: "Start Free",
       popular: false
@@ -88,10 +88,8 @@ export const siteConfig = {
       price: 9,
       description: "For busy product managers",
       features: [
-        "100 items per session",
-        "Unlimited sessions",
-        "Advanced export formats",
-        "Priority processing",
+        "25 items per request",
+        "Unlimited requests",
         "Email support"
       ],
       cta: "Upgrade to Pro",
@@ -102,13 +100,11 @@ export const siteConfig = {
       price: 29,
       description: "For growing organizations", 
       features: [
-        "500 items per session",
-        "Team sharing & collaboration",
-        "Custom export templates",
-        "Bulk processing",
+        "50 items per request",
+        "Team usage (up to 5 seats)",
         "Dedicated support"
       ],
-      cta: "Contact Sales",
+      cta: "Upgrade to Team",
       popular: false
     }
   ],
@@ -124,7 +120,7 @@ export const siteConfig = {
     },
     {
       q: "How much does Refine Backlog cost?",
-      a: "Refine Backlog offers three plans: Free (10 items per session, 3 sessions/month, no signup required), Pro at $9/month (100 items per session, unlimited sessions), and Team at $29/month (500 items per session, team sharing & collaboration). No long-term contracts — cancel anytime."
+      a: "Refine Backlog offers three plans: Free (5 items per request, 3 requests per day, no signup required), Pro at $9/month (25 items per request, unlimited requests), and Team at $29/month (50 items per request, up to 5 seats). No long-term contracts — cancel anytime."
     },
     {
       q: "Can I import from Jira, Linear, or GitHub?",
@@ -132,11 +128,11 @@ export const siteConfig = {
     },
     {
       q: "Is my data secure?",
-      a: "Yes. We don't store your backlog data. Processing happens in real-time and results are returned directly to your browser. No data is retained after your session."
+      a: "Yes. We do not store your backlog content. Your items are processed in memory, sent to Anthropic's Claude API for refinement, and returned directly to your browser. Anthropic retains API logs for 7 days then deletes them. API data is never used for model training. All data is encrypted in transit. Read our Privacy Policy for full details."
     },
     {
       q: "What's the difference between Pro and Team?",
-      a: "Pro ($9/month) is designed for individual product managers and includes 100 items per session with unlimited sessions. Team ($29/month) adds team sharing & collaboration, custom export templates, bulk processing, and dedicated support with 500 items per session."
+      a: "Pro ($9/month) is designed for individual product managers and includes 25 items per request with unlimited requests. Team ($29/month) adds team usage (up to 5 seats) and dedicated support with 50 items per request."
     },
     {
       q: "What's the difference between effort sizes?",
@@ -144,7 +140,7 @@ export const siteConfig = {
     },
     {
       q: "Do I need to create an account?",
-      a: "No. The free tier works instantly with no signup required. Just paste your backlog items and get results. You only need an account if you upgrade to Pro or Team for higher limits."
+      a: "No. The free tier requires no signup — just paste your backlog items and get results. You only need a license key if you upgrade to Pro or Team for higher limits."
     }
   ],
   
@@ -154,9 +150,6 @@ export const siteConfig = {
       { text: "Terms of Service", href: "/terms" },
       { text: "Support", href: "/support" }
     ],
-    social: [
-      { name: "Twitter", href: "https://twitter.com/refinebacklog", icon: "Twitter" },
-      { name: "GitHub", href: "https://github.com/refinebacklog", icon: "GitHub" }
-    ]
+    social: [] as { name: string; href: string; icon: string }[]
   }
 }

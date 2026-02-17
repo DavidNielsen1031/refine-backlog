@@ -127,7 +127,7 @@ export function ExampleSection() {
                           {item.priority}
                         </Badge>
                         <Badge className={getEstimateColor(item.estimate)}>
-                          {item.estimate}
+                          Effort: {item.estimate}
                         </Badge>
                       </div>
                     </div>

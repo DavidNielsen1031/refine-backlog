@@ -6,6 +6,7 @@ import { ExampleSection } from '@/components/example-section'
 import { FeaturesSection } from '@/components/features-section'
 import { PricingSection } from '@/components/pricing-section'
 import { FAQSection } from '@/components/faq-section'
+import { TrustSection } from '@/components/trust-section'
 import { Footer } from '@/components/footer'
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
         <ExampleSection />
         <FeaturesSection />
         <PricingSection />
+        <TrustSection />
         <FAQSection />
         <Footer />
       </div>

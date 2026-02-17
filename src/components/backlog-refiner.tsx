@@ -250,6 +250,12 @@ Example:
                   </CardContent>
                 </Card>
               ))}
+
+              {results.length > 0 && (
+                <p className="text-xs text-muted-foreground/70 text-center mt-6 italic">
+                  AI-generated refinement is a starting point. Review with your team before committing to sprint planning.
+                </p>
+              )}
             </div>
           )}
         </div>
