@@ -18,6 +18,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     {
+      url: `${baseUrl}/blog/why-sprint-planning-fails`,
+      lastModified: '2026-02-17',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/vague-requirements-to-clear-user-stories`,
+      lastModified: '2026-02-17',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/hidden-cost-bad-backlog-items`,
+      lastModified: '2026-02-17',
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
       url: `${baseUrl}/blog/clean-up-messy-backlog-5-minutes`,
       lastModified: '2026-02-16',
       changeFrequency: 'monthly',

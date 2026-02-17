@@ -14,6 +14,30 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "why-sprint-planning-fails",
+    title: "Why Your Sprint Planning Fails Before It Starts: The Backlog Refinement Problem",
+    description: "Most sprint planning failures trace back to poor backlog refinement. Learn why unclear user stories and messy product backlogs derail your sprints.",
+    date: "2026-02-17",
+    readTime: "5 min read",
+    tags: ["Sprint Planning", "Backlog Refinement"],
+  },
+  {
+    slug: "vague-requirements-to-clear-user-stories",
+    title: "From Vague Requirements to Clear User Stories in 30 Seconds",
+    description: "See how AI transforms messy, vague requirements into clean user stories with acceptance criteria and INVEST scoring — before and after examples included.",
+    date: "2026-02-17",
+    readTime: "6 min read",
+    tags: ["User Stories", "AI"],
+  },
+  {
+    slug: "hidden-cost-bad-backlog-items",
+    title: "The Hidden Cost of Bad Backlog Items: How Unclear Requirements Slow Your Team",
+    description: "Unclear backlog items cost teams 10+ hours per sprint in wasted meetings, rework, and context-switching. Learn to quantify the cost and fix it.",
+    date: "2026-02-17",
+    readTime: "6 min read",
+    tags: ["Agile", "Team Velocity"],
+  },
+  {
     slug: "clean-up-messy-backlog-5-minutes",
     title: "How to Clean Up a Messy Product Backlog in 5 Minutes",
     description: "Your backlog has 200+ items and nobody knows what half of them mean. Here's how to fix that fast.",

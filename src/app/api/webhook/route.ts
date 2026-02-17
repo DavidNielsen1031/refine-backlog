@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
 
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
   if (!endpointSecret || endpointSecret === 'whsec_placeholder') {
-    console.warn('[WEBHOOK] STRIPE_WEBHOOK_SECRET not configured or is placeholder — accepting request but skipping signature verification')
-    return NextResponse.json({ received: true, warning: 'webhook secret not configured' }, { status: 200 })
+    console.error('[WEBHOOK] STRIPE_WEBHOOK_SECRET not configured — rejecting request. Signature verification is mandatory.')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 })
   }
 
   let stripe: Stripe
