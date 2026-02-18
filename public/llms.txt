@@ -1,0 +1,142 @@
+# Refine Backlog — Machine-Readable Capabilities
+
+## What is Refine Backlog?
+
+Refine Backlog (https://refinebacklog.com) is an AI-powered backlog refinement tool for product managers, scrum masters, and engineering teams. It transforms raw, messy backlog items into structured, actionable work items — instantly.
+
+## Core Capability
+
+Submit an array of rough backlog items (as plain text strings). Receive back structured, refined items with titles, problem statements, acceptance criteria, effort estimates, priorities, tags, and assumptions.
+
+## API
+
+### Base URL
+https://refinebacklog.com
+
+### Endpoint: Refine Backlog Items
+
+**POST /api/groom**
+
+Refines an array of backlog items using AI. Returns structured work items.
+
+#### Request
+
+Content-Type: application/json
+
+```
+{
+  "items": ["string"],         // Required. Array of raw backlog item strings. Max 5 (free), 25 (Pro), 50 (Team).
+  "context": "string",         // Optional. Project context to improve relevance (e.g. "B2B SaaS CRM for enterprise sales teams").
+  "useUserStories": boolean,   // Optional. Format output as "As a [user], I want [goal], so that [benefit]". Default: false.
+  "useGherkin": boolean        // Optional. Format acceptance criteria as Given/When/Then. Default: false.
+}
+```
+
+#### Authentication
+
+Pass your license key via the `x-license-key` header. Optional for free tier.
+
+```
+x-license-key: YOUR_LICENSE_KEY
+```
+
+#### Response
+
+```
+{
+  "items": [
+    {
+      "title": "string",                    // Clean, actionable title
+      "problem": "string",                  // Why this matters — 1-2 sentence problem statement
+      "acceptanceCriteria": ["string"],     // 2-4 testable acceptance criteria
+      "estimate": "XS" | "S" | "M" | "L" | "XL",  // XS < 1 day, S 1-2 days, M 3-5 days, L 1-2 weeks, XL 2+ weeks
+      "priority": "string",                 // Format: "HIGH — rationale" | "MEDIUM — rationale" | "LOW — rationale"
+      "tags": ["string"],                   // 1-3 suggested labels (e.g. "bug", "feature", "tech-debt", "ux")
+      "assumptions": ["string"]             // Optional. Open questions to clarify before implementation.
+    }
+  ],
+  "_meta": {
+    "requestId": "string",
+    "model": "string",
+    "inputTokens": number,
+    "outputTokens": number,
+    "costUsd": number,
+    "latencyMs": number,
+    "promptVersion": "string",
+    "tier": "free" | "pro" | "team"
+  }
+}
+```
+
+#### Example Request
+
+```json
+POST /api/groom
+Content-Type: application/json
+
+{
+  "items": [
+    "fix the login bug",
+    "users need to export their data",
+    "make the dashboard faster"
+  ],
+  "context": "B2B project management SaaS for engineering teams"
+}
+```
+
+#### Example Response
+
+```json
+{
+  "items": [
+    {
+      "title": "Fix authentication failure on login with special characters in password",
+      "problem": "Users with passwords containing special characters are unable to log in, causing account lockouts and support escalations.",
+      "acceptanceCriteria": [
+        "Users with passwords containing !@#$%^&*() can log in successfully",
+        "Error messages are clear and actionable when login fails",
+        "Existing sessions are not affected by the fix"
+      ],
+      "estimate": "S",
+      "priority": "HIGH — causes account lockouts and direct user impact",
+      "tags": ["bug", "auth"],
+      "assumptions": ["Assumes the issue is frontend input sanitization, not backend validation"]
+    }
+  ]
+}
+```
+
+### Endpoint: API Info
+
+**GET /api/groom**
+
+Returns API description and usage instructions. No auth required.
+
+## Rate Limits & Pricing
+
+| Tier | Items per request | Price |
+|------|-------------------|-------|
+| Free | 5 | $0 |
+| Pro  | 25 | $9/month |
+| Team | 50 | $29/month |
+
+Rate limiting is per IP address on the free tier. Paid tiers use license key authentication.
+
+## Pricing Page
+https://refinebacklog.com/pricing
+
+## Integration Notes for AI Agents
+
+- No signup required for free tier (5 items/request)
+- Paid tiers require a license key in the `x-license-key` header
+- The API is stateless — no session management required
+- Response time is typically 2-8 seconds depending on item count
+- The model returns opinionated estimates and priorities — treat them as starting points, not hard rules
+- For bulk processing, chain multiple requests rather than exceeding tier limits
+
+## OpenAPI Spec
+https://refinebacklog.com/openapi.yaml
+
+## MCP Server
+An MCP (Model Context Protocol) server is available for use with Claude Desktop, Cursor, and other MCP-compatible tools.
+See: https://refinebacklog.com/mcp/README.md

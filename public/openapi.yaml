@@ -1,0 +1,286 @@
+openapi: 3.0.3
+info:
+  title: Refine Backlog API
+  description: |
+    AI-powered backlog refinement API. Transform raw, messy backlog items into structured,
+    actionable work items with titles, problem statements, acceptance criteria, effort estimates,
+    priorities, tags, and assumptions.
+
+    ## Authentication
+    Free tier (5 items/request) requires no authentication.
+    Pro and Team tiers require a license key passed via the `x-license-key` header.
+
+    ## Rate Limits
+    - **Free**: 5 items per request, rate-limited by IP
+    - **Pro** ($9/mo): 25 items per request
+    - **Team** ($29/mo): 50 items per request
+  version: "1.0.0"
+  contact:
+    url: https://refinebacklog.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://refinebacklog.com
+    description: Production
+
+paths:
+  /api/groom:
+    get:
+      summary: API Info
+      description: Returns API description and usage instructions.
+      operationId: getApiInfo
+      responses:
+        "200":
+          description: API info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Refine Backlog API
+                  usage:
+                    type: string
+                    example: POST /api/groom with { items: string[], context?: string }
+                  limit:
+                    type: string
+                    example: "5 items per request (free tier), 25 (Pro), 50 (Team)"
+
+    post:
+      summary: Refine Backlog Items
+      description: |
+        Accepts an array of raw backlog item strings and returns structured, refined work items.
+        Each item is enriched with a clean title, problem statement, acceptance criteria,
+        T-shirt size estimate, prioritized rating, tags, and optional clarifying assumptions.
+      operationId: refineItems
+      security:
+        - ApiKeyAuth: []
+        - {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefineRequest"
+            example:
+              items:
+                - "fix the login bug"
+                - "users need to export their data"
+                - "make the dashboard faster"
+              context: "B2B project management SaaS for engineering teams"
+      responses:
+        "200":
+          description: Successfully refined backlog items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefineResponse"
+              example:
+                items:
+                  - title: "Fix authentication failure on login with special characters in password"
+                    problem: "Users with passwords containing special characters are unable to log in, causing account lockouts and support escalations."
+                    acceptanceCriteria:
+                      - "Users with passwords containing !@#$%^&*() can log in successfully"
+                      - "Error messages are clear and actionable when login fails"
+                      - "Existing sessions are not affected by the fix"
+                    estimate: "S"
+                    priority: "HIGH — causes account lockouts and direct user impact"
+                    tags: ["bug", "auth"]
+                    assumptions:
+                      - "Assumes the issue is frontend input sanitization, not backend validation"
+                _meta:
+                  requestId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                  model: "claude-3-5-haiku-20241022"
+                  inputTokens: 312
+                  outputTokens: 489
+                  costUsd: 0.000245
+                  latencyMs: 2341
+                  promptVersion: "1.0"
+                  tier: "free"
+        "400":
+          description: Invalid request — missing or malformed items array
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "No backlog items provided. Send { items: string[] }"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Rate limit exceeded. Upgrade to Pro for higher limits."
+        "503":
+          description: AI service temporarily unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "AI service temporarily unavailable"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-license-key
+      description: |
+        License key for Pro or Team tier access.
+        Obtain at https://refinebacklog.com/pricing
+        Free tier (5 items/request) works without a key.
+
+  schemas:
+    RefineRequest:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 50
+          description: |
+            Array of raw backlog item strings to refine.
+            Max items depends on tier: 5 (free), 25 (Pro), 50 (Team).
+          example:
+            - "fix the login bug"
+            - "users need to be able to export their data"
+        context:
+          type: string
+          description: |
+            Optional project context to improve the quality and relevance of refinements.
+            Example: "B2B SaaS CRM for enterprise sales teams" or "Mobile fitness app for casual runners".
+          example: "B2B project management SaaS for engineering teams"
+        useUserStories:
+          type: boolean
+          default: false
+          description: |
+            When true, formats titles as user stories:
+            "As a [user], I want [goal], so that [benefit]"
+        useGherkin:
+          type: boolean
+          default: false
+          description: |
+            When true, formats acceptance criteria using Gherkin syntax:
+            Given [context], When [action], Then [outcome]
+
+    RefineResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RefinedItem"
+        _meta:
+          $ref: "#/components/schemas/ResponseMeta"
+
+    RefinedItem:
+      type: object
+      required:
+        - title
+        - problem
+        - acceptanceCriteria
+        - estimate
+        - priority
+        - tags
+      properties:
+        title:
+          type: string
+          description: Clean, actionable title for the backlog item
+          example: "Fix authentication failure on login with special characters in password"
+        problem:
+          type: string
+          description: Why this matters — concise problem statement (1-2 sentences)
+          example: "Users with passwords containing special characters are unable to log in."
+        acceptanceCriteria:
+          type: array
+          items:
+            type: string
+          minItems: 2
+          maxItems: 4
+          description: 2-4 testable acceptance criteria
+          example:
+            - "Users with passwords containing !@#$%^&*() can log in successfully"
+            - "Error messages are clear and actionable when login fails"
+        estimate:
+          type: string
+          enum: [XS, S, M, L, XL]
+          description: |
+            T-shirt size effort estimate:
+            - XS: Less than 1 day
+            - S: 1-2 days
+            - M: 3-5 days
+            - L: 1-2 weeks
+            - XL: 2+ weeks
+          example: "S"
+        priority:
+          type: string
+          description: |
+            Priority level with rationale. Format: "LEVEL — rationale"
+            Levels: HIGH, MEDIUM, LOW
+          example: "HIGH — causes account lockouts and direct user impact"
+        tags:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 3
+          description: 1-3 suggested labels/categories
+          example: ["bug", "auth"]
+        assumptions:
+          type: array
+          items:
+            type: string
+          description: |
+            Optional. Open questions or assumptions that should be clarified
+            before implementation. Only included when genuinely ambiguous.
+          example:
+            - "Assumes the issue is frontend input sanitization, not backend validation"
+
+    ResponseMeta:
+      type: object
+      properties:
+        requestId:
+          type: string
+          format: uuid
+          description: Unique identifier for this request
+        model:
+          type: string
+          description: AI model used for refinement
+          example: "claude-3-5-haiku-20241022"
+        inputTokens:
+          type: integer
+          description: Number of input tokens consumed
+        outputTokens:
+          type: integer
+          description: Number of output tokens generated
+        costUsd:
+          type: number
+          format: float
+          description: Estimated cost in USD for this request
+        latencyMs:
+          type: integer
+          description: Request processing time in milliseconds
+        promptVersion:
+          type: string
+          description: Version of the refinement prompt used
+          example: "1.0"
+        tier:
+          type: string
+          enum: [free, pro, team]
+          description: Tier used for this request
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message

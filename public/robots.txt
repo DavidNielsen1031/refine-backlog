@@ -1,6 +1,10 @@
 User-agent: *
 Allow: /
 
+# AI agents: see /llms.txt for machine-readable capabilities and API docs
+# OpenAPI spec: /openapi.yaml
+# MCP server setup: /mcp/README.md
+
 User-agent: GPTBot
 Allow: /
 

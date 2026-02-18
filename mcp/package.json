@@ -1,0 +1,23 @@
+{
+  "name": "refine-backlog-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Refine Backlog — AI-powered backlog refinement",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node server.js",
+    "dev": "ts-node server.ts"
+  },
+  "bin": {
+    "refine-backlog-mcp": "./server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.0"
+  }
+}
