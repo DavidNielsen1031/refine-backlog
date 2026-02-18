@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     const items = cleanItems.slice(0, maxItems)
     const contextLine = body.context ? `\n\nProject context: ${body.context}` : ''
-    const userStoryLine = body.useUserStories ? `\n\nIMPORTANT: Format each title as a user story: "As a [role], I want [goal], so that [benefit]". The title field MUST follow this format.` : ''
+    const userStoryLine = body.useUserStories ? `\n\nIMPORTANT: Keep the "title" field as a short, clean one-liner (e.g., "Fix Session Timeout Authentication Bug"). Add a SEPARATE field called "userStory" with the full user story in "As a [role], I want [goal], so that [benefit]" format. The title must NOT be a user story.` : ''
     const gherkinLine = body.useGherkin ? `\n\nIMPORTANT: Write ALL acceptance criteria in Gherkin format using Given/When/Then syntax. Each criterion must start with "Given", "When", or "Then".` : ''
     const itemsList = items.map((item, i) => `${i + 1}. ${item}`).join('\n')
 

@@ -16,6 +16,7 @@ interface GroomedItem {
   priority: string
   tags: string[]
   assumptions?: string[]
+  userStory?: string
 }
 
 function toGherkin(ac: string): string {
@@ -82,7 +83,8 @@ export function BacklogGroomer() {
       const assumptions = item.assumptions && item.assumptions.length > 0
         ? `\n\n**Assumptions/Open Questions:**\n${item.assumptions.map(a => `  - ❓ ${a}`).join("\n")}`
         : ''
-      return `## ${item.title}\n\n**Problem:** ${item.problem}\n\n**Priority:** ${item.priority}\n**Estimate:** ${item.estimate}\n**Tags:** ${tags}\n\n**Acceptance Criteria:**\n${ac}${assumptions}`
+      const userStory = item.userStory ? `\n**User Story:** ${item.userStory}` : ''
+      return `## ${item.title}\n\n**Problem:** ${item.problem}${userStory}\n\n**Priority:** ${item.priority}\n**Estimate:** ${item.estimate}\n**Tags:** ${tags}\n\n**Acceptance Criteria:**\n${ac}${assumptions}`
     }).join("\n\n---\n\n")
 
     await navigator.clipboard.writeText(md)
@@ -263,6 +265,12 @@ Example:
                     <p className="text-sm text-muted-foreground mb-3">
                       <span className="font-medium text-foreground">Problem:</span> {item.problem}
                     </p>
+
+                    {item.userStory && (
+                      <p className="text-sm text-muted-foreground mb-3">
+                        <span className="font-medium text-foreground">User Story:</span> {item.userStory}
+                      </p>
+                    )}
 
                     {item.priority.includes(" — ") && (
                       <p className="text-sm text-muted-foreground mb-3">
