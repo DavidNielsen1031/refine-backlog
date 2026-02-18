@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
     params.append('line_items[0][quantity]', '1')
     params.append('success_url', `${origin}/success?session_id={CHECKOUT_SESSION_ID}`)
     params.append('cancel_url', `${origin}?canceled=true`)
+    params.append('allow_promotion_codes', 'true')
     params.append('metadata[plan]', plan)
 
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
