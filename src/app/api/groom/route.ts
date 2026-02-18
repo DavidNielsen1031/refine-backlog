@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, getMaxItems, resolveUserTier } from '@/lib/rate-limit'
 import { GroomedItemsSchema, type GroomedItem } from '@/lib/schemas'
+import { trackUsage, calculateCost } from '@/lib/telemetry'
 
 interface GroomRequest {
   items: string[]
@@ -145,12 +146,35 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Track usage telemetry (non-blocking)
+    const inputTokens = response.usage?.input_tokens ?? 0
+    const outputTokens = response.usage?.output_tokens ?? 0
+    const costUsd = calculateCost(MODEL, inputTokens, outputTokens)
+    const latencyMs = Date.now() - startTime
+
+    trackUsage({
+      requestId,
+      timestamp: new Date().toISOString(),
+      model: MODEL,
+      tier,
+      itemCount: items.length,
+      inputTokens,
+      outputTokens,
+      costUsd,
+      latencyMs,
+      retried: !validation.success,
+      ip: ip,
+    }).catch(() => {}) // fire-and-forget
+
     return NextResponse.json({
       items: groomedItems,
       _meta: {
         requestId,
         model: MODEL,
-        latencyMs: Date.now() - startTime,
+        inputTokens,
+        outputTokens,
+        costUsd: Math.round(costUsd * 1_000_000) / 1_000_000, // 6 decimal places
+        latencyMs,
         promptVersion: '1.0',
         tier,
       }
