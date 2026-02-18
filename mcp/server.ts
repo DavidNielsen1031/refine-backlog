@@ -184,10 +184,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     });
 
     if (response.status === 429) {
+      const body = await response.json().catch(() => ({})) as { error?: string; upgrade?: string };
+      const msg = body.error ?? "Daily request limit reached on the free tier.";
       return {
         content: [{
           type: "text",
-          text: "Rate limit exceeded. Free tier allows 5 items per request. Upgrade at https://refinebacklog.com/pricing",
+          text: `⚠️ ${msg}\n\n👉 Upgrade at https://refinebacklog.com/pricing — add your license key to the Claude Desktop MCP config as: "licenseKey": "your-key-here"`,
         }],
         isError: true,
       };
@@ -201,9 +203,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ error: "Unknown error" })) as { error?: string };
+      const body = await response.json().catch(() => ({ error: "Unknown error" })) as {
+        error?: string;
+        upgrade?: string;
+        itemsReceived?: number;
+        itemsAllowed?: number;
+      };
+
+      // Item limit exceeded — clear upgrade prompt
+      if (body.upgrade) {
+        return {
+          content: [{
+            type: "text",
+            text: `⚠️ ${body.error}\n\n👉 Upgrade at https://refinebacklog.com/pricing\n\nOnce you have a license key, pass it in your request as the \`licenseKey\` parameter.`,
+          }],
+          isError: true,
+        };
+      }
+
       return {
-        content: [{ type: "text", text: `Error from Refine Backlog API: ${error.error ?? response.statusText}` }],
+        content: [{ type: "text", text: `Error from Refine Backlog API: ${body.error ?? response.statusText}` }],
         isError: true,
       };
     }

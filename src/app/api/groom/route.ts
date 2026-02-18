@@ -61,7 +61,11 @@ export async function POST(request: NextRequest) {
     
     if (!rateCheck.allowed) {
       return NextResponse.json(
-        { error: 'Daily request limit reached. Upgrade to Pro for unlimited requests.', tier: rateCheck.tier },
+        {
+          error: 'Daily request limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $9/month.',
+          upgrade: 'https://refinebacklog.com/pricing',
+          tier: rateCheck.tier,
+        },
         { status: 429 }
       )
     }
@@ -74,8 +78,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (cleanItems.length > maxItems) {
+      const upgradeMsg = tier === 'free'
+        ? `Free tier is limited to ${maxItems} items per request. Upgrade to Pro ($9/mo) for 25 items or Team ($29/mo) for 50 items. Get a license key at https://refinebacklog.com/pricing and pass it via the x-license-key header.`
+        : `${tier} tier is limited to ${maxItems} items per request. You sent ${cleanItems.length}.`
       return NextResponse.json(
-        { error: `${tier} tier limited to ${maxItems} items per request. You sent ${cleanItems.length}. Upgrade for more.` },
+        {
+          error: upgradeMsg,
+          upgrade: tier === 'free' ? 'https://refinebacklog.com/pricing' : undefined,
+          tier,
+          itemsReceived: cleanItems.length,
+          itemsAllowed: maxItems,
+        },
         { status: 400 }
       )
     }
