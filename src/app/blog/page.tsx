@@ -14,6 +14,22 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "backlog-refinement-template",
+    title: "Backlog Refinement Template: The Complete Guide for Product Teams",
+    description: "A practical backlog refinement template with examples, common mistakes to avoid, and tips for structuring your refinement sessions.",
+    date: "2026-02-17",
+    readTime: "8 min read",
+    tags: ["Backlog Refinement", "Templates"],
+  },
+  {
+    slug: "how-to-write-user-stories-with-ai",
+    title: "How to Write User Stories with AI: A Practical Guide",
+    description: "Learn how to use AI to write better user stories faster. Practical tips for prompting, reviewing, and refining AI-generated stories.",
+    date: "2026-02-17",
+    readTime: "7 min read",
+    tags: ["AI", "User Stories"],
+  },
+  {
     slug: "why-sprint-planning-fails",
     title: "Why Your Sprint Planning Fails Before It Starts: The Backlog Refinement Problem",
     description: "Most sprint planning failures trace back to poor backlog refinement. Learn why unclear user stories and messy product backlogs derail your sprints.",
