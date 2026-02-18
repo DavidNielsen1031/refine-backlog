@@ -34,6 +34,8 @@ export function BacklogGroomer() {
   const [error, setError] = useState("")
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
   const [showGherkin, setShowGherkin] = useState(false)
+  const [useUserStories, setUseUserStories] = useState(false)
+  const [useGherkin, setUseGherkin] = useState(false)
 
   const handleGroom = async () => {
     if (!input.trim()) {
@@ -58,6 +60,8 @@ export function BacklogGroomer() {
         body: JSON.stringify({
           items: items.map(i => i.replace(/^[-*•]\s*/, "").trim()),
           context: context.trim() || undefined,
+          useUserStories,
+          useGherkin,
         }),
       })
 
@@ -163,6 +167,29 @@ Example:
                 disabled={isLoading}
               />
 
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={useUserStories}
+                    onChange={(e) => setUseUserStories(e.target.checked)}
+                    className="rounded border-border accent-emerald-500"
+                    disabled={isLoading}
+                  />
+                  Format as User Stories
+                </label>
+                <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={useGherkin}
+                    onChange={(e) => setUseGherkin(e.target.checked)}
+                    className="rounded border-border accent-emerald-500"
+                    disabled={isLoading}
+                  />
+                  Gherkin Acceptance Criteria
+                </label>
+              </div>
+
               {error && (
                 <div className="flex items-center space-x-2 text-red-400 text-sm">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -203,18 +230,7 @@ Example:
                   <h3 className="text-xl font-semibold text-emerald-400">
                     ✨ Refined Results ({results.length} items)
                   </h3>
-                  <div className="flex items-center gap-2 mt-2">
-                    <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showGherkin}
-                        onChange={(e) => setShowGherkin(e.target.checked)}
-                        className="rounded border-border"
-                      />
-                      Show Gherkin format
-                    </label>
                   </div>
-                </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={copyMarkdown}>
                     {copySuccess === "md" ? (
@@ -260,7 +276,7 @@ Example:
                         {item.acceptanceCriteria.map((ac, i) => (
                           <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
                             <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-                            {showGherkin ? toGherkin(ac) : ac}
+                            {ac}
                           </li>
                         ))}
                       </ul>

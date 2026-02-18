@@ -7,6 +7,8 @@ import { trackUsage, calculateCost } from '@/lib/telemetry'
 interface GroomRequest {
   items: string[]
   context?: string
+  useUserStories?: boolean
+  useGherkin?: boolean
 }
 
 const MODEL = 'claude-3-5-haiku-20241022'
@@ -80,6 +82,8 @@ export async function POST(request: NextRequest) {
 
     const items = cleanItems.slice(0, maxItems)
     const contextLine = body.context ? `\n\nProject context: ${body.context}` : ''
+    const userStoryLine = body.useUserStories ? `\n\nIMPORTANT: Format each title as a user story: "As a [role], I want [goal], so that [benefit]". The title field MUST follow this format.` : ''
+    const gherkinLine = body.useGherkin ? `\n\nIMPORTANT: Write ALL acceptance criteria in Gherkin format using Given/When/Then syntax. Each criterion must start with "Given", "When", or "Then".` : ''
     const itemsList = items.map((item, i) => `${i + 1}. ${item}`).join('\n')
 
     const response = await anthropic.messages.create({
@@ -89,7 +93,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: `${GROOMING_PROMPT}${contextLine}\n\nBacklog items:\n${itemsList}`
+          content: `${GROOMING_PROMPT}${contextLine}${userStoryLine}${gherkinLine}\n\nBacklog items:\n${itemsList}`
         }
       ],
     })
@@ -120,7 +124,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 4000,
         temperature: 0.1,
         messages: [
-          { role: 'user', content: `${GROOMING_PROMPT}${contextLine}\n\nBacklog items:\n${itemsList}` },
+          { role: 'user', content: `${GROOMING_PROMPT}${contextLine}${userStoryLine}${gherkinLine}\n\nBacklog items:\n${itemsList}` },
           { role: 'assistant', content: content.text },
           { role: 'user', content: `Your response had validation errors: ${JSON.stringify(validation.error.issues)}. Fix and return valid JSON array. Priority must be "HIGH — rationale", "MEDIUM — rationale", or "LOW — rationale". Estimate must be XS/S/M/L/XL. Return ONLY the JSON array.` }
         ],
