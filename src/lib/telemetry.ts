@@ -69,7 +69,62 @@ function getRedis(): Redis | null {
   return null
 }
 
+// Source display labels for Discord notifications
+const SOURCE_LABELS: Record<string, string> = {
+  'browser': '🌐 Website',
+  'mcp': '🤖 MCP',
+  'api-direct': '⚡ API',
+}
+
+const TIER_LABELS: Record<string, string> = {
+  'free': '🆓 Free',
+  'pro': '💎 Pro',
+  'team': '👥 Team',
+}
+
+/**
+ * Fire a usage notification to Discord. Non-blocking, never throws.
+ */
+async function notifyDiscord(event: UsageEvent): Promise<void> {
+  const botToken = process.env.DISCORD_BOT_TOKEN
+  const channelId = process.env.DISCORD_RB_CHANNEL_ID
+  if (!botToken || !channelId) return
+
+  try {
+    const source = SOURCE_LABELS[event.source ?? ''] ?? event.source ?? 'Unknown'
+    const tier = TIER_LABELS[event.tier] ?? event.tier
+    const time = new Date(event.timestamp).toLocaleTimeString('en-US', {
+      hour: '2-digit', minute: '2-digit', timeZone: 'America/Chicago'
+    })
+
+    const lines = [
+      `**📊 Refine Backlog — Usage Event**`,
+      `> **Channel:** ${source}`,
+      `> **Tier:** ${tier}`,
+      `> **Items refined:** ${event.itemCount}`,
+      `> **Latency:** ${event.latencyMs}ms`,
+      `> **Cost:** $${event.costUsd.toFixed(6)}`,
+      `> **Time:** ${time} CT`,
+      `> **Request ID:** \`${event.requestId.slice(0, 8)}\``,
+    ]
+
+    await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${botToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ content: lines.join('\n') }),
+    })
+  } catch {
+    // Non-blocking — never let notification failures affect the API
+  }
+}
+
 export async function trackUsage(event: UsageEvent): Promise<void> {
+  // Fire Discord notification immediately (non-blocking)
+  notifyDiscord(event).catch(() => {})
+
   const r = getRedis()
   if (!r) {
     console.log('[telemetry]', JSON.stringify(event))
