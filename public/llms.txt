@@ -15,7 +15,8 @@ https://refinebacklog.com
 
 ### Endpoint: Refine Backlog Items
 
-**POST /api/groom**
+**POST /api/refine** *(canonical — preferred)*
+**POST /api/groom** *(legacy alias — still supported)*
 
 Refines an array of backlog items using AI. Returns structured work items.
 
@@ -71,7 +72,7 @@ x-license-key: YOUR_LICENSE_KEY
 #### Example Request
 
 ```json
-POST /api/groom
+POST /api/refine
 Content-Type: application/json
 
 {
@@ -108,7 +109,7 @@ Content-Type: application/json
 
 ### Endpoint: API Info
 
-**GET /api/groom**
+**GET /api/refine** *(or GET /api/groom — legacy)*
 
 Returns API description and usage instructions. No auth required.
 

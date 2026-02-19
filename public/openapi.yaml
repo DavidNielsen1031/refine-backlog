@@ -25,10 +25,10 @@ servers:
     description: Production
 
 paths:
-  /api/groom:
+  /api/refine:
     get:
       summary: API Info
-      description: Returns API description and usage instructions.
+      description: Returns API description and usage instructions. Also available at /api/groom (legacy).
       operationId: getApiInfo
       responses:
         "200":
@@ -43,7 +43,7 @@ paths:
                     example: Refine Backlog API
                   usage:
                     type: string
-                    example: POST /api/groom with { items: string[], context?: string }
+                    example: POST /api/refine with { items: string[], context?: string }
                   limit:
                     type: string
                     example: "5 items per request (free tier), 25 (Pro), 50 (Team)"

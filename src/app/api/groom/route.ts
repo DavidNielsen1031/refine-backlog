@@ -2,7 +2,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, getMaxItems, resolveUserTier } from '@/lib/rate-limit'
 import { GroomedItemsSchema, type GroomedItem } from '@/lib/schemas'
-import { trackUsage, calculateCost } from '@/lib/telemetry'
+import { trackUsage, calculateCost, detectSource } from '@/lib/telemetry'
 
 interface GroomRequest {
   items: string[]
@@ -169,6 +169,12 @@ export async function POST(request: NextRequest) {
     const costUsd = calculateCost(MODEL, inputTokens, outputTokens)
     const latencyMs = Date.now() - startTime
 
+    const source = detectSource(
+      request.headers.get('user-agent'),
+      request.headers.get('x-source'),
+      request.headers.get('x-client'),
+    )
+
     trackUsage({
       requestId,
       timestamp: new Date().toISOString(),
@@ -181,6 +187,7 @@ export async function POST(request: NextRequest) {
       latencyMs,
       retried: !validation.success,
       ip: ip,
+      source,
     }).catch(() => {}) // fire-and-forget
 
     return NextResponse.json({
@@ -214,7 +221,9 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     message: 'Refine Backlog API',
-    usage: 'POST /api/groom with { items: string[], context?: string }',
+    note: '/api/groom is the legacy endpoint. The canonical endpoint is now /api/refine.',
+    usage: 'POST /api/refine with { items: string[], context?: string }',
     limit: '5 items per request (free tier), 25 (Pro), 50 (Team)',
+    docs: 'https://refinebacklog.com/openapi.yaml',
   })
 }

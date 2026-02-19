@@ -1,6 +1,9 @@
 // Usage telemetry — tracks API call metrics in Upstash Redis
 import { Redis } from '@upstash/redis'
 
+// Source of the API request: browser UI, MCP tool call, or direct API usage
+export type RequestSource = 'browser' | 'mcp' | 'api-direct'
+
 export interface UsageEvent {
   requestId: string
   timestamp: string
@@ -13,6 +16,30 @@ export interface UsageEvent {
   latencyMs: number
   retried: boolean
   ip?: string
+  source?: RequestSource
+}
+
+/**
+ * Infer the request source from HTTP headers.
+ * Priority: explicit x-source header > user-agent sniffing > default api-direct
+ */
+export function detectSource(
+  userAgent: string | null,
+  xSource: string | null,
+  xClient: string | null,
+): RequestSource {
+  // Explicit override — caller can set x-source: mcp | browser | api-direct
+  if (xSource === 'mcp' || xClient === 'mcp') return 'mcp'
+  if (xSource === 'browser') return 'browser'
+  if (xSource === 'api-direct') return 'api-direct'
+
+  // User-agent sniffing
+  const ua = userAgent?.toLowerCase() ?? ''
+  if (ua.includes('mozilla/') || ua.includes('chrome/') || ua.includes('safari/')) return 'browser'
+  if (ua.includes('anthropic') || ua.includes('claude') || ua.includes('mcp-')) return 'mcp'
+
+  // No UA or non-browser UA → direct API call (scripts, curl, integrations)
+  return 'api-direct'
 }
 
 // Model pricing per million tokens (USD)
@@ -83,6 +110,12 @@ export async function trackUsage(event: UsageEvent): Promise<void> {
     await r.incrby(`telemetry:tier:${event.tier}:${day}`, 1)
     await r.expire(`telemetry:tier:${event.tier}:${day}`, 90 * 86400)
 
+    // Source tracking (browser | mcp | api-direct)
+    if (event.source) {
+      await r.incrby(`telemetry:source:${event.source}:${day}`, 1)
+      await r.expire(`telemetry:source:${event.source}:${day}`, 90 * 86400)
+    }
+
   } catch (err) {
     console.error('[telemetry] Failed to track usage:', err)
     // Non-blocking — don't let telemetry failures break the API
@@ -95,17 +128,21 @@ export async function getDailySummary(day: string): Promise<{
   outputTokens: number
   costUsd: number
   items: number
+  bySource: { browser: number; mcp: number; apiDirect: number }
 } | null> {
   const r = getRedis()
   if (!r) return null
 
   try {
-    const [calls, inputTokens, outputTokens, costUsd, items] = await Promise.all([
+    const [calls, inputTokens, outputTokens, costUsd, items, srcBrowser, srcMcp, srcApiDirect] = await Promise.all([
       r.get<number>(`telemetry:calls:daily:${day}`),
       r.get<number>(`telemetry:tokens:daily:${day}:input`),
       r.get<number>(`telemetry:tokens:daily:${day}:output`),
       r.get<number>(`telemetry:cost:daily:${day}`),
       r.get<number>(`telemetry:items:daily:${day}`),
+      r.get<number>(`telemetry:source:browser:${day}`),
+      r.get<number>(`telemetry:source:mcp:${day}`),
+      r.get<number>(`telemetry:source:api-direct:${day}`),
     ])
 
     if (!calls) return null
@@ -116,6 +153,11 @@ export async function getDailySummary(day: string): Promise<{
       outputTokens: outputTokens ?? 0,
       costUsd: costUsd ?? 0,
       items: items ?? 0,
+      bySource: {
+        browser: srcBrowser ?? 0,
+        mcp: srcMcp ?? 0,
+        apiDirect: srcApiDirect ?? 0,
+      },
     }
   } catch (err) {
     console.error('[telemetry] getDailySummary failed:', err)

@@ -99,10 +99,24 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <span className="text-sm text-muted-foreground">
-                  API Documentation
-                  <span className="text-xs ml-1 bg-muted text-muted-foreground px-1 rounded">Soon</span>
-                </span>
+                <a
+                  href="/openapi.yaml"
+                  className="text-sm text-muted-foreground hover:text-emerald-400 transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  API Spec (OpenAPI)
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/llms.txt"
+                  className="text-sm text-muted-foreground hover:text-emerald-400 transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  For AI Agents (llms.txt)
+                </a>
               </li>
             </ul>
           </div>
