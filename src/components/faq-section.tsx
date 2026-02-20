@@ -40,7 +40,7 @@ export function FAQSection() {
           <p className="text-muted-foreground">
             Still have questions?{" "}
             <a 
-              href="mailto:support@refinebacklog.com" 
+              href="mailto:refinebacklog@gmail.com" 
               className="text-emerald-400 hover:underline"
             >
               Contact our support team
