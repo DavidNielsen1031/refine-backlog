@@ -1,6 +1,6 @@
 {
   "name": "refine-backlog-mcp",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "MCP server for Refine Backlog — AI-powered backlog refinement",
   "license": "MIT",
   "type": "module",
@@ -20,5 +20,28 @@
     "typescript": "^5.0.0",
     "@types/node": "^22.0.0",
     "ts-node": "^10.9.0"
-  }
+  },
+  "author": "David Nielsen <refinebacklog@gmail.com>",
+  "homepage": "https://refinebacklog.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DavidNielsen1031/refine-backlog.git",
+    "directory": "mcp"
+  },
+  "keywords": [
+    "mcp",
+    "backlog",
+    "refinement",
+    "agile",
+    "scrum",
+    "product-management",
+    "ai",
+    "claude"
+  ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "glama.json"
+  ]
 }
