@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { setSubscription, cancelSubscriptionByCustomer, getSubscriptionByCustomer } from '@/lib/kv'
 
+async function notifyTelegram(message: string): Promise<void> {
+  const token = process.env.TELEGRAM_BOT_TOKEN
+  const chatId = process.env.TELEGRAM_CHAT_ID || '1656378684'
+  if (!token) return
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' }),
+    })
+  } catch {
+    // Non-blocking — never let notification failure affect webhook response
+  }
+}
+
 function generateLicenseKey(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   let result = ''
@@ -69,6 +84,18 @@ export async function POST(request: NextRequest) {
               subscriptionId: session.subscription as string,
             })
             console.log(`[WEBHOOK] event=${eventType} customer=${customerId} result=success licenseKey=${licenseKey}`)
+
+            // 💰 Notify David on Telegram (fire and forget)
+            const email = session.customer_details?.email ?? 'unknown'
+            const planLabel = plan === 'team' ? 'Team $29/mo' : 'Pro $9/mo'
+            notifyTelegram(
+              `💰 <b>New Refine Backlog subscriber!</b>\n\n` +
+              `📧 ${email}\n` +
+              `📦 ${planLabel}\n` +
+              `🔑 ${licenseKey}\n` +
+              `👤 ${customerId}`
+            ).catch(() => {})
+
           } catch (kvErr) {
             console.error(`[WEBHOOK] event=${eventType} customer=${customerId} result=fail kvError=`, kvErr)
             // Still return 200 to Stripe
