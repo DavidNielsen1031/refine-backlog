@@ -1,0 +1,267 @@
+# Release workflow for the Refine Backlog app + MCP server.
+#
+# Runs after CI passes on every push to main.
+# Detects what changed, publishes only what's new, then runs healthcheck.
+#
+# Surfaces managed here:
+#   - App (Vercel, auto-deploy on push — we just verify it)
+#   - MCP server (npm: refine-backlog-mcp)
+#   - Agent-native docs (llms.txt, openapi.yaml, mcp/README.md)
+#
+# Secrets required (Settings → Secrets → Actions):
+#   NPM_TOKEN            — npm publish token (npmjs.com)
+#   DISCORD_WEBHOOK_URL  — #refine-backlog channel webhook
+#   REFINE_BACKLOG_PRO_KEY — Pro license key for healthcheck
+#
+# See: products/refine-backlog/RELEASE_CONFIG.yaml for the surface map.
+
+name: Release
+
+on:
+  # Runs after CI completes on main — avoids running tests twice
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  # ── Detect which surfaces changed ────────────────────────────────────
+  detect:
+    name: Detect changed surfaces
+    # Only proceed if CI passed
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      mcp: ${{ steps.filter.outputs.mcp }}
+      mcp_version_changed: ${{ steps.mcp_version.outputs.changed }}
+      agent_native: ${{ steps.filter.outputs.agent_native }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2  # need previous commit to diff
+
+      - name: Detect changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            mcp:
+              - 'mcp/**'
+            agent_native:
+              - 'public/llms.txt'
+              - 'public/openapi.yaml'
+              - 'public/mcp/README.md'
+
+      - name: Check if MCP version bumped
+        id: mcp_version
+        if: steps.filter.outputs.mcp == 'true'
+        run: |
+          LOCAL=$(node -p "require('./mcp/package.json').version")
+          PUBLISHED=$(npm view refine-backlog-mcp version 2>/dev/null || echo "0.0.0")
+          echo "local=$LOCAL published=$PUBLISHED"
+          if [ "$LOCAL" != "$PUBLISHED" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "version=$LOCAL" >> $GITHUB_OUTPUT
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "⚠️ MCP files changed but version not bumped — skipping publish"
+          fi
+
+  # ── Publish MCP to npm (only if version bumped) ───────────────────────
+  publish-mcp:
+    name: Publish MCP → npm
+    needs: detect
+    if: needs.detect.outputs.mcp == 'true' && needs.detect.outputs.mcp_version_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: mcp
+
+      - name: Build
+        run: npm run build
+        working-directory: mcp
+
+      - name: Publish
+        run: npm publish --access public
+        working-directory: mcp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify published version
+        run: |
+          sleep 10  # npm index delay
+          PUBLISHED=$(npm view refine-backlog-mcp version)
+          EXPECTED=$(node -p "require('./mcp/package.json').version")
+          if [ "$PUBLISHED" = "$EXPECTED" ]; then
+            echo "✅ refine-backlog-mcp@$PUBLISHED live on npm"
+          else
+            echo "::error::Expected $EXPECTED but npm shows $PUBLISHED"
+            exit 1
+          fi
+
+  # ── Verify agent-native docs are reachable ────────────────────────────
+  verify-agent-native:
+    name: Verify agent-native URLs
+    needs: detect
+    if: needs.detect.outputs.agent_native == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for Vercel deploy
+        run: sleep 30
+
+      - name: Check agent-native endpoints
+        run: |
+          FAILED=0
+          for URL in \
+            "https://refinebacklog.com/llms.txt" \
+            "https://refinebacklog.com/openapi.yaml" \
+            "https://refinebacklog.com/mcp/README.md"; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ $URL → $STATUS"
+            else
+              echo "::error::❌ $URL → $STATUS"
+              FAILED=1
+            fi
+          done
+          exit $FAILED
+
+  # ── Post-deploy healthcheck (always runs after push to main) ─────────
+  healthcheck:
+    name: Post-deploy healthcheck
+    needs: [detect, publish-mcp, verify-agent-native]
+    # Run even if publish/verify were skipped — `always()` lets us check `needs` results
+    if: always() && needs.detect.result == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.check.outputs.passed }}
+      summary: ${{ steps.check.outputs.summary }}
+    steps:
+      - name: Wait for Vercel deploy
+        run: sleep 45  # Vercel typically deploys in 30-60s
+
+      - name: Run healthcheck
+        id: check
+        env:
+          REFINE_BACKLOG_PRO_KEY: ${{ secrets.REFINE_BACKLOG_PRO_KEY }}
+        run: |
+          FAILED=0
+          SUMMARY=""
+
+          check() {
+            local NAME="$1" URL="$2" EXPECTED="$3"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+            if [ "$STATUS" = "$EXPECTED" ]; then
+              echo "✅ $NAME → $STATUS"
+              SUMMARY="$SUMMARY\n✅ $NAME"
+            else
+              echo "::error::❌ $NAME → $STATUS (expected $EXPECTED)"
+              SUMMARY="$SUMMARY\n❌ $NAME ($STATUS)"
+              FAILED=1
+            fi
+          }
+
+          check "GET /pricing"   "https://refinebacklog.com/pricing"  "200"
+          check "GET /success"   "https://refinebacklog.com/success"  "200"
+          check "GET /get-key"   "https://refinebacklog.com/get-key"  "200"
+          check "GET /blog"      "https://refinebacklog.com/blog"     "200"
+          check "GET /llms.txt"  "https://refinebacklog.com/llms.txt" "200"
+
+          # API end-to-end test
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://refinebacklog.com/api/refine \
+            -H "Content-Type: application/json" \
+            -H "x-license-key: ${REFINE_BACKLOG_PRO_KEY}" \
+            -d '{"items":["Fix login bug"]}')
+          API_STATUS=$(echo "$RESPONSE" | tail -1)
+          API_BODY=$(echo "$RESPONSE" | head -n -1)
+
+          if [ "$API_STATUS" = "200" ] && echo "$API_BODY" | python3 -c "import json,sys; d=json.load(sys.stdin); assert len(d)>0" 2>/dev/null; then
+            echo "✅ POST /api/refine → 200 + valid JSON"
+            SUMMARY="$SUMMARY\n✅ POST /api/refine"
+          else
+            echo "::error::❌ POST /api/refine → $API_STATUS"
+            SUMMARY="$SUMMARY\n❌ POST /api/refine ($API_STATUS)"
+            FAILED=1
+          fi
+
+          # Webhook health (bad secret should return 400, not 500)
+          WH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST https://refinebacklog.com/api/webhook \
+            -H "Content-Type: application/json" \
+            -d '{"type":"test"}')
+          if [ "$WH_STATUS" = "400" ]; then
+            echo "✅ POST /api/webhook (no sig) → 400"
+            SUMMARY="$SUMMARY\n✅ Webhook health"
+          else
+            echo "::error::❌ Webhook → $WH_STATUS (expected 400 — env var may be corrupt)"
+            SUMMARY="$SUMMARY\n❌ Webhook ($WH_STATUS)"
+            FAILED=1
+          fi
+
+          echo "passed=$([ $FAILED -eq 0 ] && echo true || echo false)" >> $GITHUB_OUTPUT
+          echo "summary=$SUMMARY" >> $GITHUB_OUTPUT
+          exit $FAILED
+
+  # ── Notify Discord ────────────────────────────────────────────────────
+  notify:
+    name: Notify Discord
+    needs: [detect, publish-mcp, verify-agent-native, healthcheck]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build summary and post to Discord
+        env:
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          DISCORD_CHANNEL_ID: "1474028159233163358"
+          MCP_PUBLISHED: ${{ needs.publish-mcp.result }}
+          AGENT_NATIVE: ${{ needs.verify-agent-native.result }}
+          HEALTH: ${{ needs.healthcheck.outputs.passed }}
+          COMMIT_MSG: ${{ github.event.workflow_run.head_commit.message }}
+          COMMIT_SHA: ${{ github.event.workflow_run.head_sha }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          COMMIT_URL="https://github.com/${{ github.repository }}/commit/$COMMIT_SHA"
+
+          # Build what-shipped section
+          SHIPPED=""
+          [ "$MCP_PUBLISHED" = "success" ] && SHIPPED="$SHIPPED\n• 📦 MCP server published to npm"
+          [ "$AGENT_NATIVE" = "success" ] && SHIPPED="$SHIPPED\n• 📄 Agent-native docs verified (llms.txt / openapi.yaml)"
+          [ -z "$SHIPPED" ] && SHIPPED="\n• App deployed to Vercel"
+
+          # Health status
+          if [ "$HEALTH" = "true" ]; then
+            HEALTH_LINE="✅ All healthchecks passing"
+            COLOR=3066993  # green
+          else
+            HEALTH_LINE="❌ Healthcheck failures — check Actions log"
+            COLOR=15158332  # red
+          fi
+
+          python3 -c "
+          import json, urllib.request, os
+          payload = {
+            'embeds': [{
+              'title': '🚀 Refine Backlog — Deployed',
+              'description': f\"\"\"{os.environ['COMMIT_MSG']}\n\n**What shipped:**{os.environ['SHIPPED']}\n\n{os.environ['HEALTH_LINE']}\"\"\",
+              'color': int(os.environ['COLOR']),
+              'footer': {'text': f\"${SHORT_SHA} by {os.environ['ACTOR']}\"},
+              'url': os.environ['COMMIT_URL']
+            }]
+          }
+          req = urllib.request.Request(
+            f"https://discord.com/api/v10/channels/{os.environ['DISCORD_CHANNEL_ID']}/messages",
+            data=json.dumps(payload).encode(),
+            headers={'Content-Type': 'application/json', 'Authorization': f"Bot {os.environ['DISCORD_BOT_TOKEN']}", 'User-Agent': 'DiscordBot (refinebacklog.com, 1)'}
+          )
+          urllib.request.urlopen(req)
+          print('✅ Discord notified')
+          " || echo "⚠️ Discord notify failed (webhook may not be configured)"
