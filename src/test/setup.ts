@@ -10,5 +10,6 @@ vi.mock('next/navigation', () => ({
 // Mock environment variables for tests
 process.env.ANTHROPIC_API_KEY = 'test-key'
 process.env.STRIPE_SECRET_KEY = 'sk_test_mock'
+process.env.STRIPE_WEBHOOK_SECRET = 'whsec_test_mock'
 process.env.STRIPE_PRO_PRICE_ID = 'price_test_pro'
 process.env.STRIPE_TEAM_PRICE_ID = 'price_test_team'
