@@ -14,6 +14,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "how-to-write-acceptance-criteria",
+    title: "How to Write Acceptance Criteria That Actually Work",
+    description: "Learn to write acceptance criteria that prevent sprint rework. Master Given/When/Then, testability, and avoid 7 common mistakes.",
+    date: "2026-02-20",
+    readTime: "7 min read",
+    tags: ["Acceptance Criteria","User Stories"],
+  },
+
+  {
     slug: "backlog-refinement-vs-grooming",
     title: "Backlog Refinement vs Grooming: What's the Difference?",
     description: "Learn why Scrum dropped 'grooming' in 2013 and what backlog refinement really means. Best practices for running refinement sessions.",
