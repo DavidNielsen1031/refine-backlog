@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const GroomedItemSchema = z.object({
+export const RefinedItemSchema = z.object({
   title: z.string().min(1),
   problem: z.string().min(1),
   acceptanceCriteria: z.array(z.string().min(1)).min(1).max(10),
@@ -11,6 +11,11 @@ export const GroomedItemSchema = z.object({
   userStory: z.string().optional(),
 })
 
-export const GroomedItemsSchema = z.array(GroomedItemSchema).min(1)
+export const RefinedItemsSchema = z.array(RefinedItemSchema).min(1)
 
-export type GroomedItem = z.infer<typeof GroomedItemSchema>
+export type RefinedItem = z.infer<typeof RefinedItemSchema>
+
+// Legacy aliases — kept for backward compatibility, do not use in new code
+export const GroomedItemSchema = RefinedItemSchema
+export const GroomedItemsSchema = RefinedItemsSchema
+export type GroomedItem = RefinedItem

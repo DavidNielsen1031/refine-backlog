@@ -28,7 +28,7 @@ paths:
   /api/refine:
     get:
       summary: API Info
-      description: Returns API description and usage instructions. Also available at /api/groom (legacy).
+      description: Returns API description and usage instructions.
       operationId: getApiInfo
       responses:
         "200":

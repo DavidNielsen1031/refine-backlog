@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Loader2, Copy, CheckCircle2, AlertCircle, Download, Sparkles } from "lucide-react"
 
-interface GroomedItem {
+interface RefinedItem {
   title: string
   problem: string
   acceptanceCriteria: string[]
@@ -31,7 +31,7 @@ export function BacklogGroomer() {
   const [input, setInput] = useState("")
   const [context, setContext] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [results, setResults] = useState<GroomedItem[]>([])
+  const [results, setResults] = useState<RefinedItem[]>([])
   const [error, setError] = useState("")
   const [copySuccess, setCopySuccess] = useState<string | null>(null)
   const [showGherkin, setShowGherkin] = useState(false)
@@ -55,7 +55,7 @@ export function BacklogGroomer() {
     setResults([])
 
     try {
-      const response = await fetch("/api/groom", {
+      const response = await fetch("/api/refine", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
