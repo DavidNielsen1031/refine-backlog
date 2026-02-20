@@ -7,15 +7,19 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle2, Copy, ArrowRight, Key, Loader2 } from "lucide-react"
 import Link from "next/link"
 
+const MAX_ATTEMPTS = 20   // 40 seconds total — covers slow Stripe webhook delivery
+const RETRY_DELAY_MS = 2000
+
 function SuccessContent() {
   const [licenseKey, setLicenseKey] = useState<string | null>(null)
   const [licenseEmail, setLicenseEmail] = useState<string | null>(null)
   const [licenseStatus, setLicenseStatus] = useState<'loading' | 'ready' | 'error'>('loading')
+  const [attempt, setAttempt] = useState(0)
   const [copied, setCopied] = useState(false)
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('session_id')
 
-  const fetchLicenseKey = useCallback(async (attempt = 0) => {
+  const fetchLicenseKey = useCallback(async (currentAttempt = 0) => {
     if (!sessionId) {
       setLicenseStatus('error')
       return
@@ -24,9 +28,9 @@ function SuccessContent() {
     try {
       const res = await fetch(`/api/license?session_id=${encodeURIComponent(sessionId)}`)
       if (res.status === 202) {
-        // Webhook hasn't fired yet — retry up to 5 times with 2s delay
-        if (attempt < 5) {
-          setTimeout(() => fetchLicenseKey(attempt + 1), 2000)
+        if (currentAttempt < MAX_ATTEMPTS) {
+          setAttempt(currentAttempt + 1)
+          setTimeout(() => fetchLicenseKey(currentAttempt + 1), RETRY_DELAY_MS)
         } else {
           setLicenseStatus('error')
         }
@@ -41,7 +45,12 @@ function SuccessContent() {
       setLicenseEmail(data.email)
       setLicenseStatus('ready')
     } catch {
-      setLicenseStatus('error')
+      if (currentAttempt < MAX_ATTEMPTS) {
+        setAttempt(currentAttempt + 1)
+        setTimeout(() => fetchLicenseKey(currentAttempt + 1), RETRY_DELAY_MS)
+      } else {
+        setLicenseStatus('error')
+      }
     }
   }, [sessionId])
 
@@ -54,14 +63,16 @@ function SuccessContent() {
       await navigator.clipboard.writeText(text)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      console.error('Failed to copy:', err)
-    }
+    } catch {}
   }
+
+  // How far through the wait we are — used to adjust messaging
+  const waitSeconds = attempt * (RETRY_DELAY_MS / 1000)
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <div className="max-w-2xl w-full space-y-8">
+
         {/* Success Header */}
         <div className="text-center space-y-4">
           <div className="flex justify-center">
@@ -86,42 +97,51 @@ function SuccessContent() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+
+            {/* Loading state — active and reassuring */}
             {licenseStatus === 'loading' && (
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Generating your license key…
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin text-emerald-400 shrink-0" />
+                  <span>
+                    {waitSeconds < 6
+                      ? 'Activating your license key…'
+                      : waitSeconds < 16
+                      ? 'Almost there — finalizing your subscription…'
+                      : 'Taking a little longer than usual, still working…'}
+                  </span>
+                </div>
+                {/* Progress bar */}
+                <div className="h-1 bg-muted/30 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-500/60 rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min((attempt / MAX_ATTEMPTS) * 100, 95)}%` }}
+                  />
+                </div>
               </div>
             )}
 
+            {/* Ready state */}
             {licenseStatus === 'ready' && licenseKey && (
               <>
                 <p className="text-sm text-muted-foreground">
-                  Save this key — you&apos;ll need it to use the CLI and API without limits.
+                  Save this key — you&apos;ll need it for the CLI and API. You can always retrieve it at{' '}
+                  <Link href="/get-key" className="text-emerald-400 hover:underline">/get-key</Link>.
                 </p>
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <code className="flex-1 bg-muted/50 border border-muted p-3 rounded-lg text-sm font-mono tracking-wide break-all">
-                      {licenseKey}
-                    </code>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 self-start mt-1"
-                      onClick={() => handleCopy(licenseKey)}
-                    >
-                      {copied ? (
-                        <>
-                          <CheckCircle2 className="h-4 w-4 mr-1 text-emerald-400" />
-                          Copied
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="h-4 w-4 mr-1" />
-                          Copy
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                <div className="flex gap-2">
+                  <code className="flex-1 bg-muted/50 border border-muted p-3 rounded-lg text-sm font-mono tracking-wide break-all">
+                    {licenseKey}
+                  </code>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 self-start mt-1"
+                    onClick={() => handleCopy(licenseKey)}
+                  >
+                    {copied
+                      ? <><CheckCircle2 className="h-4 w-4 mr-1 text-emerald-400" />Copied</>
+                      : <><Copy className="h-4 w-4 mr-1" />Copy</>}
+                  </Button>
                 </div>
 
                 {/* CLI quickstart */}
@@ -131,7 +151,7 @@ function SuccessContent() {
                     npx refine-backlog-cli --key {licenseKey} &quot;Fix login bug&quot; &quot;Add dark mode&quot;
                   </code>
                   <p className="text-xs text-muted-foreground">
-                    Or set <code className="font-mono">REFINE_BACKLOG_KEY={licenseKey}</code> in your environment and drop the flag.
+                    Or export <code className="font-mono">REFINE_BACKLOG_KEY={licenseKey}</code> and drop the flag.
                   </p>
                 </div>
 
@@ -146,39 +166,60 @@ function SuccessContent() {
               </>
             )}
 
+            {/* Error / timeout state — self-service, no dead ends */}
             {licenseStatus === 'error' && (
-              <div className="bg-yellow-500/10 p-4 rounded-lg border border-yellow-500/20">
-                <h4 className="font-semibold text-yellow-400 mb-2">Key still processing</h4>
+              <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
-                  Your subscription is confirmed. Email{' '}
-                  <a href="mailto:refinebacklog@gmail.com?subject=License%20Key%20Request" className="text-emerald-400 hover:underline">
-                    refinebacklog@gmail.com
-                  </a>{' '}
-                  with your order and we&apos;ll send your key within minutes.
+                  Your payment was successful — the key is just taking longer than expected to activate.
+                  It&apos;s on its way.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Link
+                    href="/get-key"
+                    className="flex items-center justify-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                  >
+                    <Key className="h-4 w-4" />
+                    Retrieve my key at /get-key
+                  </Link>
+                  <a
+                    href="mailto:refinebacklog@gmail.com?subject=License%20Key%20Request&body=Hi%2C%20I%20just%20subscribed%20and%20my%20key%20hasn%27t%20appeared%20yet."
+                    className="flex items-center justify-center gap-2 rounded-lg border border-muted px-4 py-3 text-sm font-medium text-muted-foreground hover:border-foreground/30 transition-colors"
+                  >
+                    Contact support
+                  </a>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Enter the email you used to subscribe at{' '}
+                  <Link href="/get-key" className="text-emerald-400 hover:underline">
+                    refinebacklog.com/get-key
+                  </Link>{' '}
+                  and your key will appear immediately.
                 </p>
               </div>
             )}
+
           </CardContent>
         </Card>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600">
-            <Link href="/#refiner">
-              <ArrowRight className="mr-2 h-4 w-4" />
-              Start Refining Backlogs
-            </Link>
-          </Button>
+        {licenseStatus === 'ready' && (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="bg-emerald-500 hover:bg-emerald-600">
+              <Link href="/#refiner">
+                <ArrowRight className="mr-2 h-4 w-4" />
+                Start Refining Backlogs
+              </Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
+              <a href="mailto:refinebacklog@gmail.com?subject=Refine%20Backlog%20Pro%20Support">
+                Get Help &amp; Support
+              </a>
+            </Button>
+          </div>
+        )}
 
-          <Button variant="outline" size="lg" asChild>
-            <Link href="mailto:refinebacklog@gmail.com?subject=Refine%20Backlog%20Pro%20Support">
-              Get Help &amp; Support
-            </Link>
-          </Button>
-        </div>
-
-        {/* Footer Note */}
-        <div className="text-center space-y-2">
+        {/* Footer */}
+        <div className="text-center space-y-1">
           <p className="text-sm text-muted-foreground">
             Lost your key?{" "}
             <Link href="/get-key" className="text-emerald-400 hover:underline">
@@ -186,15 +227,13 @@ function SuccessContent() {
             </Link>
           </p>
           <p className="text-sm text-muted-foreground">
-            Questions? Email{" "}
-            <a
-              href="mailto:refinebacklog@gmail.com"
-              className="text-emerald-400 hover:underline"
-            >
+            Questions?{" "}
+            <a href="mailto:refinebacklog@gmail.com" className="text-emerald-400 hover:underline">
               refinebacklog@gmail.com
             </a>
           </p>
         </div>
+
       </div>
     </div>
   )
@@ -202,7 +241,11 @@ function SuccessContent() {
 
 export default function SuccessPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-400" />
+      </div>
+    }>
       <SuccessContent />
     </Suspense>
   )
