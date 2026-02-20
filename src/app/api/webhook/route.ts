@@ -17,6 +17,25 @@ async function notifyTelegram(message: string): Promise<void> {
   }
 }
 
+async function notifyDiscord(message: string): Promise<void> {
+  const token = process.env.DISCORD_BOT_TOKEN
+  const channelId = '1474028159233163358' // #refine-backlog
+  if (!token) return
+  try {
+    await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${token}`,
+        'Content-Type': 'application/json',
+        'User-Agent': 'DiscordBot (https://openclaw.ai, 1.0)',
+      },
+      body: JSON.stringify({ content: message }),
+    })
+  } catch {
+    // Non-blocking
+  }
+}
+
 function generateLicenseKey(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
   let result = ''
@@ -85,16 +104,23 @@ export async function POST(request: NextRequest) {
             })
             console.log(`[WEBHOOK] event=${eventType} customer=${customerId} result=success licenseKey=${licenseKey}`)
 
-            // 💰 Notify David on Telegram (fire and forget)
+            // 💰 Notify David on Telegram + Discord (fire and forget)
             const email = session.customer_details?.email ?? 'unknown'
             const planLabel = plan === 'team' ? 'Team $29/mo' : 'Pro $9/mo'
-            notifyTelegram(
+            const telegramMsg =
               `💰 <b>New Refine Backlog subscriber!</b>\n\n` +
               `📧 ${email}\n` +
               `📦 ${planLabel}\n` +
               `🔑 ${licenseKey}\n` +
               `👤 ${customerId}`
-            ).catch(() => {})
+            const discordMsg =
+              `💰 **New Refine Backlog subscriber!**\n\n` +
+              `📧 ${email}\n` +
+              `📦 ${planLabel}\n` +
+              `🔑 \`${licenseKey}\`\n` +
+              `👤 ${customerId}`
+            notifyTelegram(telegramMsg).catch(() => {})
+            notifyDiscord(discordMsg).catch(() => {})
 
           } catch (kvErr) {
             console.error(`[WEBHOOK] event=${eventType} customer=${customerId} result=fail kvError=`, kvErr)
