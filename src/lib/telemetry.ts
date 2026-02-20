@@ -45,6 +45,7 @@ export function detectSource(
 // Model pricing per million tokens (USD)
 const MODEL_PRICING: Record<string, { input: number; output: number }> = {
   'claude-3-5-haiku-20241022': { input: 0.80, output: 4.00 },
+  'claude-haiku-4-5': { input: 0.80, output: 4.00 },
   'claude-haiku-4-5-20250414': { input: 1.00, output: 5.00 },
 }
 
