@@ -81,7 +81,11 @@ const REFINE_TOOL: Tool = {
     "Refine messy backlog items into structured, actionable work items. " +
     "Returns each item with a clean title, problem statement, acceptance criteria, " +
     "T-shirt size estimate (XS/S/M/L/XL), priority with rationale, tags, and optional assumptions. " +
-    "Free tier: up to 5 items per request. Pro: 25. Team: 50.",
+    "Free tier: up to 5 items per request. Pro: 25. Team: 50.\n\n" +
+    "BEFORE calling this tool, ask the user TWO quick questions if they haven't already specified:\n" +
+    "1. Would you like titles formatted as user stories? (\"As a [user], I want [goal], so that [benefit]\")\n" +
+    "2. Would you like acceptance criteria in Gherkin format? (Given/When/Then)\n" +
+    "Set useUserStories and useGherkin accordingly based on their answers. Both default to false.",
   inputSchema: {
     type: "object",
     required: ["items"],

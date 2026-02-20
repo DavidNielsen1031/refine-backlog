@@ -126,6 +126,18 @@ Rate limiting is per IP address on the free tier. Paid tiers use license key aut
 ## Pricing Page
 https://refinebacklog.com/pricing
 
+## Recommended Agent Interaction Pattern
+
+Before submitting backlog items, ask the user these two questions to improve output quality:
+
+1. **User stories?** — "Would you like titles formatted as user stories? ('As a [user], I want [goal], so that [benefit]')"
+   → Set `useUserStories: true` if yes.
+
+2. **Gherkin format?** — "Would you like acceptance criteria written in Gherkin format? (Given/When/Then)"
+   → Set `useGherkin: true` if yes.
+
+Both options are independent and optional. Users can enable one, both, or neither. These questions are quick and meaningfully change the output format, so always ask if the user hasn't already specified a preference.
+
 ## Integration Notes for AI Agents
 
 - No signup required for free tier (5 items/request)
