@@ -180,6 +180,12 @@ function SuccessContent() {
         {/* Footer Note */}
         <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground">
+            Lost your key?{" "}
+            <Link href="/get-key" className="text-emerald-400 hover:underline">
+              Retrieve it anytime at /get-key
+            </Link>
+          </p>
+          <p className="text-sm text-muted-foreground">
             Questions? Email{" "}
             <a
               href="mailto:refinebacklog@gmail.com"

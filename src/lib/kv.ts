@@ -64,6 +64,11 @@ export async function setSubscription(customerId: string, data: SubscriptionData
         plan: data.plan,
         status: data.status,
       } satisfies LicenseData))
+      // Email reverse lookup — lets customers retrieve their key by email
+      if (data.email) {
+        const emailKey = `email:${data.email.toLowerCase().trim()}:customerId`
+        await r.set(emailKey, customerId)
+      }
     } catch (err) {
       console.error('[KV] setSubscription failed, falling back to memory:', err)
       memSubs.set(customerId, data)
@@ -73,6 +78,27 @@ export async function setSubscription(customerId: string, data: SubscriptionData
     memSubs.set(customerId, data)
     memLicenses.set(data.licenseKey, { customerId, plan: data.plan, status: data.status })
   }
+}
+
+export async function getSubscriptionByEmail(email: string): Promise<SubscriptionData | null> {
+  logKvStatus()
+  const r = getRedis()
+  const normalizedEmail = email.toLowerCase().trim()
+  if (r) {
+    try {
+      const customerId = await r.get<string>(`email:${normalizedEmail}:customerId`)
+      if (!customerId) return null
+      return getSubscriptionByCustomer(typeof customerId === 'string' ? customerId : String(customerId))
+    } catch (err) {
+      console.error('[KV] getSubscriptionByEmail failed:', err)
+      return null
+    }
+  }
+  // Memory fallback: scan subscriptions for matching email
+  for (const [, sub] of memSubs.entries()) {
+    if (sub.email?.toLowerCase().trim() === normalizedEmail) return sub
+  }
+  return null
 }
 
 export async function getSubscriptionByCustomer(customerId: string): Promise<SubscriptionData | null> {
