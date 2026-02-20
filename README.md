@@ -42,7 +42,7 @@ Refine your backlog automatically in CI. Trigger on issue open, manual dispatch,
     key: ${{ secrets.REFINE_BACKLOG_KEY }}
 ```
 
-→ [Full GitHub Action docs](../action/README.md)
+→ [GitHub Marketplace](https://github.com/marketplace/actions/refine-backlog) · [Full docs + examples](https://github.com/DavidNielsen1031/refine-backlog-action#readme)
 
 ## API
 
