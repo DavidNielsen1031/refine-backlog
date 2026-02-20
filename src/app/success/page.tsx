@@ -139,7 +139,7 @@ function SuccessContent() {
           </Button>
           
           <Button variant="outline" size="lg" asChild>
-            <Link href="mailto:david@perpetualagility.com?subject=Refine%20Backlog%20Pro%20Support">
+            <Link href="mailto:refinebacklog@gmail.com?subject=Refine%20Backlog%20Pro%20Support">
               Get Help & Support
             </Link>
           </Button>
@@ -150,10 +150,10 @@ function SuccessContent() {
           <p className="text-sm text-muted-foreground">
             Need help? Email{" "}
             <a 
-              href="mailto:david@perpetualagility.com" 
+              href="mailto:refinebacklog@gmail.com" 
               className="text-emerald-400 hover:underline"
             >
-              david@perpetualagility.com
+              refinebacklog@gmail.com
             </a>
           </p>
           <p className="text-xs text-muted-foreground">

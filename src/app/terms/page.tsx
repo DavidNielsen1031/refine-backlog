@@ -95,8 +95,7 @@ export default function TermsOfService() {
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Contact</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Email: <a href="mailto:legal@refinebacklog.com" className="text-emerald-400 hover:underline">legal@refinebacklog.com</a>{" "}
-            (or <a href="mailto:david@perpetualagility.com" className="text-emerald-400 hover:underline">david@perpetualagility.com</a> as fallback)
+            Email: <a href="mailto:refinebacklog@gmail.com" className="text-emerald-400 hover:underline">refinebacklog@gmail.com</a>
           </p>
         </div>
       </article>

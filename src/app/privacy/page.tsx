@@ -86,8 +86,7 @@ export default function PrivacyPolicy() {
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Contact</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Email: <a href="mailto:privacy@refinebacklog.com" className="text-emerald-400 hover:underline">privacy@refinebacklog.com</a>{" "}
-            (or <a href="mailto:david@perpetualagility.com" className="text-emerald-400 hover:underline">david@perpetualagility.com</a> as fallback)
+            Email: <a href="mailto:refinebacklog@gmail.com" className="text-emerald-400 hover:underline">refinebacklog@gmail.com</a>
           </p>
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Changes</h2>
