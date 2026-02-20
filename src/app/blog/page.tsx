@@ -14,6 +14,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "backlog-refinement-vs-grooming",
+    title: "Backlog Refinement vs Grooming: What's the Difference?",
+    description: "Learn why Scrum dropped 'grooming' in 2013 and what backlog refinement really means. Best practices for running refinement sessions.",
+    date: "2026-02-20",
+    readTime: "7 min read",
+    tags: ["Backlog Refinement","Scrum"],
+  },
+
+  {
     slug: "backlog-refinement-template",
     title: "Backlog Refinement Template: The Complete Guide for Product Teams",
     description: "A practical backlog refinement template with examples, common mistakes to avoid, and tips for structuring your refinement sessions.",
