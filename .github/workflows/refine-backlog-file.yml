@@ -1,0 +1,38 @@
+name: Refine Backlog File
+
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Path to backlog file (one item per line)"
+        default: "backlog.txt"
+        required: true
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refine backlog
+        id: refine
+        uses: DavidNielsen1031/refine-backlog-action@v1
+        with:
+          file: ${{ inputs.file }}
+          output-file: refined.json
+          user-stories: "true"
+          gherkin: "true"
+          key: ${{ secrets.REFINE_BACKLOG_KEY }}
+
+      - name: Commit refined output
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "Refine Backlog Action"
+          git add refined.json
+          git diff --staged --quiet || git commit -m "chore: update refined backlog (${{ steps.refine.outputs.count }} items)"
+          git push
+
+      - name: Summary
+        run: echo "✅ Refined ${{ steps.refine.outputs.count }} items → refined.json"

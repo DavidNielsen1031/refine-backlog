@@ -1,0 +1,22 @@
+name: Refine on Issue Open
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  refine:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Refine issue
+        uses: DavidNielsen1031/refine-backlog-action@v1
+        with:
+          items: ${{ github.event.issue.title }}
+          write-back: "true"
+          gherkin: "true"
+          user-stories: "true"
+          key: ${{ secrets.REFINE_BACKLOG_KEY }}

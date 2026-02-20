@@ -29,6 +29,21 @@ Or install via npm:
 npm install -g refine-backlog-mcp
 ```
 
+## GitHub Action
+
+Refine your backlog automatically in CI. Trigger on issue open, manual dispatch, or any GitHub event.
+
+```yaml
+- uses: DavidNielsen1031/refine-backlog-action@v1
+  with:
+    items: ${{ github.event.issue.title }}
+    write-back: "true"
+    gherkin: "true"
+    key: ${{ secrets.REFINE_BACKLOG_KEY }}
+```
+
+→ [Full GitHub Action docs](../action/README.md)
+
 ## API
 
 Direct REST API for scripts, automations, and pipelines:
