@@ -101,6 +101,17 @@ Once configured, just talk to your AI naturally:
 
 Get a license key at [refinebacklog.com/pricing](https://refinebacklog.com/pricing)
 
+## Prefer automation over chat?
+
+If you want to run Refine Backlog in scripts, GitHub Actions, or CI pipelines — without an LLM in the loop — use the CLI instead:
+
+```bash
+npx refine-backlog-cli "Fix login bug" --gherkin
+cat backlog.txt | npx refine-backlog-cli --user-stories --format json
+```
+
+**CLI repo:** [github.com/DavidNielsen1031/refine-backlog-cli](https://github.com/DavidNielsen1031/refine-backlog-cli)
+
 ## API Reference
 
 Full API docs: [refinebacklog.com/llms.txt](https://refinebacklog.com/llms.txt)  

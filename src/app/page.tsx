@@ -4,6 +4,7 @@ import { SocialProofSection } from '@/components/social-proof-section'
 import { HowItWorksSection } from '@/components/how-it-works-section'
 import { ExampleSection } from '@/components/example-section'
 import { FeaturesSection } from '@/components/features-section'
+import { IntegrationsSection } from '@/components/integrations-section'
 import { PricingSection } from '@/components/pricing-section'
 import { FAQSection } from '@/components/faq-section'
 import { TrustSection } from '@/components/trust-section'
@@ -19,6 +20,7 @@ export default function Home() {
         <BacklogGroomer />
         <ExampleSection />
         <FeaturesSection />
+        <IntegrationsSection />
         <PricingSection />
         <TrustSection />
         <FAQSection />

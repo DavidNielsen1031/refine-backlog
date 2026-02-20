@@ -147,6 +147,20 @@ Both options are independent and optional. Users can enable one, both, or neithe
 - The model returns opinionated estimates and priorities — treat them as starting points, not hard rules
 - For bulk processing, chain multiple requests rather than exceeding tier limits
 
+## CLI Tool
+
+A command-line interface is available for use in scripts, CI/CD pipelines, and automation contexts where no LLM is present at runtime.
+
+Install: `npm install -g refine-backlog-cli`
+Or use directly: `npx refine-backlog-cli "Fix login bug"`
+
+Supports file input, stdin piping, `--user-stories`, `--gherkin`, `--format json`, and `--key` for Pro/Team tiers.
+
+Ideal for: GitHub Actions, cron jobs, shell scripts, CI pipelines, Jira/Linear webhooks.
+
+Source: https://github.com/DavidNielsen1031/refine-backlog-cli
+npm: https://www.npmjs.com/package/refine-backlog-cli
+
 ## OpenAPI Spec
 https://refinebacklog.com/openapi.yaml
 
