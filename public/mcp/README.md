@@ -37,16 +37,34 @@ node dist/server.js
 
 Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on Mac):
 
+**Free tier** (3 requests/day, 5 items):
 ```json
 {
   "mcpServers": {
     "refine-backlog": {
       "command": "npx",
-      "args": ["refine-backlog-mcp"]
+      "args": ["-y", "refine-backlog-mcp"]
     }
   }
 }
 ```
+
+**Pro/Team** (unlimited requests, 25–50 items) — add your license key:
+```json
+{
+  "mcpServers": {
+    "refine-backlog": {
+      "command": "npx",
+      "args": ["-y", "refine-backlog-mcp"],
+      "env": {
+        "REFINE_BACKLOG_KEY": "your-license-key-here"
+      }
+    }
+  }
+}
+```
+
+Get a license key at [refinebacklog.com/pricing](https://refinebacklog.com/pricing).
 
 With a license key (Pro/Team tier):
 

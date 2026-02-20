@@ -166,4 +166,19 @@ https://refinebacklog.com/openapi.yaml
 
 ## MCP Server
 An MCP (Model Context Protocol) server is available for use with Claude Desktop, Cursor, and other MCP-compatible tools.
-See: https://refinebacklog.com/mcp/README.md
+Free tier works without configuration. For paid tier (unlimited requests), set `REFINE_BACKLOG_KEY` in the MCP server env config.
+See full setup: https://refinebacklog.com/mcp/README.md
+
+### MCP License Key Setup
+```json
+{
+  "mcpServers": {
+    "refine-backlog": {
+      "command": "npx",
+      "args": ["-y", "refine-backlog-mcp"],
+      "env": { "REFINE_BACKLOG_KEY": "your-license-key" }
+    }
+  }
+}
+```
+Get a license key: https://refinebacklog.com/pricing

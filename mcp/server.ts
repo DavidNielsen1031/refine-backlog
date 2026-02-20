@@ -18,6 +18,10 @@ import {
 
 const API_BASE = "https://refinebacklog.com";
 
+// License key from MCP server environment — set REFINE_BACKLOG_KEY in Claude Desktop config.
+// This is the preferred way for MCP users with a paid subscription.
+const ENV_LICENSE_KEY = process.env.REFINE_BACKLOG_KEY ?? null;
+
 interface RefinedItem {
   title: string;
   problem: string;
@@ -85,7 +89,10 @@ const REFINE_TOOL: Tool = {
     "BEFORE calling this tool, ask the user TWO quick questions if they haven't already specified:\n" +
     "1. Would you like titles formatted as user stories? (\"As a [user], I want [goal], so that [benefit]\")\n" +
     "2. Would you like acceptance criteria in Gherkin format? (Given/When/Then)\n" +
-    "Set useUserStories and useGherkin accordingly based on their answers. Both default to false.",
+    "Set useUserStories and useGherkin accordingly based on their answers. Both default to false.\n\n" +
+    "LICENSE KEY: For unlimited requests and higher item limits, set REFINE_BACKLOG_KEY in your MCP server " +
+    "environment config (Claude Desktop → claude_desktop_config.json → env section). " +
+    "Get a key at https://refinebacklog.com/pricing",
   inputSchema: {
     type: "object",
     required: ["items"],
@@ -109,7 +116,8 @@ const REFINE_TOOL: Tool = {
         type: "string",
         description:
           "Optional. Refine Backlog license key for Pro or Team tier. " +
-          "Obtain at https://refinebacklog.com/pricing. Free tier (5 items) works without a key.",
+          "Preferred: set REFINE_BACKLOG_KEY in your MCP server env config instead of passing inline. " +
+          "Get a key at https://refinebacklog.com/pricing. Free tier (5 items, 3 req/day) works without a key.",
       },
       useUserStories: {
         type: "boolean",
@@ -168,8 +176,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     "Content-Type": "application/json",
   };
 
-  if (args.licenseKey) {
-    headers["x-license-key"] = args.licenseKey;
+  // Inline arg takes precedence; env var is the recommended approach for MCP configs
+  const resolvedKey = args.licenseKey ?? ENV_LICENSE_KEY;
+  if (resolvedKey) {
+    headers["x-license-key"] = resolvedKey;
   }
 
   const body: Record<string, unknown> = {
@@ -181,7 +191,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   if (args.useGherkin !== undefined) body.useGherkin = args.useGherkin;
 
   try {
-    const response = await fetch(`${API_BASE}/api/groom`, {
+    const response = await fetch(`${API_BASE}/api/refine`, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
@@ -193,7 +203,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return {
         content: [{
           type: "text",
-          text: `⚠️ ${msg}\n\n👉 Upgrade at https://refinebacklog.com/pricing — add your license key to the Claude Desktop MCP config as: "licenseKey": "your-key-here"`,
+          text: `⚠️ ${msg}\n\n👉 Upgrade at https://refinebacklog.com/pricing\n\nOnce you have a key, add it to your Claude Desktop config:\n{\n  "mcpServers": {\n    "refine-backlog": {\n      "command": "npx",\n      "args": ["-y", "refine-backlog-mcp"],\n      "env": { "REFINE_BACKLOG_KEY": "your-key-here" }\n    }\n  }\n}`,
         }],
         isError: true,
       };
