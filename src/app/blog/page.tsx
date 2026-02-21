@@ -14,6 +14,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "definition-of-ready-checklist",
+    title: "Definition of Ready: The Checklist Your Team Needs Before Sprint Planning",
+    description: "Learn what Definition of Ready in Scrum is, why it matters more than Definition of Done, and get a practical DoR checklist your team can use today.",
+    date: "2026-02-21",
+    readTime: "7 min read",
+    tags: ["Scrum","Sprint Planning"],
+  },
+
+  {
     slug: "how-to-write-acceptance-criteria",
     title: "How to Write Acceptance Criteria That Actually Work",
     description: "Learn to write acceptance criteria that prevent sprint rework. Master Given/When/Then, testability, and avoid 7 common mistakes.",
