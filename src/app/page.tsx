@@ -5,6 +5,7 @@ import { HowItWorksSection } from '@/components/how-it-works-section'
 import { ExampleSection } from '@/components/example-section'
 import { FeaturesSection } from '@/components/features-section'
 import { IntegrationsSection } from '@/components/integrations-section'
+import { AgentNativeSection } from '@/components/agent-native-section'
 import { PricingSection } from '@/components/pricing-section'
 import { FAQSection } from '@/components/faq-section'
 import { TrustSection } from '@/components/trust-section'
@@ -21,6 +22,7 @@ export default function Home() {
         <ExampleSection />
         <FeaturesSection />
         <IntegrationsSection />
+        <AgentNativeSection />
         <PricingSection />
         <TrustSection />
         <FAQSection />

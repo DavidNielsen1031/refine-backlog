@@ -86,10 +86,11 @@ export const siteConfig = {
     {
       name: "Pro",
       price: 9,
-      description: "For busy product managers",
+      description: "For developers using the API",
       features: [
         "25 items per request",
-        "Unlimited requests",
+        "Unlimited API requests",
+        "License key for scripts & pipelines",
         "Email support"
       ],
       cta: "Upgrade to Pro",
@@ -98,10 +99,11 @@ export const siteConfig = {
     {
       name: "Team",
       price: 29,
-      description: "For growing organizations", 
+      description: "For engineering orgs automating at scale", 
       features: [
         "50 items per request",
-        "Team usage (up to 5 seats)",
+        "Unlimited API requests",
+        "5 license keys for team automation",
         "Dedicated support"
       ],
       cta: "Upgrade to Team",
@@ -132,7 +134,7 @@ export const siteConfig = {
     },
     {
       q: "What's the difference between Pro and Team?",
-      a: "Pro ($9/month) is designed for individual product managers and includes 25 items per request with unlimited requests. Team ($29/month) adds team usage (up to 5 seats) and dedicated support with 50 items per request."
+      a: "Pro ($9/month) is designed for developers automating backlog refinement — pipe items through scripts, CI/CD pipelines, or GitHub Actions with a license key. Team ($29/month) gives your whole engineering org access with 5 license keys, 50 items per request, and dedicated support."
     },
     {
       q: "What's the difference between effort sizes?",
