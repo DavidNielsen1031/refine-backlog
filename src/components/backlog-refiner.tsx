@@ -261,7 +261,7 @@ Example:
                 />
                 <label htmlFor="runDiscovery" className="text-sm text-muted-foreground cursor-pointer select-none">
                   Run Discovery Gate first{" "}
-                  <span className="text-xs text-emerald-400">PRO</span>
+                  <span className="text-xs text-muted-foreground/50">(3 free/day · unlimited on Pro)</span>
                 </label>
               </div>
 

@@ -21,11 +21,11 @@ const DISCOVERY_PROMPT = `You are an expert product manager and discovery specia
 CLASSIFICATION RULES:
 
 SKIP — item does NOT need discovery before refinement. Use when:
-- Bug report with clear expected vs actual behavior
-- Regression ("used to work before X")
-- Small, localized change with no new user workflow (copy update, rename, logging)
-- Has explicit acceptance criteria or testable conditions
-- Known user behavior, just needs implementation
+- Bug report with BOTH explicit expected behavior AND explicit actual behavior AND reproduction conditions described in the item text. A bare bug title like "fix bug", "fix login issue", "fix crash" with no description MUST be classified FULL_DISCOVERY — there is nothing to refine without knowing what's broken.
+- Regression with a named version ("used to work before v2.1.3") AND a described symptom
+- Small, localized change with no new user workflow (copy update, rename, logging) — but ONLY if the exact change is spelled out
+- Has explicit acceptance criteria or testable conditions written in the item
+- Known user behavior with clear implementation details, just needs execution
 
 LIGHT_DISCOVERY — item needs 1-2 quick clarifications before refinement. Use when:
 - Mostly clear but missing a success metric or key constraint
