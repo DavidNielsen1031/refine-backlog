@@ -2,6 +2,106 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { setSubscription, cancelSubscriptionByCustomer, getSubscriptionByCustomer } from '@/lib/kv'
 
+async function sendLicenseEmail(params: {
+  to: string
+  plan: 'pro' | 'team'
+  licenseKey: string
+}): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'hello@perpetualagility.com'
+  if (!apiKey) {
+    console.error('[EMAIL] RESEND_API_KEY not configured — skipping license email')
+    return
+  }
+
+  const planLabel = params.plan === 'team' ? 'Team' : 'Pro'
+  const planPrice = params.plan === 'team' ? '$29/month' : '$9/month'
+  const itemLimit = params.plan === 'team' ? '50 backlog items per run' : '25 backlog items per run'
+  const keyCount = params.plan === 'team' ? '5 license keys' : '1 license key'
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
+  <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">You're on Refine Backlog ${planLabel} ✅</h1>
+  <p style="color: #666; margin-bottom: 32px;">${planPrice} · ${itemLimit} · ${keyCount}</p>
+
+  <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 32px;">
+    <p style="font-size: 12px; color: #888; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em;">Your License Key</p>
+    <code style="font-size: 18px; font-weight: 700; letter-spacing: 0.1em; color: #1a1a1a;">${params.licenseKey}</code>
+    <p style="font-size: 12px; color: #888; margin: 12px 0 0 0;">Keep this safe — you'll need it to authenticate API calls and MCP access.</p>
+  </div>
+
+  <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Get started in 30 seconds</h2>
+
+  <p style="font-size: 14px; margin-bottom: 8px;"><strong>Option 1 — API (curl / scripts / CI)</strong></p>
+  <pre style="background: #1a1a1a; color: #e5e5e5; padding: 16px; border-radius: 6px; font-size: 13px; overflow-x: auto;">curl -X POST https://refinebacklog.com/api/refine \\
+  -H "Content-Type: application/json" \\
+  -H "x-license-key: ${params.licenseKey}" \\
+  -d '{"item": "As a user, I want to..."}'</pre>
+
+  <p style="font-size: 14px; margin-top: 24px; margin-bottom: 8px;"><strong>Option 2 — MCP (Claude Desktop)</strong></p>
+  <pre style="background: #1a1a1a; color: #e5e5e5; padding: 16px; border-radius: 6px; font-size: 13px; overflow-x: auto;">{
+  "mcpServers": {
+    "refine-backlog": {
+      "command": "npx",
+      "args": ["-y", "refine-backlog-mcp"],
+      "env": {
+        "REFINE_BACKLOG_KEY": "${params.licenseKey}"
+      }
+    }
+  }
+}</pre>
+
+  <div style="border-top: 1px solid #e5e5e5; margin-top: 40px; padding-top: 24px;">
+    <p style="font-size: 13px; color: #888; margin: 0;">
+      Questions? Reply to this email or check <a href="https://refinebacklog.com" style="color: #1a1a1a;">refinebacklog.com</a>.<br>
+      Built by <a href="https://perpetualagility.com" style="color: #1a1a1a;">Perpetual Agility</a>.
+    </p>
+  </div>
+</body>
+</html>`
+
+  const text = `You're on Refine Backlog ${planLabel}
+
+Your license key: ${params.licenseKey}
+
+Get started:
+  curl -X POST https://refinebacklog.com/api/refine \\
+    -H "x-license-key: ${params.licenseKey}" \\
+    -H "Content-Type: application/json" \\
+    -d '{"item": "As a user, I want to..."}'
+
+Questions? Reply to this email or visit https://refinebacklog.com`
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: `Refine Backlog <${fromEmail}>`,
+        to: [params.to],
+        reply_to: fromEmail,
+        subject: `Your Refine Backlog ${planLabel} license key`,
+        html,
+        text,
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) {
+      console.error('[EMAIL] Resend error:', JSON.stringify(data))
+    } else {
+      console.log(`[EMAIL] License key email sent to ${params.to} via Resend id=${data.id}`)
+    }
+  } catch (err) {
+    console.error('[EMAIL] Failed to send via Resend:', err)
+  }
+}
+
 async function notifyTelegram(message: string): Promise<void> {
   const token = process.env.TELEGRAM_BOT_TOKEN
   const chatId = process.env.TELEGRAM_CHAT_ID || '1656378684'
@@ -104,8 +204,13 @@ export async function POST(request: NextRequest) {
             })
             console.log(`[WEBHOOK] event=${eventType} customer=${customerId} result=success licenseKey=${licenseKey}`)
 
-            // 💰 Notify David on Telegram + Discord (fire and forget)
+            // 📧 Email license key to customer via Resend (fire and forget)
             const email = session.customer_details?.email ?? 'unknown'
+            if (email !== 'unknown') {
+              sendLicenseEmail({ to: email, plan, licenseKey }).catch(() => {})
+            }
+
+            // 💰 Notify David on Telegram + Discord (fire and forget)
             const planLabel = plan === 'team' ? 'Team $29/mo' : 'Pro $9/mo'
             const telegramMsg =
               `💰 <b>New Refine Backlog subscriber!</b>\n\n` +
