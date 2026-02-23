@@ -41,6 +41,8 @@ export function BacklogRefiner() {
   const [runDiscovery, setRunDiscovery] = useState(false)
   const [discoveryResult, setDiscoveryResult] = useState<DiscoveryResult | null>(null)
   const [showingDiscovery, setShowingDiscovery] = useState(false)
+  const [discoveryClassification, setDiscoveryClassification] = useState<string | null>(null)
+  const [copyDiscoverySuccess, setCopyDiscoverySuccess] = useState(false)
 
   const handleRefine = async () => {
     if (!input.trim()) {
@@ -59,6 +61,7 @@ export function BacklogRefiner() {
     setResults([])
     setDiscoveryResult(null)
     setShowingDiscovery(false)
+    setDiscoveryClassification(null)
 
     // If discovery gate is enabled, run discovery first
     if (runDiscovery) {
@@ -151,6 +154,44 @@ export function BacklogRefiner() {
     a.download = "refined-backlog.csv"
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  const copyDiscoveryMarkdown = async () => {
+    if (!discoveryResult) return
+    const pct = Math.round(discoveryResult.confidence * 100)
+    const classLabel =
+      discoveryResult.classification === 'SKIP' ? '✅ Ready to Refine' :
+      discoveryResult.classification === 'LIGHT_DISCOVERY' ? '⚠️ Light Discovery Needed' :
+      '🔴 Full Discovery Required'
+
+    const lines: string[] = [
+      `## Discovery Gate Result — ${classLabel} (${pct}% confidence)`,
+      ``,
+      `**Rationale:** ${discoveryResult.rationale}`,
+      ``,
+      `**Primary signal:** ${discoveryResult.primary_signal}`,
+    ]
+
+    if (discoveryResult.questions.length > 0) {
+      lines.push(``, `### Key Questions to Answer`)
+      discoveryResult.questions.forEach(q => {
+        lines.push(``, `**Q${q.rank}: ${q.question}**`)
+        lines.push(`- Category: \`${q.category}\` · Validate via: ${q.fastest_validation}`)
+        lines.push(`- Risk if skipped: ${q.why_it_matters}`)
+      })
+    }
+
+    if (discoveryResult.assumptions.length > 0) {
+      lines.push(``, `### Key Assumptions`)
+      discoveryResult.assumptions.forEach(a => {
+        lines.push(``, `**[${a.risk.toUpperCase()} RISK · ${a.type}]** ${a.statement}`)
+        lines.push(`- Quick test: ${a.simple_test}`)
+      })
+    }
+
+    await navigator.clipboard.writeText(lines.join('\n'))
+    setCopyDiscoverySuccess(true)
+    setTimeout(() => setCopyDiscoverySuccess(false), 2000)
   }
 
   const getPriorityColor = (priority: string) => {
@@ -311,24 +352,20 @@ Example:
                   Discovery Gate Result
                 </h3>
                 {(() => {
-                  const { classification } = discoveryResult
+                  const { classification, confidence } = discoveryResult
+                  const pct = Math.round(confidence * 100)
                   if (classification === 'SKIP') {
-                    return <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-sm px-3 py-1">✅ Ready to Refine</Badge>
+                    return <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-sm px-3 py-1">✅ Ready to Refine · {pct}%</Badge>
                   } else if (classification === 'LIGHT_DISCOVERY') {
-                    return <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-sm px-3 py-1">⚠️ Light Discovery Needed</Badge>
+                    return <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/20 text-sm px-3 py-1">⚠️ Light Discovery Needed · {pct}%</Badge>
                   } else {
-                    return <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-sm px-3 py-1">🔴 Full Discovery Required</Badge>
+                    return <Badge className="bg-red-500/10 text-red-400 border-red-500/20 text-sm px-3 py-1">🔴 Full Discovery Required · {pct}%</Badge>
                   }
                 })()}
               </div>
 
               <Card className="border-border/50 bg-card/50 backdrop-blur">
                 <CardContent className="pt-6 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">Confidence:</span>
-                    <span className="text-sm text-muted-foreground">{Math.round(discoveryResult.confidence * 100)}%</span>
-                  </div>
-
                   <div>
                     <span className="text-sm font-medium">Rationale: </span>
                     <span className="text-sm text-muted-foreground">{discoveryResult.rationale}</span>
@@ -394,9 +431,28 @@ Example:
                 </CardContent>
               </Card>
 
-              <div className="flex justify-end">
+              <div className="flex justify-between items-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={copyDiscoveryMarkdown}
+                  className="text-muted-foreground"
+                >
+                  {copyDiscoverySuccess ? (
+                    <>
+                      <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-400" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copy findings
+                    </>
+                  )}
+                </Button>
                 <Button
                   onClick={() => {
+                    setDiscoveryClassification(discoveryResult.classification)
                     setShowingDiscovery(false)
                     const items = input.split("\n").filter(line => line.trim())
                     runRefinement(items)
@@ -423,6 +479,21 @@ Example:
           {/* Results */}
           {results.length > 0 && (
             <div className="mt-8 space-y-4">
+              {/* Discovery gap warning */}
+              {(discoveryClassification === 'FULL_DISCOVERY' || discoveryClassification === 'LIGHT_DISCOVERY') && (
+                <div className={`flex items-start gap-3 rounded-md border px-4 py-3 text-sm ${
+                  discoveryClassification === 'FULL_DISCOVERY'
+                    ? 'border-red-500/20 bg-red-500/5 text-red-400'
+                    : 'border-yellow-500/20 bg-yellow-500/5 text-yellow-400'
+                }`}>
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                  <span>
+                    {discoveryClassification === 'FULL_DISCOVERY'
+                      ? 'Refined with unresolved discovery gaps. Review the questions and assumptions above before committing this to a sprint.'
+                      : 'Refined with minor discovery gaps. Consider answering the questions above before sprint commitment.'}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="text-xl font-semibold text-emerald-400">
