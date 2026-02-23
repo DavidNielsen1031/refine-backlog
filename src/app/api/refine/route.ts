@@ -9,6 +9,13 @@ interface RefineRequest {
   context?: string
   useUserStories?: boolean
   useGherkin?: boolean
+  discovery_context?: {
+    classification: string
+    rationale: string
+    primary_signal: string
+    questions: Array<{ rank: number; question: string; category: string; why_it_matters: string }>
+    assumptions: Array<{ statement: string; type: string; risk: string }>
+  }
 }
 
 const MODEL = 'claude-haiku-4-5'
@@ -97,6 +104,13 @@ export async function POST(request: NextRequest) {
     const contextLine = body.context ? `\n\nProject context: ${body.context}` : ''
     const userStoryLine = body.useUserStories ? `\n\nIMPORTANT: Keep the "title" field as a short, clean one-liner (e.g., "Fix Session Timeout Authentication Bug"). Add a SEPARATE field called "userStory" with the full user story in "As a [role], I want [goal], so that [benefit]" format. The title must NOT be a user story.` : ''
     const gherkinLine = body.useGherkin ? `\n\nIMPORTANT: Write ALL acceptance criteria in Gherkin format using Given/When/Then syntax. Each criterion must start with "Given", "When", or "Then".` : ''
+    let discoveryLine = ''
+    if (body.discovery_context) {
+      const dc = body.discovery_context
+      const qBlock = dc.questions.map(q => `  Q${q.rank}. ${q.question} (${q.category}) — risk if skipped: ${q.why_it_matters}`).join('\n')
+      const aBlock = dc.assumptions.map(a => `  - [${a.risk.toUpperCase()} RISK] ${a.statement}`).join('\n')
+      discoveryLine = `\n\nDISCOVERY CONTEXT (this item went through a discovery gate before refinement — use this to write sharper, more targeted acceptance criteria):\nClassification: ${dc.classification}\nRationale: ${dc.rationale}\nPrimary signal: ${dc.primary_signal}\n${dc.questions.length > 0 ? `\nKey questions identified:\n${qBlock}` : ''}${dc.assumptions.length > 0 ? `\nKey assumptions:\n${aBlock}` : ''}\n\nIMPORTANT: Use the discovery questions and assumptions above to write MORE SPECIFIC acceptance criteria. Each discovery question should inform at least one AC. Each high-risk assumption should appear in the "assumptions" field of the refined item.`
+    }
     const itemsList = items.map((item, i) => `${i + 1}. ${item}`).join('\n')
 
     const response = await anthropic.messages.create({
@@ -106,7 +120,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: `${REFINEMENT_PROMPT}${contextLine}${userStoryLine}${gherkinLine}\n\nBacklog items:\n${itemsList}`
+          content: `${REFINEMENT_PROMPT}${contextLine}${userStoryLine}${gherkinLine}${discoveryLine}\n\nBacklog items:\n${itemsList}`
         }
       ],
     })
@@ -137,7 +151,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 4000,
         temperature: 0.1,
         messages: [
-          { role: 'user', content: `${REFINEMENT_PROMPT}${contextLine}${userStoryLine}${gherkinLine}\n\nBacklog items:\n${itemsList}` },
+          { role: 'user', content: `${REFINEMENT_PROMPT}${contextLine}${userStoryLine}${gherkinLine}${discoveryLine}\n\nBacklog items:\n${itemsList}` },
           { role: 'assistant', content: content.text },
           { role: 'user', content: `Your response had validation errors: ${JSON.stringify(validation.error.issues)}. Fix and return valid JSON array. Priority must be "HIGH — rationale", "MEDIUM — rationale", or "LOW — rationale". Estimate must be XS/S/M/L/XL. Return ONLY the JSON array.` }
         ],

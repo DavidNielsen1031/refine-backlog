@@ -107,6 +107,22 @@ export function BacklogRefiner() {
           context: context.trim() || undefined,
           useUserStories,
           useGherkin,
+          discovery_context: discoveryResult ? {
+            classification: discoveryResult.classification,
+            rationale: discoveryResult.rationale,
+            primary_signal: discoveryResult.primary_signal,
+            questions: discoveryResult.questions.map(q => ({
+              rank: q.rank,
+              question: q.question,
+              category: q.category,
+              why_it_matters: q.why_it_matters,
+            })),
+            assumptions: discoveryResult.assumptions.map(a => ({
+              statement: a.statement,
+              type: a.type,
+              risk: a.risk,
+            })),
+          } : undefined,
         }),
       })
 
