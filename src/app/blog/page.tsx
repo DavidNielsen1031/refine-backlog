@@ -14,6 +14,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "how-to-break-down-epics-into-user-stories",
+    title: "How to Break Down Epics Into Sprint-Ready User Stories",
+    description: "Learn vertical slicing to break down epics into sprint-ready user stories. Real examples and techniques for better backlog refinement.",
+    date: "2026-02-24",
+    readTime: "7 min read",
+    tags: ["User Stories","Agile"],
+  },
+
+  {
     slug: "context-aware-refinement",
     title: "Why Your AI Backlog Tool Doesn't Know You're Building an iOS App",
     description: "Generic AI refinement treats every team the same. Refine Backlog now auto-detects your project context from AGENTS.md, package.json, README, and more — zero config.",
