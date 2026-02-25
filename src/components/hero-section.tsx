@@ -4,14 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { siteConfig } from "@/config/site"
 import { ArrowRight, Sparkles } from "lucide-react"
+import Link from "next/link"
 
 export function HeroSection() {
-  const scrollToRefiner = () => {
-    document.getElementById('refiner')?.scrollIntoView({ 
-      behavior: 'smooth' 
-    })
-  }
-
   const scrollToExample = () => {
     document.getElementById('example')?.scrollIntoView({ 
       behavior: 'smooth' 
@@ -43,11 +38,13 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up animate-stagger-delay-3">
             <Button 
               size="lg" 
-              onClick={scrollToRefiner}
+              asChild
               className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-8 py-3 h-auto text-lg group"
             >
-              {siteConfig.hero.cta.text}
-              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              <Link href="/pricing">
+                Start Refining Free
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </Button>
             <Button 
               size="lg" 
