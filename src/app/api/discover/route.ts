@@ -247,6 +247,8 @@ export async function POST(request: NextRequest) {
       retried: !validation.success,
       ip,
       source,
+      items: [item],
+      endpoint: 'discover',
     }).catch(() => {})
 
     return NextResponse.json({

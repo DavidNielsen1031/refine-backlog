@@ -202,6 +202,8 @@ export async function POST(request: NextRequest) {
       retried: !validation.success,
       ip: ip,
       source,
+      items,
+      endpoint: 'refine',
     }).catch(() => {}) // fire-and-forget
 
     return NextResponse.json({

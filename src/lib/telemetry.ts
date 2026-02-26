@@ -17,6 +17,10 @@ export interface UsageEvent {
   retried: boolean
   ip?: string
   source?: RequestSource
+  /** Raw input items shown in Discord alerts — truncated for display */
+  items?: string[]
+  /** API endpoint that generated this event */
+  endpoint?: 'refine' | 'discover' | 'plan'
 }
 
 /**
@@ -98,16 +102,40 @@ async function notifyDiscord(event: UsageEvent): Promise<void> {
       hour: '2-digit', minute: '2-digit', timeZone: 'America/Chicago'
     })
 
+    const ENDPOINT_LABELS: Record<string, string> = {
+      'refine': '✏️ /refine',
+      'discover': '🔍 /discover',
+      'plan': '📋 /plan',
+    }
+    const endpointLabel = event.endpoint ? ENDPOINT_LABELS[event.endpoint] ?? event.endpoint : null
+
     const lines = [
       `**📊 Refine Backlog — Usage Event**`,
       `> **Channel:** ${source}`,
+      ...(endpointLabel ? [`> **Endpoint:** ${endpointLabel}`] : []),
       `> **Tier:** ${tier}`,
-      `> **Items refined:** ${event.itemCount}`,
+      `> **Items:** ${event.itemCount}`,
       `> **Latency:** ${event.latencyMs}ms`,
       `> **Cost:** $${event.costUsd.toFixed(6)}`,
       `> **Time:** ${time} CT`,
       `> **Request ID:** \`${event.requestId.slice(0, 8)}\``,
     ]
+
+    // Show input items (truncated, max 5)
+    if (event.items && event.items.length > 0) {
+      const MAX_ITEM_LEN = 80
+      const MAX_SHOW = 5
+      const shown = event.items.slice(0, MAX_SHOW)
+      const overflow = event.items.length - MAX_SHOW
+      lines.push(`> **Input:**`)
+      shown.forEach((item, i) => {
+        const truncated = item.length > MAX_ITEM_LEN ? item.slice(0, MAX_ITEM_LEN) + '…' : item
+        lines.push(`> \`${i + 1}.\` ${truncated}`)
+      })
+      if (overflow > 0) {
+        lines.push(`> *…and ${overflow} more*`)
+      }
+    }
 
     await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
       method: 'POST',

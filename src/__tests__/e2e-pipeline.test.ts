@@ -407,7 +407,7 @@ describe('E2E Pipeline: Discover → Refine → Plan', () => {
   // 4. Pro tier — dependency fields present in plan output
   it('e2e_pro_tier — plan response includes parallel_group and depends_on for Pro users', async () => {
     const { getLicenseData } = await import('@/lib/kv')
-    vi.mocked(getLicenseData).mockResolvedValueOnce({ plan: 'pro', status: 'active', email: 'pro@example.com' })
+    vi.mocked(getLicenseData).mockResolvedValueOnce({ plan: 'pro', status: 'active', customerId: 'cus_test123' })
 
     mockCreate.mockResolvedValueOnce(MOCK_PLAN_FULL)
     const planRes = await planPOST(makePlanRequest(

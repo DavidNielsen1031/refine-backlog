@@ -274,6 +274,8 @@ export async function POST(request: NextRequest) {
       retried: !validation.success,
       ip,
       source,
+      items: normalizedItems.map(i => i.title),
+      endpoint: 'plan',
     }).catch(() => {})
 
     return NextResponse.json({
