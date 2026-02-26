@@ -90,11 +90,7 @@ jobs:
                -F "document=@/tmp/demo.gif" \
                "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument"
 
-      - name: Send GIF to Discord
-        if: success()
-        run: |
-          curl -s -X POST "https://discord.com/api/v10/channels/1474028159233163358/messages" \
-               -H "Authorization: Bot ${{ secrets.DISCORD_BOT_TOKEN }}" \
-               -F "content=🎬 **Demo — PR #${{ github.event.pull_request.number }}**
-Preview: ${{ steps.vercel.outputs.url }}" \
-               -F "files[0]=@/tmp/demo.gif;type=image/gif;filename=demo.gif"
+      # TODO: restore after Discord webhook URL is set (bot API blocked by Cloudflare from GH Actions)
+      # - name: Send GIF to Discord
+      #   if: success()
+      #   uses webhook URL via DISCORD_WEBHOOK_URL secret
