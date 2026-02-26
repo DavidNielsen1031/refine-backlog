@@ -14,6 +14,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "gherkin-acceptance-criteria-examples",
+    title: "Gherkin Acceptance Criteria: Examples and Best Practices for Agile Teams",
+    description: "Learn Gherkin acceptance criteria with 10+ real examples using Given/When/Then. Best practices and when to use Gherkin for agile teams.",
+    date: "2026-02-26",
+    readTime: "7 min read",
+    tags: ["Acceptance Criteria","BDD"],
+  },
+
+  {
     slug: "story-points-vs-hours",
     title: "Story Points vs Hours: Which Estimation Method Is Actually Better?",
     description: "Compare story points vs hours estimation. Learn which method works best for velocity tracking, billing, and why t-shirt sizing might be your best bet.",
