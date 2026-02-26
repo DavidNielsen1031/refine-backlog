@@ -42,3 +42,26 @@ export const DiscoveryResultSchema = z.object({
 export type DiscoveryQuestion = z.infer<typeof DiscoveryQuestionSchema>
 export type DiscoveryAssumption = z.infer<typeof DiscoveryAssumptionSchema>
 export type DiscoveryResult = z.infer<typeof DiscoveryResultSchema>
+
+// ---- Sprint Planner schemas -----------------------------------------------
+
+export const SprintItemSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  estimate: z.enum(['XS', 'S', 'M', 'L', 'XL']).optional(),
+  priority: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  rationale: z.string().min(1),
+  parallel_group: z.number().int().positive().optional(),
+  depends_on: z.array(z.string()).optional(),
+})
+
+export const SprintPlanSchema = z.object({
+  sprint_goal: z.string().min(1),
+  execution_queue: z.array(SprintItemSchema).min(1),
+  deferred: z.array(SprintItemSchema).optional(),
+  fit_ratio: z.number().min(0).max(1),
+})
+
+export type SprintItem = z.infer<typeof SprintItemSchema>
+export type SprintPlan = z.infer<typeof SprintPlanSchema>

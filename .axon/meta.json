@@ -1,0 +1,15 @@
+{
+  "version": "0.2.2",
+  "name": "app",
+  "path": "/Users/clawdbot/.openclaw/workspace/products/refine-backlog/app",
+  "stats": {
+    "files": 76,
+    "symbols": 125,
+    "relationships": 745,
+    "clusters": 7,
+    "flows": 6,
+    "dead_code": 40,
+    "coupled_pairs": 379
+  },
+  "last_indexed_at": "2026-02-24T14:52:35.869989+00:00"
+}
