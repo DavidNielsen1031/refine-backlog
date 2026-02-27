@@ -17,7 +17,7 @@ const articleSchema = {
   "@type": "Article",
   "headline": "The Product Manager's Guide to Backlog Refinement Best Practices",
   "description": "A comprehensive guide to backlog refinement best practices for product managers and scrum masters.",
-  "author": { "@type": "Organization", "name": "Perpetual Agility LLC" },
+  "author": { "@type": "Person", "name": "David Nielsen", "url": "https://refinebacklog.com/about", "jobTitle": "Agile Coach & Product Strategist" },
   "publisher": { "@type": "Organization", "name": "Perpetual Agility LLC", "url": "https://refinebacklog.com" },
   "datePublished": "2026-02-14",
   "dateModified": "2026-02-17",
@@ -94,7 +94,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 14, 2026 · 7 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 14, 2026 · 7 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             The Product Manager's Guide to Backlog Refinement Best Practices
           </h1>

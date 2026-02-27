@@ -18,8 +18,10 @@ const articleSchema = {
   "headline": "The Hidden Cost of Bad Backlog Items: How Unclear Requirements Slow Your Team",
   "description": "Unclear backlog items cost teams 10+ hours per sprint in wasted meetings, rework, and context-switching. Learn to quantify the cost and fix your requirement quality.",
   "author": {
-    "@type": "Organization",
-    "name": "Perpetual Agility LLC"
+    "@type": "Person",
+    "name": "David Nielsen",
+    "url": "https://refinebacklog.com/about",
+    "jobTitle": "Agile Coach & Product Strategist"
   },
   "publisher": {
     "@type": "Organization",
@@ -101,7 +103,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 17, 2026 · 6 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 17, 2026 · 6 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             The Hidden Cost of Bad Backlog Items: How Unclear Requirements Slow Your Team
           </h1>

@@ -27,7 +27,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 19, 2026 · 7 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 19, 2026 · 7 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             Backlog Refinement vs Grooming: What's the Difference?
           </h1>

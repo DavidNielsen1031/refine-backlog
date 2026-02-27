@@ -18,8 +18,10 @@ const articleSchema = {
   "headline": "Why Your Sprint Planning Fails Before It Starts: The Backlog Refinement Problem",
   "description": "Most sprint planning failures trace back to poor backlog refinement. Learn why unclear user stories and messy product backlogs derail your sprints — and how to fix it.",
   "author": {
-    "@type": "Organization",
-    "name": "Perpetual Agility LLC"
+    "@type": "Person",
+    "name": "David Nielsen",
+    "url": "https://refinebacklog.com/about",
+    "jobTitle": "Agile Coach & Product Strategist"
   },
   "publisher": {
     "@type": "Organization",
@@ -101,7 +103,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 17, 2026 · 5 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 17, 2026 · 5 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             Why Your Sprint Planning Fails Before It Starts: The Backlog Refinement Problem
           </h1>

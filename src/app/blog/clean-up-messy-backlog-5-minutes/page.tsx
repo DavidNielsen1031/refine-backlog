@@ -17,7 +17,7 @@ const articleSchema = {
   "@type": "Article",
   "headline": "How to Clean Up a Messy Product Backlog in 5 Minutes",
   "description": "Clean up a messy product backlog in 5 minutes using AI-powered refinement tools.",
-  "author": { "@type": "Organization", "name": "Perpetual Agility LLC" },
+  "author": { "@type": "Person", "name": "David Nielsen", "url": "https://refinebacklog.com/about", "jobTitle": "Agile Coach & Product Strategist" },
   "publisher": { "@type": "Organization", "name": "Perpetual Agility LLC", "url": "https://refinebacklog.com" },
   "datePublished": "2026-02-16",
   "dateModified": "2026-02-17",
@@ -46,7 +46,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 16, 2026 · 5 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 16, 2026 · 5 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             How to Clean Up a Messy Product Backlog in 5 Minutes
           </h1>

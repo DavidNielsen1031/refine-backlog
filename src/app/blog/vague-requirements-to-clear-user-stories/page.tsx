@@ -18,8 +18,10 @@ const articleSchema = {
   "headline": "From Vague Requirements to Clear User Stories in 30 Seconds",
   "description": "See how AI transforms messy, vague requirements into clean user stories with acceptance criteria and INVEST scoring — before and after examples included.",
   "author": {
-    "@type": "Organization",
-    "name": "Perpetual Agility LLC"
+    "@type": "Person",
+    "name": "David Nielsen",
+    "url": "https://refinebacklog.com/about",
+    "jobTitle": "Agile Coach & Product Strategist"
   },
   "publisher": {
     "@type": "Organization",
@@ -53,7 +55,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 17, 2026 · 6 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 17, 2026 · 6 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             From Vague Requirements to Clear User Stories in 30 Seconds
           </h1>

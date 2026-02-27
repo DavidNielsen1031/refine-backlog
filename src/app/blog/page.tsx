@@ -50,6 +50,14 @@ const posts = [
   },
 
   {
+    slug: "refine-backlog-vs-jira-vs-linear",
+    title: "Refine Backlog vs Jira vs Linear: Which Tool Actually Improves Backlog Quality?",
+    description: "Jira and Linear organize your backlog. Refine Backlog improves it. An honest comparison of what each tool does — and which one solves the requirement quality problem.",
+    date: "2026-02-27",
+    readTime: "8 min read",
+    tags: ["Comparison", "Jira", "Linear", "AI"],
+  },
+  {
     slug: "context-aware-refinement",
     title: "Why Your AI Backlog Tool Doesn't Know You're Building an iOS App",
     description: "Generic AI refinement treats every team the same. Refine Backlog now auto-detects your project context from AGENTS.md, package.json, README, and more — zero config.",

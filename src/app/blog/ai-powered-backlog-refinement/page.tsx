@@ -18,8 +18,10 @@ const articleSchema = {
   "headline": "AI-Powered Backlog Refinement: Save Hours of Sprint Planning",
   "description": "AI-powered backlog refinement saves product teams 60-70% of their sprint planning time. Learn how tools like Refine Backlog automate story writing, estimation, and deduplication.",
   "author": {
-    "@type": "Organization",
-    "name": "Perpetual Agility LLC"
+    "@type": "Person",
+    "name": "David Nielsen",
+    "url": "https://refinebacklog.com/about",
+    "jobTitle": "Agile Coach & Product Strategist"
   },
   "publisher": {
     "@type": "Organization",
@@ -53,7 +55,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 15, 2026 · 6 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 15, 2026 · 6 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             AI-Powered Backlog Refinement: How to Save Hours of Sprint Planning
           </h1>

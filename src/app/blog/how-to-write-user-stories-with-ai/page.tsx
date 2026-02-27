@@ -25,8 +25,10 @@ const articleSchema = {
   "headline": "How to Write User Stories with AI: A Practical Guide",
   "description": "Learn how to use AI to write better user stories faster. Practical tips for prompting, reviewing, and refining AI-generated user stories.",
   "author": {
-    "@type": "Organization",
-    "name": "Perpetual Agility LLC"
+    "@type": "Person",
+    "name": "David Nielsen",
+    "url": "https://refinebacklog.com/about",
+    "jobTitle": "Agile Coach & Product Strategist"
   },
   "publisher": {
     "@type": "Organization",
@@ -60,7 +62,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 17, 2026 · 7 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 17, 2026 · 7 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             How to Write User Stories with AI: A Practical Guide
           </h1>

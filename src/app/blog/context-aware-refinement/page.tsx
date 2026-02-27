@@ -27,7 +27,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 23, 2026 · 6 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 23, 2026 · 6 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             Why Your AI Backlog Tool Doesn&apos;t Know You&apos;re Building an iOS App
           </h1>

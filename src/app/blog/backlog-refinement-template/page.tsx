@@ -25,8 +25,10 @@ const articleSchema = {
   "headline": "Backlog Refinement Template: The Complete Guide for Product Teams",
   "description": "A practical backlog refinement template with examples, common mistakes to avoid, and tips for structuring your refinement sessions.",
   "author": {
-    "@type": "Organization",
-    "name": "Perpetual Agility LLC"
+    "@type": "Person",
+    "name": "David Nielsen",
+    "url": "https://refinebacklog.com/about",
+    "jobTitle": "Agile Coach & Product Strategist"
   },
   "publisher": {
     "@type": "Organization",
@@ -60,7 +62,7 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">February 17, 2026 · 8 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · February 17, 2026 · 8 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
             Backlog Refinement Template: The Complete Guide for Product Teams
           </h1>
