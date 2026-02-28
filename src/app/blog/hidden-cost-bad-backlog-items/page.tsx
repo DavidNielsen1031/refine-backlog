@@ -141,7 +141,7 @@ export default function BlogPost() {
             When a developer starts a vague story, they don't just struggle in silence. They post in Slack. The Product Owner responds an hour later. The developer has already context-switched to something else. They switch back, re-read the thread, and finally resume work.
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Research from the American Psychological Association shows that context-switching can cost 20–40% of productive time. For unclear stories, expect at least 2–3 clarification rounds per story.
+            Research from the American Psychological Association shows that context-switching can cost 20–40% of productive time. <Link href="https://www.apa.org/topics/research/multitasking" className="text-emerald-400/70 hover:text-emerald-400 text-xs">[source]</Link> For unclear stories, expect at least 2–3 clarification rounds per story.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             <strong className="text-foreground">Cost per sprint:</strong> 5 unclear stories × 45 minutes of back-and-forth = <strong className="text-foreground">3.75 person-hours</strong> minimum. In practice, usually double that with context-switching overhead.

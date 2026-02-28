@@ -14,6 +14,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "definition-of-ready-checklist-15-items",
+    title: "The 15-Item Definition of Ready Checklist Every Scrum Team Needs",
+    description: "A complete Definition of Ready checklist with 15 items covering user stories, acceptance criteria, dependencies, and estimability. Copy this template for your next sprint planning session.",
+    date: "2026-02-28",
+    readTime: "8 min read",
+    tags: ["Definition of Ready","Sprint Planning"],
+  },
+
+  {
     slug: "sprint-velocity-how-to-improve",
     title: "Why Your Sprint Velocity Is Inconsistent (And How to Fix It)",
     description: "Sprint velocity fluctuates due to poor backlog refinement, scope creep, and unclear DoD. Learn how to stabilize it with better prep.",
