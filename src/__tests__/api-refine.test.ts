@@ -22,6 +22,8 @@ vi.mock('@anthropic-ai/sdk', () => {
     messages = { create: vi.fn().mockResolvedValue(mockResponse) }
   }
   class APIError extends Error {}
+  // Make APIError accessible as Anthropic.APIError (matches production usage)
+  ;(MockAnthropic as unknown as Record<string, unknown>).APIError = APIError
   return { default: MockAnthropic, APIError }
 })
 
@@ -30,6 +32,7 @@ vi.mock('@/lib/kv', () => ({
   checkRateLimitKV: vi.fn().mockResolvedValue({ count: 0, allowed: true }),
   isKvConnected: vi.fn(() => false),
   getSubscriptionByCustomer: vi.fn().mockResolvedValue(null),
+  storeLintReceipt: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('@/lib/telemetry', () => ({
