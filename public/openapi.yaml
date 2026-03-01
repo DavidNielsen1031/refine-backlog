@@ -431,6 +431,37 @@ components:
           description: |
             When true, each input string is scored as a single item without decomposition.
             Recommended for CI integrations sending one issue body per request. Default: false.
+        persona:
+          $ref: "#/components/schemas/PersonaInput"
+
+    PersonaInput:
+      type: object
+      description: |
+        Optional. Target user persona for persona-aware spec scoring (Solo/Team tiers).
+        When provided, each refined item receives a `persona_alignment` score (0-100)
+        and `persona_gaps` listing which concerns are not addressed in the spec.
+        Free tier users receive an upgrade_message instead of persona scores.
+      required:
+        - role
+        - cares_about
+        - doesnt_care_about
+      properties:
+        role:
+          type: string
+          description: The persona's role or job title
+          example: "frontend developer at 3-person AI dev firm"
+        cares_about:
+          type: array
+          items:
+            type: string
+          description: Things this persona prioritizes
+          example: ["CI integration", "agent compatibility", "fast iteration"]
+        doesnt_care_about:
+          type: array
+          items:
+            type: string
+          description: Things this persona does NOT prioritize
+          example: ["enterprise compliance", "manual QA"]
 
     RefineResponse:
       type: object
@@ -448,6 +479,13 @@ components:
           $ref: "#/components/schemas/ScoreSummary"
         _meta:
           $ref: "#/components/schemas/ResponseMeta"
+        upgrade_message:
+          type: string
+          nullable: true
+          description: |
+            Present only when a free-tier user provides a `persona` in the request.
+            Indicates that persona scoring requires a paid plan.
+          example: "Persona scoring available on Solo plan ($29/mo)"
 
     ItemScore:
       type: object
@@ -554,6 +592,25 @@ components:
             before implementation. Only included when genuinely ambiguous.
           example:
             - "Assumes the issue is frontend input sanitization, not backend validation"
+        persona_alignment:
+          type: integer
+          minimum: 0
+          maximum: 100
+          nullable: true
+          description: |
+            Persona alignment score (0-100). Only present when a `persona` was provided
+            in the request and the tier is Solo or higher. Null otherwise.
+            Scoring: concern_coverage (50pts) + anti_concern_avoidance (25pts) + role_appropriate_language (25pts)
+          example: 75
+        persona_gaps:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: |
+            List of `cares_about` items from the persona that are NOT addressed in the spec.
+            Only present when persona_alignment is a number. Null otherwise.
+          example: ["CI integration"]
 
     ResponseMeta:
       type: object

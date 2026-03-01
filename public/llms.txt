@@ -33,7 +33,12 @@ Content-Type: application/json
   "items": ["string"],         // Array of issue strings. Max 5 (free), 25 (Pro), 50 (Team).
   "context": "string",         // Optional. Project context (e.g. "Next.js 14 SaaS, PostgreSQL, deployed on Railway").
   "codebase_context": "string",// Optional. Your tech stack for AC generation. Pro/Team feature.
-  "preserve_structure": false  // Optional. When true, each input string is scored as a single item without decomposition. Default: false.
+  "preserve_structure": false, // Optional. When true, each input string is scored as a single item without decomposition. Default: false.
+  "persona": {                 // Optional. Target user persona for persona-aware scoring. Solo/Team feature.
+    "role": "string",          //   e.g. "frontend developer at 3-person AI dev firm"
+    "cares_about": ["string"], //   e.g. ["CI integration", "agent compatibility", "fast iteration"]
+    "doesnt_care_about": ["string"] // e.g. ["enterprise compliance", "manual QA"]
+  }
 }
 ```
 
@@ -124,8 +129,18 @@ Submit multiple issues and receive a build order — which specs depend on which
 | Team | 50 | Unlimited | $79/month |
 
 - Free: completeness_score included, no signup required
-- Pro: + codebase_context, priority support
+- Pro (Solo): + codebase_context, persona-aware scoring (persona_alignment + persona_gaps), priority support
 - Team: + dependency mapping (/api/plan), SLA
+
+### Persona-Aware Scoring (Solo/Team tiers)
+Pass a `persona` object with your request to receive a `persona_alignment` score (0-100) for each item.
+The score measures how well the spec addresses your user's concerns:
+- 50 pts: concern_coverage — how many `cares_about` items are addressed in ACs/problem
+- 25 pts: anti_concern_avoidance — spec does NOT focus on `doesnt_care_about` items
+- 25 pts: role_appropriate_language — spec references context relevant to the persona's role
+Each item also returns `persona_gaps`: which `cares_about` items are missing from the spec.
+`agent_ready` is gated on BOTH completeness_score ≥ 70 AND persona_alignment ≥ 60 when persona is provided.
+Free-tier requests with `persona` receive `upgrade_message` instead of scores.
 
 ## Pricing Page
 https://speclint.ai/pricing
