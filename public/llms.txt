@@ -31,7 +31,8 @@ Content-Type: application/json
 {
   "items": ["string"],         // Required. Array of issue strings. Max 5 (free), 25 (Pro), 50 (Team).
   "context": "string",         // Optional. Project context (e.g. "Next.js 14 SaaS, PostgreSQL, deployed on Railway").
-  "codebase_context": "string" // Optional. Your tech stack for AC generation. Pro/Team feature.
+  "codebase_context": "string",// Optional. Your tech stack for AC generation. Pro/Team feature.
+  "preserve_structure": false  // Optional. When true, each input string is scored as a single item without decomposition. Recommended for CI integrations sending one issue body per request. Default: false.
 }
 ```
 

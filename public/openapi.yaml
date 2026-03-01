@@ -389,6 +389,12 @@ components:
           description: |
             When true, formats acceptance criteria using Gherkin syntax:
             Given [context], When [action], Then [outcome]
+        preserve_structure:
+          type: boolean
+          default: false
+          description: |
+            When true, each input string is scored as a single item without decomposition.
+            Recommended for CI integrations sending one issue body per request. Default: false.
 
     RefineResponse:
       type: object

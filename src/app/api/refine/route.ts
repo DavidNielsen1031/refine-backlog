@@ -10,6 +10,7 @@ interface RefineRequest {
   context?: string
   useUserStories?: boolean
   useGherkin?: boolean
+  preserve_structure?: boolean
   discovery_context?: {
     classification: string
     rationale: string
@@ -126,6 +127,9 @@ export async function POST(request: NextRequest) {
       discoveryLine = `\n\nDISCOVERY CONTEXT (this item went through a discovery gate before refinement — use this to write sharper, more targeted acceptance criteria):\nClassification: ${dc.classification}\nRationale: ${dc.rationale}\nPrimary signal: ${dc.primary_signal}\n${dc.questions.length > 0 ? `\nKey questions identified:\n${qBlock}` : ''}${dc.assumptions.length > 0 ? `\nKey assumptions:\n${aBlock}` : ''}\n\nIMPORTANT: Use the discovery questions and assumptions above to write MORE SPECIFIC acceptance criteria. Each discovery question should inform at least one AC. Each high-risk assumption should appear in the "assumptions" field of the refined item.`
     }
     const itemsList = items.map((item, i) => `${i + 1}. ${item}`).join('\n')
+    const preserveStructureLine = body.preserve_structure
+      ? `\n\nIMPORTANT: Score each input as a SINGLE item. Do NOT split, decompose, or restructure the input. Each string in the items array is already a complete specification — refine and score it as one item, even if it contains multiple acceptance criteria or sub-tasks. Return exactly one JSON object per input string.`
+      : ''
 
     const response = await anthropic.messages.create({
       model: MODEL,
@@ -134,7 +138,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}\n\nBacklog items:\n${itemsList}`
+          content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}${preserveStructureLine}\n\nBacklog items:\n${itemsList}`
         }
       ],
     })
@@ -165,7 +169,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 4000,
         temperature: 0.1,
         messages: [
-          { role: 'user', content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}\n\nBacklog items:\n${itemsList}` },
+          { role: 'user', content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}${preserveStructureLine}\n\nBacklog items:\n${itemsList}` },
           { role: 'assistant', content: content.text },
           { role: 'user', content: `Your response had validation errors: ${JSON.stringify(validation.error.issues)}. Fix and return valid JSON array. Priority must be "HIGH — rationale", "MEDIUM — rationale", or "LOW — rationale". Estimate must be XS/S/M/L/XL. Return ONLY the JSON array.` }
         ],
