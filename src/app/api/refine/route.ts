@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
       ip: ip,
       source,
       items,
-      endpoint: (['lint', 'refine', 'discover', 'plan'].includes(request.nextUrl.pathname.split('/').pop() ?? '') ? request.nextUrl.pathname.split('/').pop() : 'refine') as 'lint' | 'refine' | 'discover' | 'plan',
+      endpoint: (['lint', 'refine', 'discover', 'plan'].includes(request.headers.get('x-forwarded-endpoint') ?? '') ? request.headers.get('x-forwarded-endpoint') : (request.nextUrl.pathname.split('/').pop() ?? 'refine')) as 'lint' | 'refine' | 'discover' | 'plan',
     }).catch(() => {}) // fire-and-forget
 
     // Compute completeness scores (deterministic, post-LLM)
