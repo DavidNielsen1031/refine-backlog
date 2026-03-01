@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "Terms of Service — Refine Backlog",
   description: "Terms of Service for Refine Backlog. Plain English, no legalese.",
   alternates: {
-    canonical: "https://refinebacklog.com/terms",
+    canonical: "https://speclint.ai/terms",
   },
 }
 

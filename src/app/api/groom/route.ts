@@ -9,5 +9,5 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.redirect('https://refinebacklog.com/api/refine', { status: 301 })
+  return NextResponse.redirect('https://speclint.ai/api/lint', { status: 301 })
 }

@@ -51,6 +51,6 @@ describe('GET /api/groom → 301 redirect', () => {
   it('redirects to https://refinebacklog.com/api/refine', async () => {
     const res = await GET()
     const location = res.headers.get('location')
-    expect(location).toBe('https://refinebacklog.com/api/refine')
+    expect(location).toBe('https://speclint.ai/api/lint')
   })
 })

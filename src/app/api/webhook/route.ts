@@ -36,7 +36,7 @@ async function sendLicenseEmail(params: {
   <h2 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Get started in 30 seconds</h2>
 
   <p style="font-size: 14px; margin-bottom: 8px;"><strong>Option 1 — API (curl / scripts / CI)</strong></p>
-  <pre style="background: #1a1a1a; color: #e5e5e5; padding: 16px; border-radius: 6px; font-size: 13px; overflow-x: auto;">curl -X POST https://refinebacklog.com/api/refine \\
+  <pre style="background: #1a1a1a; color: #e5e5e5; padding: 16px; border-radius: 6px; font-size: 13px; overflow-x: auto;">curl -X POST https://speclint.ai/api/lint \\
   -H "Content-Type: application/json" \\
   -H "x-license-key: ${params.licenseKey}" \\
   -d '{"item": "As a user, I want to..."}'</pre>
@@ -56,7 +56,7 @@ async function sendLicenseEmail(params: {
 
   <div style="border-top: 1px solid #e5e5e5; margin-top: 40px; padding-top: 24px;">
     <p style="font-size: 13px; color: #888; margin: 0;">
-      Questions? Reply to this email or check <a href="https://refinebacklog.com" style="color: #1a1a1a;">refinebacklog.com</a>.<br>
+      Questions? Reply to this email or check <a href="https://speclint.ai" style="color: #1a1a1a;">speclint.ai</a>.<br>
       Built by <a href="https://perpetualagility.com" style="color: #1a1a1a;">Perpetual Agility</a>.
     </p>
   </div>
@@ -68,12 +68,12 @@ async function sendLicenseEmail(params: {
 Your license key: ${params.licenseKey}
 
 Get started:
-  curl -X POST https://refinebacklog.com/api/refine \\
+  curl -X POST https://speclint.ai/api/lint \\
     -H "x-license-key: ${params.licenseKey}" \\
     -H "Content-Type: application/json" \\
     -d '{"item": "As a user, I want to..."}'
 
-Questions? Reply to this email or visit https://refinebacklog.com`
+Questions? Reply to this email or visit https://speclint.ai`
 
   try {
     const res = await fetch('https://api.resend.com/emails', {

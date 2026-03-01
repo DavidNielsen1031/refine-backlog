@@ -124,8 +124,8 @@ export async function POST(request: NextRequest) {
     if (!rateCheck.allowed) {
       return NextResponse.json(
         {
-          error: 'Daily discovery limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $9/month.',
-          upgrade: 'https://refinebacklog.com/pricing',
+          error: 'Daily discovery limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $29/month.',
+          upgrade: 'https://speclint.ai/pricing',
           tier: rateCheck.tier,
         },
         { status: 429 }
@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
           assumptions: discoveryResult.assumptions.slice(0, 1).map(a => ({
             ...a,
             simple_test: discoveryResult.assumptions.length > 1
-              ? `${a.simple_test} (${discoveryResult.assumptions.length - 1} more assumptions available on Pro — upgrade at https://refinebacklog.com/pricing)`
+              ? `${a.simple_test} (${discoveryResult.assumptions.length - 1} more assumptions available on Pro — upgrade at https://speclint.ai/pricing)`
               : a.simple_test,
           })),
         }
@@ -283,6 +283,6 @@ export async function GET() {
     message: 'Discovery Gate API',
     usage: 'POST /api/discover with { item: string, context?: string }',
     description: 'Classifies a backlog item\'s discovery risk before refinement (SKIP / LIGHT_DISCOVERY / FULL_DISCOVERY)',
-    docs: 'https://refinebacklog.com/openapi.yaml',
+    docs: 'https://speclint.ai/openapi.yaml',
   })
 }

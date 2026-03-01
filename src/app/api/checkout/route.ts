@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Stripe not configured' }, { status: 500 })
     }
 
-    const origin = request.headers.get('origin') || 'https://refinebacklog.com'
+    const origin = request.headers.get('origin') || 'https://speclint.ai'
 
     // Use raw fetch to Stripe API
     const params = new URLSearchParams()

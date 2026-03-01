@@ -99,8 +99,8 @@ export async function POST(request: NextRequest) {
     if (!rateCheck.allowed) {
       return NextResponse.json(
         {
-          error: 'Daily planning limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $9/month.',
-          upgrade: 'https://refinebacklog.com/pricing',
+          error: 'Daily planning limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $29/month.',
+          upgrade: 'https://speclint.ai/pricing',
           tier: rateCheck.tier,
         },
         { status: 429 }
@@ -112,12 +112,12 @@ export async function POST(request: NextRequest) {
 
     if (items.length > maxItems) {
       const upgradeMsg = tier === 'free'
-        ? `Free tier is limited to ${maxItems} items per request. Upgrade to Pro ($9/mo) for 25 items or Team ($29/mo) for 50 items. Get a license key at https://refinebacklog.com/pricing and pass it via the x-license-key header.`
+        ? `Free tier is limited to ${maxItems} items per request. Upgrade to Pro ($29/mo) for 25 items or Team ($79/mo) for 50 items. Get a license key at https://speclint.ai/pricing and pass it via the x-license-key header.`
         : `${tier} tier is limited to ${maxItems} items per request. You sent ${items.length}.`
       return NextResponse.json(
         {
           error: upgradeMsg,
-          upgrade: tier === 'free' ? 'https://refinebacklog.com/pricing' : undefined,
+          upgrade: tier === 'free' ? 'https://speclint.ai/pricing' : undefined,
           tier,
           itemsReceived: items.length,
           itemsAllowed: maxItems,
@@ -244,7 +244,7 @@ export async function POST(request: NextRequest) {
           fit_ratio: plan.fit_ratio,
           // No deferred for free tier — but hint if items were deferred
           ...(plan.deferred && plan.deferred.length > 0 ? {
-            _upgrade_hint: `${plan.deferred.length} item(s) deferred. Upgrade to Pro for full dependency mapping and deferred queue at https://refinebacklog.com/pricing`
+            _upgrade_hint: `${plan.deferred.length} item(s) deferred. Upgrade to Pro for full dependency mapping and deferred queue at https://speclint.ai/pricing`
           } : {})
         }
       : plan
@@ -310,6 +310,6 @@ export async function GET() {
     message: 'Sprint Planner API',
     usage: 'POST /api/plan with { items, budget?, goal_hint?, context? }',
     description: 'AI-native sprint execution router — packs refined items into an ordered queue with dependency chains and parallel groups',
-    docs: 'https://refinebacklog.com/openapi.yaml',
+    docs: 'https://speclint.ai/openapi.yaml',
   })
 }

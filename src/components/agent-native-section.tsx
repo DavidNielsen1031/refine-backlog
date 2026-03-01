@@ -7,7 +7,7 @@ const agentSurfaces = [
     label: "llms.txt",
     description:
       "LLM-readable manifest. AI agents discover what this API does before calling it.",
-    code: "GET https://refinebacklog.com/llms.txt",
+    code: "GET https://speclint.ai/llms.txt",
     href: "/llms.txt",
     cta: "View llms.txt →",
     external: false,
@@ -17,7 +17,7 @@ const agentSurfaces = [
     label: "OpenAPI Spec",
     description:
       "Machine-readable API spec. Plug into any OpenAPI-compatible tool, agent, or code generator.",
-    code: "GET https://refinebacklog.com/openapi.yaml",
+    code: "GET https://speclint.ai/openapi.yaml",
     href: "/openapi.yaml",
     cta: "View spec →",
     external: false,
@@ -27,7 +27,7 @@ const agentSurfaces = [
     label: "REST API",
     description:
       "Direct programmatic access. Call from any script, agent, GitHub Action, or CI pipeline with a license key.",
-    code: "POST https://refinebacklog.com/api/refine",
+    code: "POST https://speclint.ai/api/lint",
     href: "/pricing",
     cta: "Get API key →",
     external: false,

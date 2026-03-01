@@ -76,8 +76,8 @@ export async function POST(request: NextRequest) {
     if (!rateCheck.allowed) {
       return NextResponse.json(
         {
-          error: 'Daily request limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $9/month.',
-          upgrade: 'https://refinebacklog.com/pricing',
+          error: 'Daily request limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $29/month.',
+          upgrade: 'https://speclint.ai/pricing',
           tier: rateCheck.tier,
         },
         { status: 429 }
@@ -93,12 +93,12 @@ export async function POST(request: NextRequest) {
 
     if (cleanItems.length > maxItems) {
       const upgradeMsg = tier === 'free'
-        ? `Free tier is limited to ${maxItems} items per request. Upgrade to Pro ($9/mo) for 25 items or Team ($29/mo) for 50 items. Get a license key at https://refinebacklog.com/pricing and pass it via the x-license-key header.`
+        ? `Free tier is limited to ${maxItems} items per request. Upgrade to Pro ($29/mo) for 25 items or Team ($79/mo) for 50 items. Get a license key at https://speclint.ai/pricing and pass it via the x-license-key header.`
         : `${tier} tier is limited to ${maxItems} items per request. You sent ${cleanItems.length}.`
       return NextResponse.json(
         {
           error: upgradeMsg,
-          upgrade: tier === 'free' ? 'https://refinebacklog.com/pricing' : undefined,
+          upgrade: tier === 'free' ? 'https://speclint.ai/pricing' : undefined,
           tier,
           itemsReceived: cleanItems.length,
           itemsAllowed: maxItems,

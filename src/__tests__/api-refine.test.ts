@@ -81,7 +81,7 @@ describe('POST /api/refine', () => {
     expect(res.status).toBe(400)
     const data = await res.json()
     expect(data.error).toContain('Free tier is limited')
-    expect(data.upgrade).toBe('https://refinebacklog.com/pricing')
+    expect(data.upgrade).toBe('https://speclint.ai/pricing')
   })
 
   it('returns 200 with refined items on valid request', async () => {
@@ -240,6 +240,6 @@ describe('Rate limiting behavior', () => {
     expect(res.status).toBe(429)
     const data = await res.json()
     expect(data.error).toContain('Daily request limit reached')
-    expect(data.upgrade).toBe('https://refinebacklog.com/pricing')
+    expect(data.upgrade).toBe('https://speclint.ai/pricing')
   })
 })

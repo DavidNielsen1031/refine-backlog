@@ -7,7 +7,7 @@ const integrations = [
     icon: Globe,
     label: "Web UI",
     description: "Refine items manually in the browser.",
-    code: "refinebacklog.com",
+    code: "speclint.ai",
     href: "/#refiner",
     cta: "Try free →",
   },

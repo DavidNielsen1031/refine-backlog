@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const ALLOWED_ORIGINS = [
-  'https://refinebacklog.com',
-  'https://www.refinebacklog.com',
+  'https://speclint.ai',
+  'https://www.speclint.ai',
 ]
 
 // Allow localhost in development

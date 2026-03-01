@@ -158,7 +158,7 @@ function SuccessContent() {
                 {/* API quickstart */}
                 <div className="bg-muted/30 p-4 rounded-lg border border-muted space-y-2">
                   <h4 className="font-semibold text-sm text-foreground">Quick start — API</h4>
-                  <code className="block text-xs font-mono text-muted-foreground break-all whitespace-pre-wrap">{`curl -X POST https://refinebacklog.com/api/refine \\
+                  <code className="block text-xs font-mono text-muted-foreground break-all whitespace-pre-wrap">{`curl -X POST https://speclint.ai/api/refine \\
   -H "Content-Type: application/json" \\
   -H "x-license-key: ${licenseKey}" \\
   -d '{"items":["Fix login bug"]}'`}</code>
@@ -191,7 +191,7 @@ function SuccessContent() {
                 <p className="text-xs text-muted-foreground">
                   Enter the email you used to subscribe at{' '}
                   <Link href="/get-key" className="text-emerald-400 hover:underline">
-                    refinebacklog.com/get-key
+                    speclint.ai/get-key
                   </Link>{' '}
                   and your key will appear immediately.
                 </p>

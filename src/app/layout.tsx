@@ -19,9 +19,9 @@ export const metadata: Metadata = {
   keywords: ["backlog refinement", "AI backlog refinement", "sprint planning", "backlog cleanup", "product management tool", "AI product management", "backlog refinement tool", "scrum refinement"],
   authors: [{ name: "Perpetual Agility LLC" }],
   creator: "Perpetual Agility LLC",
-  metadataBase: new URL("https://refinebacklog.com"),
+  metadataBase: new URL("https://speclint.ai"),
   alternates: {
-    canonical: "https://refinebacklog.com",
+    canonical: "https://speclint.ai",
   },
   robots: {
     index: true,
@@ -36,13 +36,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://refinebacklog.com",
+    url: "https://speclint.ai",
     title: "Refine Backlog — AI-Powered Backlog Refinement Tool",
     description: "Paste your messy product backlog and get it back clean, prioritized, and sprint-ready in seconds. Free tier available. Used by product managers and scrum masters.",
     siteName: "Refine Backlog",
     images: [
       {
-        url: "https://refinebacklog.com/og-image.png",
+        url: "https://speclint.ai/og-image.png",
         width: 1200,
         height: 630,
         alt: "Refine Backlog — AI-Powered Backlog Refinement Tool",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     title: "Refine Backlog — AI-Powered Backlog Refinement Tool",
     description: "Paste your messy product backlog and get it back clean, prioritized, and sprint-ready in seconds. Free tier available.",
     creator: "@refinebacklog",
-    images: ["https://refinebacklog.com/og-image.png"],
+    images: ["https://speclint.ai/og-image.png"],
   },
   other: {
     "author": "Perpetual Agility LLC",
@@ -70,7 +70,7 @@ const structuredData = {
       "description": "AI-powered backlog refinement tool that turns messy product backlogs into clean, prioritized, sprint-ready stories in seconds.",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "url": "https://refinebacklog.com",
+      "url": "https://speclint.ai",
       "offers": [
         {
           "@type": "Offer",
@@ -105,8 +105,8 @@ const structuredData = {
     {
       "@type": "Organization",
       "name": "Perpetual Agility LLC",
-      "url": "https://refinebacklog.com",
-      "logo": "https://refinebacklog.com/logo.png",
+      "url": "https://speclint.ai",
+      "logo": "https://speclint.ai/logo.png",
       "sameAs": [
         "https://twitter.com/refinebacklog"
       ]
@@ -114,10 +114,10 @@ const structuredData = {
     {
       "@type": "WebSite",
       "name": "Refine Backlog",
-      "url": "https://refinebacklog.com",
+      "url": "https://speclint.ai",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://refinebacklog.com/blog?q={search_term_string}",
+        "target": "https://speclint.ai/blog?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     },
@@ -187,7 +187,7 @@ export default function RootLayout({
       <head>
         <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
         <meta name="author" content="Perpetual Agility LLC" />
-        <link rel="canonical" href="https://refinebacklog.com" />
+        <link rel="canonical" href="https://speclint.ai" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://refinebacklog.com'
+  const baseUrl = 'https://speclint.ai'
   const now = new Date().toISOString()
 
   return [
