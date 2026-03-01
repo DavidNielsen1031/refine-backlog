@@ -115,10 +115,20 @@ export async function POST(request: NextRequest) {
     }
 
     const maxItems = getMaxItems(tier)
+    const MAX_ITEM_LENGTH = 10000 // 10K chars per item — prevents token abuse
     const cleanItems = (body.items ?? []).filter(i => i.trim())
 
     if (cleanItems.length === 0) {
       return NextResponse.json({ error: 'All items were empty' }, { status: 400 })
+    }
+
+    // SEC-004: Input size validation
+    const oversizedItem = cleanItems.find(i => i.length > MAX_ITEM_LENGTH)
+    if (oversizedItem) {
+      return NextResponse.json(
+        { error: `Item exceeds maximum length of ${MAX_ITEM_LENGTH} characters. Trim your spec or split into multiple items.` },
+        { status: 400 }
+      )
     }
 
     if (cleanItems.length > maxItems) {

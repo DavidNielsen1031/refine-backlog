@@ -15,8 +15,8 @@ async function sendLicenseEmail(params: {
   }
 
   const planLabel = params.plan === 'team' ? 'Team' : 'Pro'
-  const planPrice = params.plan === 'team' ? '$29/month' : '$9/month'
-  const itemLimit = params.plan === 'team' ? '50 backlog items per run' : '25 backlog items per run'
+  const planPrice = params.plan === 'team' ? '$79/month' : '$29/month'
+  const itemLimit = params.plan === 'team' ? '50 specs per request' : '25 specs per request'
   const keyCount = params.plan === 'team' ? '5 license keys' : '1 license key'
 
   const html = `
@@ -119,7 +119,7 @@ async function notifyTelegram(message: string): Promise<void> {
 
 async function notifyDiscord(message: string): Promise<void> {
   const token = process.env.DISCORD_BOT_TOKEN
-  const channelId = '1474028159233163358' // #speclint
+  const channelId = process.env.DISCORD_RB_CHANNEL_ID || '1477742404244209786' // #speclint-notifications
   if (!token) return
   try {
     await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {

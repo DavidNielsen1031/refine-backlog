@@ -1,13 +1,13 @@
 # Speclint MCP Server
 
 Use Speclint directly inside Claude Desktop, Cursor, or any MCP-compatible client.
-Tell your AI to refine your backlog and it calls the API automatically — no copy-paste required.
+Tell your AI to lint your specs and it calls the API automatically — no copy-paste required.
 
 ## What it does
 
 Exposes a single tool: `speclint`
 
-Give it a list of rough backlog items. Get back structured work items with:
+Give it a list of specs or GitHub issues. Get back structured work items with:
 - Clean, actionable titles
 - Problem statements
 - Acceptance criteria (2-4 per item)
@@ -104,7 +104,7 @@ Add to your Cursor MCP config (`~/.cursor/mcp.json`):
 
 Once configured, just talk to your AI naturally:
 
-> "Lint these backlog items: fix login bug, add CSV export, improve dashboard load time"
+> "Lint these specs: fix login bug, add CSV export, improve dashboard load time"
 
 > "Take these 10 stories and run them through Speclint. Context: we're building a B2B SaaS for HR teams."
 
