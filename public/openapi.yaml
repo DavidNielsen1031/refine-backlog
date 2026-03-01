@@ -1,10 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Refine Backlog API
+  title: Speclint API
   description: |
-    AI-powered backlog refinement API. Transform raw, messy backlog items into structured,
-    actionable work items with titles, problem statements, acceptance criteria, effort estimates,
-    priorities, tags, and assumptions.
+    Lint your GitHub issues before AI coding agents touch them. Get completeness_score and agent_ready signal for every spec.
 
     ## Authentication
     Free tier (5 items/request) requires no authentication.
@@ -12,17 +10,19 @@ info:
 
     ## Rate Limits
     - **Free**: 5 items per request, rate-limited by IP
-    - **Pro** ($9/mo): 25 items per request
-    - **Team** ($29/mo): 50 items per request
+    - **Pro** ($29/mo): 25 items per request
+    - **Team** ($79/mo): 50 items per request
   version: "1.0.0"
   contact:
-    url: https://refinebacklog.com
+    url: https://speclint.ai
   license:
     name: Proprietary
 
 servers:
-  - url: https://refinebacklog.com
+  - url: https://speclint.ai
     description: Production
+  - url: https://refinebacklog.com
+    description: Legacy (backward compat)
 
 paths:
   /api/refine:
@@ -40,10 +40,10 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Refine Backlog API
+                    example: Speclint API
                   usage:
                     type: string
-                    example: POST /api/refine with { items: string[], context?: string }
+                    example: "POST /api/refine with { items: string[], context?: string }"
                   limit:
                     type: string
                     example: "5 items per request (free tier), 25 (Pro), 50 (Team)"
@@ -54,6 +54,7 @@ paths:
         Accepts an array of raw backlog item strings and returns structured, refined work items.
         Each item is enriched with a clean title, problem statement, acceptance criteria,
         T-shirt size estimate, prioritized rating, tags, and optional clarifying assumptions.
+        Also returns a completeness_score and agent_ready signal for each item.
       operationId: refineItems
       security:
         - ApiKeyAuth: []
@@ -90,6 +91,20 @@ paths:
                     tags: ["bug", "auth"]
                     assumptions:
                       - "Assumes the issue is frontend input sanitization, not backend validation"
+                scores:
+                  - title: "Fix authentication failure on login with special characters in password"
+                    completeness_score: 82
+                    agent_ready: true
+                    breakdown:
+                      has_problem_statement: true
+                      has_acceptance_criteria: true
+                      has_estimate: true
+                      has_priority: true
+                      has_tags: true
+                summary:
+                  average_score: 82
+                  agent_ready_count: 1
+                  total_count: 1
                 _meta:
                   requestId: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
                   model: "claude-3-5-haiku-20241022"
@@ -142,7 +157,7 @@ paths:
                     example: Discovery Gate API
                   usage:
                     type: string
-                    example: POST /api/discover with { item: string, context?: string }
+                    example: "POST /api/discover with { item: string, context?: string }"
 
     post:
       summary: Classify Backlog Item Discovery Risk
@@ -215,8 +230,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                error: "Daily discovery limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $9/month."
-                upgrade: "https://refinebacklog.com/pricing"
+                error: "Daily discovery limit reached on the free tier (3 requests/day). Upgrade to Pro for unlimited requests at $29/month."
+                upgrade: "https://speclint.ai/pricing"
         "503":
           description: AI service temporarily unavailable
           content:
@@ -311,7 +326,7 @@ components:
       name: x-license-key
       description: |
         License key for Pro or Team tier access.
-        Obtain at https://refinebacklog.com/pricing
+        Obtain at https://speclint.ai/pricing
         Free tier (5 items/request) works without a key.
 
   schemas:
@@ -358,8 +373,58 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/RefinedItem"
+        scores:
+          type: array
+          description: Completeness scores and agent_ready signals for each item
+          items:
+            $ref: "#/components/schemas/ItemScore"
+        summary:
+          $ref: "#/components/schemas/ScoreSummary"
         _meta:
           $ref: "#/components/schemas/ResponseMeta"
+
+    ItemScore:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Title of the backlog item (matches RefinedItem.title)
+        completeness_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Completeness score from 0-100 indicating how ready the spec is for an AI coding agent
+        agent_ready:
+          type: boolean
+          description: Whether the spec is ready for an AI coding agent to implement without clarification
+        breakdown:
+          type: object
+          description: Boolean breakdown of which spec fields are present and complete
+          properties:
+            has_problem_statement:
+              type: boolean
+            has_acceptance_criteria:
+              type: boolean
+            has_estimate:
+              type: boolean
+            has_priority:
+              type: boolean
+            has_tags:
+              type: boolean
+
+    ScoreSummary:
+      type: object
+      description: Aggregate scoring summary across all items in the request
+      properties:
+        average_score:
+          type: number
+          description: Average completeness_score across all items
+        agent_ready_count:
+          type: integer
+          description: Number of items with agent_ready = true
+        total_count:
+          type: integer
+          description: Total number of items scored
 
     RefinedItem:
       type: object
