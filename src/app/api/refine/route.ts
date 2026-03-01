@@ -17,6 +17,12 @@ interface RefineRequest {
     questions: Array<{ rank: number; question: string; category: string; why_it_matters: string }>
     assumptions: Array<{ statement: string; type: string; risk: string }>
   }
+  codebase_context?: {
+    stack: string[]
+    patterns: string[]
+    constraints: string[]
+    repo_url?: string
+  }
 }
 
 const MODEL = 'claude-haiku-4-5'
@@ -103,6 +109,13 @@ export async function POST(request: NextRequest) {
 
     const items = cleanItems.slice(0, maxItems)
     const contextLine = body.context ? `\n\nProject context: ${body.context}` : ''
+    const isPaidTier = tier === 'pro' || tier === 'team'
+    const codebaseContextUsed = isPaidTier && !!body.codebase_context
+    let codebaseContextLine = ''
+    if (codebaseContextUsed && body.codebase_context) {
+      const { stack, patterns, constraints } = body.codebase_context
+      codebaseContextLine = `\n\nCODEBASE CONTEXT (write acceptance criteria that reference this tech stack specifically — not generic):\nStack: ${stack.join(', ')}\nPatterns: ${patterns.join(', ')}\nConstraints: ${constraints.join(', ')}\n\nIMPORTANT: Each acceptance criterion must reference at least one specific technology from the stack above. Write ACs like: "Given the Next.js API route, when..." not generic "Given the system, when..."`
+    }
     const userStoryLine = body.useUserStories ? `\n\nIMPORTANT: Keep the "title" field as a short, clean one-liner (e.g., "Fix Session Timeout Authentication Bug"). Add a SEPARATE field called "userStory" with the full user story in "As a [role], I want [goal], so that [benefit]" format. The title must NOT be a user story.` : ''
     const gherkinLine = body.useGherkin ? `\n\nIMPORTANT: Write ALL acceptance criteria in Gherkin format using Given/When/Then syntax. Each criterion must start with "Given", "When", or "Then".` : ''
     let discoveryLine = ''
@@ -121,7 +134,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: `${REFINEMENT_PROMPT}${contextLine}${userStoryLine}${gherkinLine}${discoveryLine}\n\nBacklog items:\n${itemsList}`
+          content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}\n\nBacklog items:\n${itemsList}`
         }
       ],
     })
@@ -152,7 +165,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 4000,
         temperature: 0.1,
         messages: [
-          { role: 'user', content: `${REFINEMENT_PROMPT}${contextLine}${userStoryLine}${gherkinLine}${discoveryLine}\n\nBacklog items:\n${itemsList}` },
+          { role: 'user', content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}\n\nBacklog items:\n${itemsList}` },
           { role: 'assistant', content: content.text },
           { role: 'user', content: `Your response had validation errors: ${JSON.stringify(validation.error.issues)}. Fix and return valid JSON array. Priority must be "HIGH — rationale", "MEDIUM — rationale", or "LOW — rationale". Estimate must be XS/S/M/L/XL. Return ONLY the JSON array.` }
         ],
@@ -241,6 +254,7 @@ export async function POST(request: NextRequest) {
         latencyMs,
         promptVersion: '1.0',
         tier,
+        codebase_context_used: codebaseContextUsed,
       }
     }, { status: 200 })
 

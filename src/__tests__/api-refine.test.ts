@@ -191,6 +191,46 @@ describe('Scoring fields in response', () => {
   })
 })
 
+describe('codebase_context parameter', () => {
+  it('ignores codebase_context for free tier — no error, codebase_context_used is false', async () => {
+    const res = await POST(makeRequest({
+      items: ['Fix login bug'],
+      codebase_context: {
+        stack: ['Next.js', 'TypeScript', 'Upstash Redis'],
+        patterns: ['REST API', 'JWT auth'],
+        constraints: ['No breaking API changes'],
+      },
+    }))
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data._meta.codebase_context_used).toBe(false)
+  })
+
+  it('sets codebase_context_used: true for pro tier when codebase_context is provided', async () => {
+    const { getLicenseData } = await import('@/lib/kv')
+    vi.mocked(getLicenseData).mockResolvedValueOnce({
+      plan: 'pro',
+      customerId: 'cus_test',
+      status: 'active',
+    })
+
+    const res = await POST(makeRequest(
+      {
+        items: ['Fix login bug'],
+        codebase_context: {
+          stack: ['Next.js', 'TypeScript', 'Upstash Redis'],
+          patterns: ['REST API', 'JWT auth'],
+          constraints: ['No breaking API changes'],
+        },
+      },
+      { 'x-license-key': 'pro-license-key' }
+    ))
+    expect(res.status).toBe(200)
+    const data = await res.json()
+    expect(data._meta.codebase_context_used).toBe(true)
+  })
+})
+
 describe('Rate limiting behavior', () => {
   it('returns 429 when rate limit is exceeded', async () => {
     const { checkRateLimitKV } = await import('@/lib/kv')
