@@ -93,6 +93,14 @@ export function ForAIAgentsSection() {
                 {API_EXAMPLE}
               </pre>
             </div>
+            {/* suggestion field callout */}
+            <div className="mt-3 bg-emerald-500/5 border border-emerald-500/20 rounded-lg px-4 py-3 flex items-start gap-3">
+              <span className="text-emerald-400 text-sm shrink-0">↑</span>
+              <div>
+                <span className="text-emerald-400 font-mono text-xs font-semibold">suggestion</span>
+                <span className="text-zinc-400 text-xs ml-2">— Speclint tells you exactly what to add. Not just a score, a fix.</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -41,12 +41,13 @@ export function GitHubActionSection() {
               Drop it in your workflow.<br />It runs on every issue.
             </h2>
             <p className="text-zinc-400 leading-relaxed mb-6">
-              The GitHub Action fires automatically on <span className="text-white font-mono text-sm">issues.opened</span>. No configuration, no webhooks, no service to babysit.
+              The GitHub Action fires automatically on <span className="text-white font-mono text-sm">issues.opened</span> and <span className="text-white font-mono text-sm">issues.edited</span>. Fix the spec, get instant feedback — no manual re-run needed.
             </p>
             <ul className="space-y-3 mb-8">
               {[
                 "Scores every spec in < 2s using the /api/lint endpoint",
                 "Posts what's missing from the spec as a GitHub comment",
+                "Auto re-lints on issue edits — fix the spec, get instant feedback",
                 "Labels passing issues with agent_ready",
                 "Optionally blocks merging with fail-on-low-score",
                 "Works with Cursor, Codex, Claude Code — any agent",

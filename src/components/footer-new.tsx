@@ -48,7 +48,7 @@ export function Footer() {
             © {new Date().getFullYear()} Perpetual Agility LLC — All rights reserved
           </p>
           <p className="text-zinc-700 text-xs font-mono">
-            completeness_score: 100 · agent_ready: true
+            completeness_score ≥ threshold → agent_ready: true
           </p>
         </div>
       </div>

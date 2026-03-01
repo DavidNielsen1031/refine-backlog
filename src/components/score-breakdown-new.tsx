@@ -93,7 +93,32 @@ export function ScoreBreakdownSection() {
           ))}
         </div>
 
-        <div className="mt-8 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-5 flex items-center justify-between">
+        {/* Codebase context callout — Pro/Team */}
+        <div className="mt-8 bg-[#0f0f0f] border border-[#1e1e1e] rounded-lg p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="text-white text-sm font-semibold">Codebase-aware scoring</div>
+            <span className="bg-emerald-500/10 text-emerald-400 font-mono text-[10px] px-2 py-0.5 rounded uppercase tracking-wider border border-emerald-500/20">
+              Pro / Team
+            </span>
+          </div>
+          <p className="text-zinc-500 text-xs mb-4">
+            Pass <span className="font-mono text-zinc-400">codebase_context</span> to get ACs that reference your actual stack — not generic patterns.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="bg-red-500/5 border border-red-500/20 rounded px-4 py-3">
+              <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider mb-2">without context</div>
+              <div className="text-xs text-zinc-400 font-mono">{`AC: "Use a caching layer"`}</div>
+              <div className="text-[10px] text-zinc-600 mt-1">Generic. Could mean anything.</div>
+            </div>
+            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded px-4 py-3">
+              <div className="text-[10px] font-mono text-zinc-600 uppercase tracking-wider mb-2">with codebase_context</div>
+              <div className="text-xs text-zinc-400 font-mono">{`AC: "Use Redis via the existing CacheService class, not a new caching layer"`}</div>
+              <div className="text-[10px] text-emerald-600 mt-1">Specific. Agent can act on this.</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-5 flex items-center justify-between">
           <div>
             <div className="text-emerald-400 font-mono text-sm">completeness_score ≥ 80</div>
             <div className="text-white font-semibold mt-1">Agent-ready threshold</div>

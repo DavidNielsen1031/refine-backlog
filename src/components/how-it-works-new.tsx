@@ -15,8 +15,8 @@ export function HowItWorksSection() {
     {
       number: "03",
       title: "Gate or label, you decide",
-      description: "Below your threshold? Block the issue from entering the agent queue. Above it? Label it agent_ready: true and let Cursor, Codex, or Claude Code run.",
-      code: 'if score >= 80:\n  label("agent_ready")\nelse:\n  comment("Spec incomplete")',
+      description: "Below your threshold? Speclint comments with what's missing. Edit the issue → it re-lints automatically on issues.edited. Above it? Label it agent_ready: true and let Cursor, Codex, or Claude Code run. Set your own threshold in the action config (default: 80).",
+      code: 'if score >= threshold:  # default: 80\n  label("agent_ready")\nelse:\n  comment("missing: ...")\n  # re-lints on issues.edited',
     },
   ]
 

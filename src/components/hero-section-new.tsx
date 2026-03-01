@@ -76,7 +76,7 @@ export function HeroSection() {
               Bad specs ship broken code. Good specs ship in one pass.
             </p>
             <p className="text-sm text-zinc-500 mb-10 font-mono">
-              completeness_score: 100 → agent_ready: true
+              completeness_score: 85 → agent_ready: true
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
