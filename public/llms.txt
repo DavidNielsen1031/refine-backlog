@@ -17,8 +17,9 @@ https://speclint.ai
 
 ### Endpoint: Score and Refine Issues
 
-**POST /api/refine** *(canonical — preferred)*
-**POST /api/groom** *(legacy — redirects to /api/refine, maintained for backward compatibility)*
+**POST /api/lint** *(canonical — preferred)*
+**POST /api/refine** *(deprecated alias — still works, redirects to /api/lint)*
+**POST /api/groom** *(legacy — redirects to /api/lint, maintained for backward compatibility)*
 
 Scores and refines an array of GitHub issues using AI. Returns structured items with completeness_score.
 
@@ -71,7 +72,7 @@ x-license-key: YOUR_API_KEY
 
 ### Endpoint: API Info
 
-**GET /api/refine**
+**GET /api/lint**
 
 Returns API description and usage instructions. No auth required.
 

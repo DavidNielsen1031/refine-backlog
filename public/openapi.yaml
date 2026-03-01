@@ -21,11 +21,9 @@ info:
 servers:
   - url: https://speclint.ai
     description: Production
-  - url: https://refinebacklog.com  # legacy redirect active
-    description: Legacy (backward compat)
 
 paths:
-  /api/refine:
+  /api/lint:
     get:
       summary: API Info
       description: Returns API description and usage instructions.
@@ -43,7 +41,7 @@ paths:
                     example: Speclint API
                   usage:
                     type: string
-                    example: "POST /api/refine with { items: string[], context?: string }"
+                    example: "POST /api/lint with { items: string[], context?: string }"
                   limit:
                     type: string
                     example: "5 items per request (free tier), 25 (Pro), 50 (Team)"
@@ -138,6 +136,32 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: "AI service temporarily unavailable"
+
+  /api/refine:
+    post:
+      summary: Lint and Score Specs (deprecated alias)
+      description: |
+        **Deprecated.** Use `/api/lint` instead. This endpoint is a maintained alias
+        and will continue to work for backward compatibility, but new integrations should
+        use `/api/lint`.
+      deprecated: true
+      operationId: refineItemsAlias
+      security:
+        - ApiKeyAuth: []
+        - {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefineRequest"
+      responses:
+        "200":
+          description: Successfully linted items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefineResponse"
 
   /api/discover:
     get:

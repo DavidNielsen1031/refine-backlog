@@ -7,33 +7,36 @@ const AGENTS = [
 ]
 
 const API_EXAMPLE = `POST https://speclint.ai/api/lint
-Authorization: Bearer sk_live_...
+x-license-key: sk_live_...
 Content-Type: application/json
 
 {
-  "issue": {
-    "title": "Add CSV export to reports",
-    "body": "Users want to export report data...",
-    "labels": ["feature", "reports"]
-  }
+  "items": ["Fix mobile Safari login failure — users cannot log in via mobile Safari after deployment"]
 }
 
 // Response
 {
-  "completeness_score": 62,
-  "agent_ready": false,
-  "dimensions": {
-    "has_measurable_outcome": 25,
-    "has_testable_criteria": 12,
-    "has_constraints": 15,
-    "no_vague_verbs": 10,
-    "has_definition_of_done": 0
-  },
-  "missing": [
-    "has_definition_of_done",
-    "has_testable_criteria (partial)"
-  ],
-  "suggestion": "Add: which report types, max rows, file format..."
+  "items": [{
+    "title": "Fix mobile Safari login failure",
+    "problem": "Users cannot log in via mobile Safari after deployment",
+    "acceptanceCriteria": [
+      "User can log in on Safari iOS 14+",
+      "No console errors during auth"
+    ],
+    "estimate": "S",
+    "priority": "HIGH — blocks core functionality",
+    "tags": ["bug", "critical", "mobile"],
+    "completeness_score": 75,
+    "agent_ready": true,
+    "breakdown": {
+      "has_measurable_outcome": false,
+      "has_testable_criteria": true,
+      "has_constraints": true,
+      "no_vague_verbs": true,
+      "has_definition_of_done": true
+    }
+  }],
+  "summary": { "average_score": 75, "agent_ready_count": 1, "total_count": 1 }
 }`
 
 export function ForAIAgentsSection() {

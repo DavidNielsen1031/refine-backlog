@@ -211,7 +211,7 @@ function SuccessContent() {
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <a href="mailto:support@speclint.ai?subject=Refine%20Backlog%20Pro%20Support">
+              <a href="mailto:support@speclint.ai?subject=Speclint%20Pro%20Support">
                 Get Help &amp; Support
               </a>
             </Button>
