@@ -11,6 +11,12 @@ interface IssueInput {
   labels?: string[]
 }
 
+interface PersonaInput {
+  role: string
+  cares_about: string[]
+  doesnt_care_about: string[]
+}
+
 interface RefineRequest {
   items?: string[]
   issues?: IssueInput[]
@@ -18,6 +24,7 @@ interface RefineRequest {
   useUserStories?: boolean
   useGherkin?: boolean
   preserve_structure?: boolean
+  persona?: PersonaInput
   discovery_context?: {
     classification: string
     rationale: string
@@ -153,6 +160,13 @@ export async function POST(request: NextRequest) {
       ? `\n\nIMPORTANT: Score each input as a SINGLE item. Do NOT split, decompose, or restructure the input. Each string in the items array is already a complete specification — refine and score it as one item, even if it contains multiple acceptance criteria or sub-tasks. Return exactly one JSON object per input string.`
       : ''
 
+    const personaEnabled = isPaidTier && !!body.persona
+    let personaLine = ''
+    if (personaEnabled && body.persona) {
+      const persona = body.persona
+      personaLine = `\n\nPERSONA SCORING:\nYou are also evaluating how well each spec aligns with this target user persona:\n- Role: ${persona.role}\n- Cares about: ${persona.cares_about.join(', ')}\n- Does NOT care about: ${persona.doesnt_care_about.join(', ')}\n\nFor each item, also include in your JSON response:\n- "persona_alignment": number 0-100 scored as: concern_coverage (50pts: how many cares_about items are addressed in the ACs or problem), anti_concern_avoidance (25pts: spec does NOT focus on doesnt_care_about items), role_appropriate_language (25pts: spec references context relevant to the persona's role)\n- "persona_gaps": string[] listing which cares_about items are NOT addressed in the spec`
+    }
+
     const response = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 4000,
@@ -160,7 +174,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: 'user',
-          content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}${preserveStructureLine}\n\nBacklog items:\n${itemsList}`
+          content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}${preserveStructureLine}${personaLine}\n\nBacklog items:\n${itemsList}`
         }
       ],
     })
@@ -191,7 +205,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 4000,
         temperature: 0.1,
         messages: [
-          { role: 'user', content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}${preserveStructureLine}\n\nBacklog items:\n${itemsList}` },
+          { role: 'user', content: `${REFINEMENT_PROMPT}${contextLine}${codebaseContextLine}${userStoryLine}${gherkinLine}${discoveryLine}${preserveStructureLine}${personaLine}\n\nBacklog items:\n${itemsList}` },
           { role: 'assistant', content: content.text },
           { role: 'user', content: `Your response had validation errors: ${JSON.stringify(validation.error.issues)}. Fix and return valid JSON array. Priority must be "HIGH — rationale", "MEDIUM — rationale", or "LOW — rationale". Estimate must be XS/S/M/L/XL. Return ONLY the JSON array.` }
         ],
@@ -229,6 +243,60 @@ export async function POST(request: NextRequest) {
       request.headers.get('x-client'),
     )
 
+    const resolvedEndpoint = (['lint', 'refine', 'discover', 'plan'].includes(request.headers.get('x-forwarded-endpoint') ?? '') ? request.headers.get('x-forwarded-endpoint') : (request.nextUrl.pathname.split('/').pop() ?? 'refine')) as 'lint' | 'refine' | 'discover' | 'plan'
+
+    // Compute completeness scores (deterministic, post-LLM)
+    const scores = refinedItems.map(item => {
+      const { score, breakdown } = computeCompletenessScore(item)
+      // Extract persona fields from LLM output (if persona was provided and paid tier)
+      let personaAlignment: number | null = null
+      let personaGaps: string[] | null = null
+      if (personaEnabled) {
+        const pa = (item as Record<string, unknown>).persona_alignment
+        const pg = (item as Record<string, unknown>).persona_gaps
+        personaAlignment = typeof pa === 'number' ? pa : null
+        personaGaps = Array.isArray(pg) ? pg : null
+      }
+      // Gate agent_ready on persona when present
+      let agentReady: boolean
+      if (personaEnabled && typeof personaAlignment === 'number') {
+        agentReady = score >= 70 && personaAlignment >= 60
+      } else {
+        agentReady = isAgentReady(score)
+      }
+      return {
+        title: item.title,
+        completeness_score: score,
+        agent_ready: agentReady,
+        breakdown,
+        persona_alignment: personaAlignment,
+        persona_gaps: personaGaps,
+      }
+    })
+
+    const totalCount = scores.length
+    const agentReadyCount = scores.filter(s => s.agent_ready).length
+    const averageScore = totalCount > 0
+      ? Math.round(scores.reduce((sum, s) => sum + s.completeness_score, 0) / totalCount)
+      : 0
+
+    // Handle free tier with persona — strip persona scoring, add upgrade message
+    const freeWithPersona = tier === 'free' && !!body.persona
+    const upgradeMessage = freeWithPersona
+      ? 'Persona scoring available on Solo plan ($29/mo)'
+      : undefined
+
+    // Embed score fields into each item (SL-028)
+    const itemsWithScores = refinedItems.map((item, i) => ({
+      ...item,
+      completeness_score: scores[i].completeness_score,
+      agent_ready: scores[i].agent_ready,
+      breakdown: scores[i].breakdown,
+      persona_alignment: freeWithPersona ? null : scores[i].persona_alignment ?? null,
+      persona_gaps: freeWithPersona ? null : scores[i].persona_gaps ?? null,
+    }))
+
+    // Fire telemetry AFTER scores are computed so notifications include them
     trackUsage({
       requestId,
       timestamp: new Date().toISOString(),
@@ -243,36 +311,19 @@ export async function POST(request: NextRequest) {
       ip: ip,
       source,
       items,
-      endpoint: (['lint', 'refine', 'discover', 'plan'].includes(request.headers.get('x-forwarded-endpoint') ?? '') ? request.headers.get('x-forwarded-endpoint') : (request.nextUrl.pathname.split('/').pop() ?? 'refine')) as 'lint' | 'refine' | 'discover' | 'plan',
+      endpoint: resolvedEndpoint,
+      scores: scores.map(s => ({
+        title: s.title,
+        completeness_score: s.completeness_score,
+        agent_ready: s.agent_ready,
+      })),
+      averageScore,
+      agentReadyCount,
     }).catch(() => {}) // fire-and-forget
-
-    // Compute completeness scores (deterministic, post-LLM)
-    const scores = refinedItems.map(item => {
-      const { score, breakdown } = computeCompletenessScore(item)
-      return {
-        title: item.title,
-        completeness_score: score,
-        agent_ready: isAgentReady(score),
-        breakdown,
-      }
-    })
-
-    const totalCount = scores.length
-    const agentReadyCount = scores.filter(s => s.agent_ready).length
-    const averageScore = totalCount > 0
-      ? Math.round(scores.reduce((sum, s) => sum + s.completeness_score, 0) / totalCount)
-      : 0
-
-    // Embed score fields into each item (SL-028)
-    const itemsWithScores = refinedItems.map((item, i) => ({
-      ...item,
-      completeness_score: scores[i].completeness_score,
-      agent_ready: scores[i].agent_ready,
-      breakdown: scores[i].breakdown,
-    }))
 
     return NextResponse.json({
       items: itemsWithScores,
+      ...(upgradeMessage ? { upgrade_message: upgradeMessage } : {}),
       scores,
       summary: {
         average_score: averageScore,

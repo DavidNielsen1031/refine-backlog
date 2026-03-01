@@ -21,6 +21,12 @@ export interface UsageEvent {
   items?: string[]
   /** API endpoint that generated this event */
   endpoint?: 'lint' | 'refine' | 'discover' | 'plan'
+  /** Completeness scores per item (post-LLM) */
+  scores?: { title: string; completeness_score: number; agent_ready: boolean }[]
+  /** Average completeness score across all items */
+  averageScore?: number
+  /** Number of items that passed the agent-ready gate */
+  agentReadyCount?: number
 }
 
 /**
@@ -90,6 +96,7 @@ const TIER_LABELS: Record<string, string> = {
 
 /**
  * Fire a usage notification to Discord. Non-blocking, never throws.
+ * Format optimized for signal density — lead with what matters (specs + scores).
  */
 async function notifyDiscord(event: UsageEvent): Promise<void> {
   // Suppress healthcheck pings — they're internal noise, not real usage
@@ -101,45 +108,66 @@ async function notifyDiscord(event: UsageEvent): Promise<void> {
 
   try {
     const source = SOURCE_LABELS[event.source ?? ''] ?? event.source ?? 'Unknown'
-    const tier = TIER_LABELS[event.tier] ?? event.tier
-    const time = new Date(event.timestamp).toLocaleTimeString('en-US', {
-      hour: '2-digit', minute: '2-digit', timeZone: 'America/Chicago'
-    })
+    const latencySec = (event.latencyMs / 1000).toFixed(1)
+    const slowFlag = event.latencyMs > 5000 ? ' ⚠️' : ''
 
-    const ENDPOINT_LABELS: Record<string, string> = {
-      'lint': '🔍 /lint',
-      'refine': '✏️ /refine',
-      'discover': '🔭 /discover',
-      'plan': '📋 /plan',
+    const ENDPOINT_SHORT: Record<string, string> = {
+      'lint': '/lint',
+      'refine': '/refine',
+      'discover': '/discover',
+      'plan': '/plan',
     }
-    const endpointLabel = event.endpoint ? ENDPOINT_LABELS[event.endpoint] ?? event.endpoint : null
+    const ep = event.endpoint ? ENDPOINT_SHORT[event.endpoint] ?? event.endpoint : ''
 
-    const lines = [
-      `**🔍 Speclint — Usage Event**`,
-      `> **Channel:** ${source}`,
-      ...(endpointLabel ? [`> **Endpoint:** ${endpointLabel}`] : []),
-      `> **Tier:** ${tier}`,
-      `> **Items:** ${event.itemCount}`,
-      `> **Latency:** ${event.latencyMs}ms`,
-      `> **Cost:** $${event.costUsd.toFixed(6)}`,
-      `> **Time:** ${time} CT`,
-      `> **Request ID:** \`${event.requestId.slice(0, 8)}\``,
-    ]
+    // Compact header: endpoint · source · items · latency · cost
+    const headerParts = [
+      ep ? `**${ep}**` : null,
+      source,
+      `${event.itemCount} item${event.itemCount !== 1 ? 's' : ''}`,
+      `${latencySec}s${slowFlag}`,
+      `$${event.costUsd.toFixed(4)}`,
+    ].filter(Boolean)
 
-    // Show input items (truncated, max 5)
+    const lines: string[] = []
+
+    // If we have scores, lead with the score summary
+    if (event.averageScore !== undefined && event.averageScore !== null) {
+      const scoreEmoji = event.averageScore >= 70 ? '✅' : event.averageScore >= 40 ? '⚠️' : '❌'
+      const readyText = event.agentReadyCount !== undefined
+        ? ` · ${event.agentReadyCount}/${event.itemCount} agent-ready`
+        : ''
+      lines.push(`${scoreEmoji} **Score: ${event.averageScore}/100**${readyText}`)
+    }
+
+    lines.push(`🔍 ${headerParts.join(' · ')}`)
+
+    // Show input items with per-item scores if available
     if (event.items && event.items.length > 0) {
-      const MAX_ITEM_LEN = 80
+      const MAX_ITEM_LEN = 70
       const MAX_SHOW = 5
       const shown = event.items.slice(0, MAX_SHOW)
       const overflow = event.items.length - MAX_SHOW
-      lines.push(`> **Input:**`)
+
       shown.forEach((item, i) => {
         const truncated = item.length > MAX_ITEM_LEN ? item.slice(0, MAX_ITEM_LEN) + '…' : item
-        lines.push(`> \`${i + 1}.\` ${truncated}`)
+        // Add per-item score if available
+        const itemScore = event.scores?.[i]
+        if (itemScore) {
+          const badge = itemScore.agent_ready ? '✅' : '⚠️'
+          lines.push(`> ${badge} \`${itemScore.completeness_score}\` ${truncated}`)
+        } else {
+          lines.push(`> ${truncated}`)
+        }
       })
       if (overflow > 0) {
-        lines.push(`> *…and ${overflow} more*`)
+        lines.push(`> *…+${overflow} more*`)
       }
+    }
+
+    // Fetch daily running totals from Redis for context
+    const dailyContext = await getDailyRunningTotal(event.timestamp.slice(0, 10))
+    if (dailyContext) {
+      lines.push(`📊 Today: ${dailyContext.calls} calls · $${dailyContext.costUsd.toFixed(4)}`)
     }
 
     await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
@@ -152,6 +180,24 @@ async function notifyDiscord(event: UsageEvent): Promise<void> {
     })
   } catch {
     // Non-blocking — never let notification failures affect the API
+  }
+}
+
+/**
+ * Quick Redis fetch for daily running totals (used in notifications).
+ */
+async function getDailyRunningTotal(day: string): Promise<{ calls: number; costUsd: number } | null> {
+  const r = getRedis()
+  if (!r) return null
+  try {
+    const [calls, costUsd] = await Promise.all([
+      r.get<number>(`telemetry:calls:daily:${day}`),
+      r.get<number>(`telemetry:cost:daily:${day}`),
+    ])
+    if (!calls) return null
+    return { calls: calls ?? 0, costUsd: costUsd ?? 0 }
+  } catch {
+    return null
   }
 }
 

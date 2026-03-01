@@ -9,6 +9,8 @@ export const RefinedItemSchema = z.object({
   tags: z.array(z.string()).min(1).max(10),
   assumptions: z.array(z.string()).max(2).optional(),
   userStory: z.string().optional(),
+  persona_alignment: z.number().min(0).max(100).nullable().optional(),
+  persona_gaps: z.array(z.string()).nullable().optional(),
 })
 
 export const RefinedItemsSchema = z.array(RefinedItemSchema).min(1)
