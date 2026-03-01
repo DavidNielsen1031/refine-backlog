@@ -2,7 +2,10 @@ import type { RefinedItem } from '@/lib/schemas'
 
 const VAGUE_VERBS = ['improve', 'enhance', 'optimize', 'update', 'fix']
 
+// Match both imperative ACs ("Verify X") and declarative ACs ("X is visible", "X returns 200")
+// LLMs often rewrite "Verify X does Y" → "X does Y" — we must catch both forms
 const ACTION_VERB_RE = /^(given|when|then|user can|verify|confirm|ensure|check|assert|validate|the system|it should|should|must|display|show|return|redirect|allow|prevent|enable|disable|create|delete|update|send|receive|load|render|submit|click|navigate|log|track)/i
+const DECLARATIVE_AC_RE = /\b(is visible|is displayed|is enabled|is disabled|is present|is removed|is hidden|appears?\b|contains?\b|includes?\b|returns?\b|redirects?\b|loads?\b|renders?\b|shows?\b|displays?\b|supports?\b|accepts?\b|rejects?\b|blocks?\b|allows?\b|prevents?\b|triggers?\b|fires?\b|completes?\b|downloads?\b|uploads?\b|passes?\b|fails?\b|works?\b|functions?\b|remains?\b|stays?\b|persists?\b)\b/i
 
 const DOD_RE = /\d+|logged in|returns? \d+|visible|enabled|disabled|less than|within|at least|greater than|no more than|exactly|complete|success|fail|error|approved|rejected|active|inactive/i
 
@@ -13,8 +16,11 @@ export function computeCompletenessScore(item: RefinedItem): { score: number; br
 
   // has_testable_criteria: at least 2 acceptance criteria starting with action verbs
   const ac = item.acceptanceCriteria ?? []
-  const actionVerbCount = ac.filter(c => ACTION_VERB_RE.test(c.trim())).length
-  const has_testable_criteria = actionVerbCount >= 2
+  const testableCount = ac.filter(c => {
+    const trimmed = c.trim()
+    return ACTION_VERB_RE.test(trimmed) || DECLARATIVE_AC_RE.test(trimmed)
+  }).length
+  const has_testable_criteria = testableCount >= 2
 
   // has_constraints: tags >= 2 OR assumptions present and non-empty
   const has_constraints = (item.tags && item.tags.length >= 2) ||
