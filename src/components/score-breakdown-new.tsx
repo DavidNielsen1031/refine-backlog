@@ -50,6 +50,9 @@ export function ScoreBreakdownSection() {
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
             Five dimensions. 100 points.
           </h2>
+          <p className="text-zinc-500 font-mono text-sm mb-3">
+            What separates a GitHub issue from an agent-ready specification
+          </p>
           <p className="text-zinc-400 max-w-2xl">
             &ldquo;The distance between Level 3 and Level 4 is the quality of the spec, not the quality of the model.&rdquo;
           </p>

@@ -1,12 +1,12 @@
 export const siteConfig = {
   name: "Speclint",
   url: "https://speclint.ai",
-  tagline: "Lint your tickets before agents touch them.",
+  tagline: "Lint your specs before agents touch them.",
   description: "Speclint scores every GitHub issue before your AI coding agent sees it. Bad specs ship broken code. Good specs ship in one pass.",
   
   hero: {
     badge: "Free tier — no credit card",
-    title: "Lint your tickets before\nagents touch them",
+    title: "Lint your specs before\nagents touch them",
     subtitle: "Speclint scores every GitHub issue before your AI coding agent sees it. Bad specs ship broken code. Good specs ship in one pass.",
     cta: { text: "Get API Key", href: "/get-key" },
     secondaryCta: { text: "Read the docs", href: "/openapi.yaml" },

@@ -14,7 +14,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Speclint — Lint your tickets before agents touch them",
+  title: "Speclint — Lint your specs before agents touch them",
   description: "Speclint scores every GitHub issue before your AI coding agent sees it. Bad specs ship broken code. Good specs ship in one pass. Free tier available.",
   keywords: ["spec quality", "AI coding agents", "GitHub Action", "spec linting", "coding agent pipeline", "AI development", "spec completeness score", "agent-ready tickets"],
   authors: [{ name: "Perpetual Agility LLC" }],
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://speclint.ai",
-    title: "Speclint — Lint your tickets before agents touch them",
+    title: "Speclint — Lint your specs before agents touch them",
     description: "Speclint scores every GitHub issue before your AI coding agent sees it. Bad specs ship broken code. Good specs ship in one pass.",
     siteName: "Speclint",
     images: [
@@ -45,13 +45,13 @@ export const metadata: Metadata = {
         url: "https://speclint.ai/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Speclint — Lint your tickets before agents touch them",
+        alt: "Speclint — Lint your specs before agents touch them",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Speclint — Lint your tickets before agents touch them",
+    title: "Speclint — Lint your specs before agents touch them",
     description: "Speclint scores every GitHub issue before your AI coding agent sees it. Bad specs ship broken code.",
     creator: "@speclint",
     images: ["https://speclint.ai/og-image.png"],

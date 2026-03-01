@@ -6,7 +6,7 @@ export function Footer() {
           <div>
             <div className="font-mono font-bold text-white text-lg mb-2">speclint</div>
             <p className="text-zinc-500 text-sm">
-              Lint your tickets before agents touch them.
+              Lint your specs before agents touch them.
             </p>
           </div>
           <div>

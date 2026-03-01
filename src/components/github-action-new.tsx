@@ -45,8 +45,8 @@ export function GitHubActionSection() {
             </p>
             <ul className="space-y-3 mb-8">
               {[
-                "Scores issue in < 2s using the /api/lint endpoint",
-                "Posts structured comment showing what's missing",
+                "Scores every spec in < 2s using the /api/lint endpoint",
+                "Posts what's missing from the spec as a GitHub comment",
                 "Labels passing issues with agent_ready",
                 "Optionally blocks merging with fail-on-low-score",
                 "Works with Cursor, Codex, Claude Code — any agent",

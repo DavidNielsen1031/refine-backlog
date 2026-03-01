@@ -2,8 +2,8 @@ export function HowItWorksSection() {
   const steps = [
     {
       number: "01",
-      title: "Issue opens on GitHub",
-      description: "A developer creates a GitHub issue. Before any agent touches it, the speclint-action fires automatically on issues.opened.",
+      title: "A spec lands on GitHub",
+      description: "Every GitHub issue is a spec — it defines what an agent should build, how to verify it, and where to stop. Before any agent touches it, the speclint-action fires automatically on issues.opened.",
       code: "on:\n  issues:\n    types: [opened]",
     },
     {

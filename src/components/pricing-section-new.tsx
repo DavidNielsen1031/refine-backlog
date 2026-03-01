@@ -12,7 +12,7 @@ const PLANS = [
     per: null,
     description: "Kick the tires. No commitment.",
     features: [
-      "5 lints per day",
+      "5 specs per day",
       "All 5 scoring dimensions",
       "JSON response via /api/lint",
       "No API key required",
@@ -100,6 +100,10 @@ export function PricingSection() {
             You&apos;re spending $1,000/day on AI coding agents. Are you spending $0 making sure they build the right thing?
           </p>
         </div>
+
+        <p className="text-zinc-500 text-sm font-mono mb-10">
+          Your GitHub issues already contain specs. Speclint tells you if they&apos;re good enough.
+        </p>
 
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           {PLANS.map((plan) => (

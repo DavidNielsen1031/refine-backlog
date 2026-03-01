@@ -64,10 +64,13 @@ export function HeroSection() {
             <Badge className="mb-6 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs px-3 py-1">
               v1.0 — GitHub Action available
             </Badge>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] mb-6">
-              Lint your tickets before{" "}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] mb-4">
+              Lint your specs before{" "}
               <span className="text-emerald-400">agents touch them</span>
             </h1>
+            <p className="text-base text-zinc-500 mb-5 font-mono">
+              Every GitHub issue is a spec. Most of them are bad ones.
+            </p>
             <p className="text-lg text-zinc-400 mb-4 leading-relaxed max-w-lg">
               Speclint scores every GitHub issue 0–100 before your AI coding agent sees it.
               Bad specs ship broken code. Good specs ship in one pass.
