@@ -23,6 +23,7 @@ export default function GetKeyPage() {
     setLicenseKey(null)
 
     try {
+      // First: check for existing paid key
       const res = await fetch('/api/retrieve-key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -33,8 +34,22 @@ export default function GetKeyPage() {
         setLicenseKey(data.licenseKey)
         setPlan(data.plan)
         setStatus('found')
+        return
+      }
+
+      // No paid key — issue a free key
+      const freeRes = await fetch('/api/issue-free-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      })
+      const freeData = await freeRes.json()
+      if (freeRes.ok && freeData.licenseKey) {
+        setLicenseKey(freeData.licenseKey)
+        setPlan('free')
+        setStatus('found')
       } else {
-        setStatus('not-found')
+        setStatus('error')
       }
     } catch {
       setStatus('error')
@@ -61,14 +76,14 @@ export default function GetKeyPage() {
           </div>
           <h1 className="text-2xl font-bold text-foreground">Retrieve Your License Key</h1>
           <p className="text-muted-foreground text-sm">
-            Enter the email you used to subscribe and we&apos;ll show your key.
+            Enter your email — we&apos;ll find your paid key or issue a free one instantly.
           </p>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Look up by email</CardTitle>
-            <CardDescription>We&apos;ll find your active subscription</CardDescription>
+            <CardDescription>Paid subscribers get their key; everyone else gets a free key</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,7 +114,7 @@ export default function GetKeyPage() {
             <CardContent className="pt-6 space-y-4">
               <div className="flex items-center gap-2 text-emerald-400 font-semibold">
                 <CheckCircle2 className="h-5 w-5" />
-                Found your {plan} subscription
+                {plan === 'free' ? 'Your free API key is ready' : `Found your ${plan} subscription`}
               </div>
               <div className="flex gap-2">
                 <code className="flex-1 bg-muted/50 border border-muted p-3 rounded-lg text-sm font-mono break-all">
@@ -110,26 +125,14 @@ export default function GetKeyPage() {
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">
-                Use with: <code className="font-mono">npx refine-backlog-cli --key {licenseKey.slice(0, 12)}…</code>
+                Use with: <code className="font-mono">npx speclint-cli --key {licenseKey.slice(0, 12)}…</code>
               </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Not found */}
-        {status === 'not-found' && (
-          <Card className="border-yellow-500/30 bg-yellow-50/5">
-            <CardContent className="pt-6 space-y-2">
-              <p className="text-sm text-muted-foreground">
-                No active subscription found for that email. Check you used the right address, or{' '}
-                <a href="mailto:refinebacklog@gmail.com" className="text-emerald-400 hover:underline">
-                  contact support
-                </a>.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Don&apos;t have a subscription?{' '}
-                <Link href="/pricing" className="text-emerald-400 hover:underline">View pricing →</Link>
-              </p>
+              {plan === 'free' && (
+                <p className="text-xs text-muted-foreground border-t border-border/30 pt-3">
+                  Free tier: 5 items/request, 3 requests/day.{' '}
+                  <Link href="/pricing" className="text-emerald-400 hover:underline">Upgrade for more →</Link>
+                </p>
+              )}
             </CardContent>
           </Card>
         )}

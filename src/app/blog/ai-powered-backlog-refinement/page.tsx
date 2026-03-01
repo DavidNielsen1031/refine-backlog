@@ -4,43 +4,43 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 
 export const metadata: Metadata = {
-  title: "Refine Backlog vs. ChatGPT: Which AI Tool Actually Improves Your Backlog? — Refine Backlog",
-  description: "Comparing Refine Backlog vs raw ChatGPT for backlog refinement. See side-by-side output quality, INVEST scoring, context awareness, and which tool works in CI/CD pipelines.",
-  keywords: ["AI backlog tool", "Refine Backlog vs ChatGPT", "backlog refinement AI", "AI sprint planning tool"],
+  title: "AI-Powered Spec Linting for Coding Agents — Speclint",
+  description: "Learn how AI-powered spec linting catches broken GitHub issues before your coding agent wastes hours on the wrong thing. Speclint scores every issue for agent-readiness.",
+  keywords: ["ai coding agent spec quality", "lint github issues", "spec infrastructure", "cursor codex spec", "speclint completeness score"],
   alternates: {
-    canonical: "https://refinebacklog.com/blog/ai-powered-backlog-refinement",
+    canonical: "https://speclint.ai/blog/ai-powered-backlog-refinement",
   },
 }
 
 const articleSchema = {
   "@context": "https://schema.org",
   "@type": "Article",
-  "headline": "Refine Backlog vs. ChatGPT: Which AI Tool Actually Improves Your Backlog?",
-  "description": "A direct comparison of purpose-built backlog refinement AI vs. raw ChatGPT. See output quality, INVEST scoring, context awareness, and API/pipeline suitability.",
+  "headline": "AI-Powered Spec Linting for Coding Agents",
+  "description": "How Speclint uses AI to lint GitHub issues before your coding agent touches them — catching ambiguity, missing context, and untestable acceptance criteria automatically.",
   "author": {
     "@type": "Person",
     "name": "David Nielsen",
-    "url": "https://refinebacklog.com/about",
-    "jobTitle": "Agile Coach & Product Strategist"
+    "url": "https://speclint.ai/about",
+    "jobTitle": "Spec Infrastructure Engineer"
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Perpetual Agility LLC",
-    "url": "https://refinebacklog.com"
+    "name": "Speclint",
+    "url": "https://speclint.ai"
   },
-  "datePublished": "2026-02-15",
-  "dateModified": "2026-02-28",
-  "mainEntityOfPage": "https://refinebacklog.com/blog/ai-powered-backlog-refinement",
-  "image": "https://refinebacklog.com/og-image.png"
+  "datePublished": "2026-03-01",
+  "dateModified": "2026-03-01",
+  "mainEntityOfPage": "https://speclint.ai/blog/ai-powered-backlog-refinement",
+  "image": "https://speclint.ai/og-image.png"
 };
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   "itemListElement": [
-    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://refinebacklog.com" },
-    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://refinebacklog.com/blog" },
-    { "@type": "ListItem", "position": 3, "name": "Refine Backlog vs ChatGPT", "item": "https://refinebacklog.com/blog/ai-powered-backlog-refinement" }
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://speclint.ai" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://speclint.ai/blog" },
+    { "@type": "ListItem", "position": 3, "name": "AI-Powered Spec Linting", "item": "https://speclint.ai/blog/ai-powered-backlog-refinement" }
   ]
 };
 
@@ -50,34 +50,26 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": "Can I use ChatGPT for backlog refinement instead of a dedicated tool?",
+      "name": "What is spec linting for AI coding agents?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Yes, for occasional manual refinement. ChatGPT can structure vague stories and draft acceptance criteria if you prompt it carefully. The gap appears at scale: ChatGPT requires prompt engineering per item, produces inconsistent output formats, and can't plug into CI/CD pipelines or GitHub Actions. Purpose-built tools like Refine Backlog output structured JSON with INVEST scores and effort estimates in one call — no prompt wrangling required."
+        "text": "Spec linting analyzes your GitHub issues before an AI coding agent picks them up. It checks for completeness — does the issue have a clear problem statement, testable acceptance criteria, relevant file paths, and enough context for an agent to work autonomously? Issues that fail the lint get flagged with a completeness_score and specific remediation suggestions."
       }
     },
     {
       "@type": "Question",
-      "name": "Does Refine Backlog use ChatGPT under the hood?",
+      "name": "How is Speclint different from just using ChatGPT to review issues?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Refine Backlog uses large language models optimized for structured output, but the value isn't the model — it's the prompt engineering, output schema, INVEST scoring logic, and context detection that's already been done for you. Using raw ChatGPT for refinement is like using a general-purpose text editor to write code instead of an IDE: the underlying engine is similar, but the tooling layer is what makes you productive."
+        "text": "Speclint is purpose-built for agent pipelines. It outputs structured JSON with a completeness_score, specific failure reasons, and an agent_ready label — not prose feedback you have to interpret. It integrates directly into your GitHub Actions workflow, so every issue gets linted automatically when opened or labeled."
       }
     },
     {
       "@type": "Question",
-      "name": "Which tool is better for automating backlog refinement in CI/CD pipelines?",
+      "name": "What score does an issue need to be agent_ready?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Refine Backlog has a REST API and official GitHub Action designed for pipeline integration. ChatGPT's API requires you to engineer the prompt, parse unstructured output, and handle inconsistencies yourself. For scripted or automated refinement — Jira webhook → refine → write back — a purpose-built API is significantly faster to integrate and more reliable in production."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "When should I just use ChatGPT for backlog refinement?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "ChatGPT is the right choice when you're refining a single story manually, you want complete control over the prompt, you need output in a very custom format, or you're already in a ChatGPT conversation about a feature and want to refine inline. For volume work, team workflows, or automation — a dedicated tool with a stable API will save you significant time and produce more consistent output."
+        "text": "Speclint applies the agent_ready label when an issue scores 80 or above on the completeness_score scale. Below 80, the issue gets a comment with the specific dimensions that need improvement — missing AC, no file context, ambiguous scope, etc."
       }
     }
   ]
@@ -95,150 +87,99 @@ export default function BlogPost() {
         </Link>
 
         <header className="mb-12">
-          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · Updated February 28, 2026 · 7 min read</p>
+          <p className="text-sm text-muted-foreground mb-4">By David Nielsen · March 1, 2026 · 6 min read</p>
           <h1 className="text-4xl font-bold font-space-grotesk mb-6 leading-tight">
-            Refine Backlog vs. ChatGPT: Which AI Tool Actually Improves Your Backlog?
+            AI-Powered Spec Linting for Coding Agents
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            Both tools use AI. Both can produce structured user stories. But one is a general-purpose chatbot that requires prompt engineering per item, and one is purpose-built for backlog refinement with structured output, INVEST scoring, and a REST API for pipeline automation. Here&apos;s what that means in practice.
+            Your AI coding agent is only as good as the issue it&apos;s reading. Speclint analyzes every GitHub issue before your agent touches it — scoring completeness, flagging ambiguity, and blocking low-quality specs from wasting compute.
           </p>
         </header>
 
         <div className="p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 mb-12">
-          <p className="text-sm font-semibold text-emerald-400 mb-2">Bottom Line</p>
+          <p className="text-sm font-semibold text-emerald-400 mb-2">The Core Problem</p>
           <p className="text-muted-foreground">
-            ChatGPT works for occasional manual refinement if you write good prompts. Refine Backlog is faster for volume work, produces consistent structured output (no parsing required), and is the only option for automating refinement in CI/CD pipelines or GitHub Actions.
+            Cursor, Codex, and Claude Code don&apos;t push back on bad specs. They hallucinate confidently and ship the wrong thing. Speclint is the quality gate that runs before your agent does.
           </p>
         </div>
 
         <div className="prose prose-invert prose-emerald max-w-none space-y-6">
 
-          <h2 className="text-2xl font-semibold mt-12 mb-4">What happens when you use raw ChatGPT for backlog refinement?</h2>
+          <h2 className="text-2xl font-semibold mt-12 mb-4">The agent doesn&apos;t know your spec is broken</h2>
           <p className="text-muted-foreground leading-relaxed">
-            ChatGPT can absolutely refine a backlog item. Ask it to &quot;rewrite this as a user story with acceptance criteria&quot; and it&apos;ll do a reasonable job. The friction shows up at scale:
+            When you assign a GitHub issue to Codex or kick it off in Cursor, the agent reads the issue title, description, and acceptance criteria — then starts writing code. If the spec is vague, the agent fills in the blanks with assumptions. Those assumptions are often wrong.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            This isn&apos;t a model problem. GPT-4, Claude 3.5, and Gemini all do the same thing: they&apos;re trained to be helpful and complete, so they complete the task even when the task is underspecified. The result is code that compiles, passes tests you wrote for the wrong behavior, and ships the wrong feature.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            The fix isn&apos;t a better model. It&apos;s better specs.
+          </p>
+
+          <h2 className="text-2xl font-semibold mt-12 mb-4">What spec linting actually checks</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Speclint analyzes each GitHub issue across five dimensions that predict whether an AI coding agent will ship the right thing:
           </p>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li><strong className="text-foreground">Prompt engineering per item</strong> — you have to specify the output format every time, or get inconsistent results</li>
-            <li><strong className="text-foreground">No INVEST scoring</strong> — ChatGPT won&apos;t tell you if your story violates the &quot;Independent&quot; or &quot;Estimable&quot; criteria without explicit prompting</li>
-            <li><strong className="text-foreground">No context persistence</strong> — each conversation starts fresh; it doesn&apos;t know you&apos;re building a React Native iOS app unless you tell it every time</li>
-            <li><strong className="text-foreground">Unstructured output</strong> — the response is markdown prose, not parseable JSON. If you want to write it back to Jira or Linear, you&apos;re building a parser</li>
-            <li><strong className="text-foreground">Rate limits and cost at scale</strong> — running 50 stories through ChatGPT manually is a 30-minute task. Through an API with proper batching, it&apos;s 2 minutes</li>
+            <li><strong className="text-foreground">Problem statement clarity</strong> — Is there a specific, observable problem described? Or just a vague feature request?</li>
+            <li><strong className="text-foreground">Acceptance criteria testability</strong> — Can the ACs be verified by running tests or inspecting the UI? Or are they subjective ("should feel fast")?</li>
+            <li><strong className="text-foreground">Scope boundedness</strong> — Is the issue small enough for a single agent pass? Or does it hide three features behind one title?</li>
+            <li><strong className="text-foreground">Codebase context</strong> — Are the relevant files, components, or API endpoints mentioned? Or does the agent have to guess where to start?</li>
+            <li><strong className="text-foreground">Edge case coverage</strong> — Are the failure modes described? What should happen when things go wrong?</li>
           </ul>
           <p className="text-muted-foreground leading-relaxed">
-            None of this is a dealbreaker for occasional manual use. It becomes a bottleneck when you have a backlog of 80 items before sprint planning.
+            Each dimension contributes to a <code className="text-emerald-400">completeness_score</code> from 0–100. Issues scoring 80+ get the <code className="text-emerald-400">agent_ready</code> label and are safe to assign to your coding agent. Issues below 80 get a comment with specific remediation.
           </p>
 
-          <h2 className="text-2xl font-semibold mt-12 mb-4">What does a purpose-built tool give you?</h2>
+          <h2 className="text-2xl font-semibold mt-12 mb-4">How the GitHub Action works</h2>
           <p className="text-muted-foreground leading-relaxed">
-            <Link href="/" className="text-emerald-400 hover:underline">Refine Backlog</Link> was built specifically for the &quot;turn raw backlog input into sprint-ready stories&quot; workflow. In one API call, you get:
+            Speclint plugs directly into your GitHub workflow. Add the action to your repo and it runs every time an issue is opened or labeled:
           </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li><strong className="text-foreground">Structured JSON output</strong> — user story, problem statement, acceptance criteria, effort estimate, INVEST score, and priority. No parsing required.</li>
-            <li><strong className="text-foreground">INVEST scoring built-in</strong> — every item gets scored on Independent, Negotiable, Valuable, Estimable, Small, Testable. You see which criteria are failing.</li>
-            <li><strong className="text-foreground">Auto-context detection</strong> — the tool reads your project context (from README, package.json, AGENTS.md) and applies relevant patterns automatically. An iOS app gets mobile-specific ACs; a backend API gets latency and error-handling criteria.</li>
-            <li><strong className="text-foreground">API + GitHub Action</strong> — plug it into your CI/CD pipeline, Jira webhook, or Linear workflow without building the prompt layer yourself</li>
-            <li><strong className="text-foreground">Consistent output every time</strong> — same schema, same quality, regardless of how the input was phrased</li>
-          </ul>
+          <pre className="bg-muted/30 rounded-lg p-4 text-sm text-emerald-300 overflow-x-auto">
+{`# .github/workflows/speclint.yml
+on:
+  issues:
+    types: [opened, edited, labeled]
 
-          <h2 className="text-2xl font-semibold mt-12 mb-4">Side-by-side comparison</h2>
-          <p className="text-muted-foreground leading-relaxed">Here&apos;s how the two approaches stack up across the dimensions that matter in practice:</p>
-
-          <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="text-left p-4 font-semibold text-foreground">Dimension</th>
-                  <th className="text-left p-4 font-semibold text-emerald-400">Refine Backlog</th>
-                  <th className="text-left p-4 font-semibold text-muted-foreground">Raw ChatGPT</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                <tr>
-                  <td className="p-4 text-foreground font-medium">Prompt required</td>
-                  <td className="p-4 text-emerald-400">No — paste and go</td>
-                  <td className="p-4 text-muted-foreground">Yes — every item</td>
-                </tr>
-                <tr>
-                  <td className="p-4 text-foreground font-medium">Output format</td>
-                  <td className="p-4 text-emerald-400">Structured JSON</td>
-                  <td className="p-4 text-muted-foreground">Markdown prose (parse it yourself)</td>
-                </tr>
-                <tr>
-                  <td className="p-4 text-foreground font-medium">INVEST scoring</td>
-                  <td className="p-4 text-emerald-400">Built-in</td>
-                  <td className="p-4 text-muted-foreground">Only if you ask</td>
-                </tr>
-                <tr>
-                  <td className="p-4 text-foreground font-medium">Project context</td>
-                  <td className="p-4 text-emerald-400">Auto-detected from repo</td>
-                  <td className="p-4 text-muted-foreground">Re-enter every conversation</td>
-                </tr>
-                <tr>
-                  <td className="p-4 text-foreground font-medium">CI/CD pipeline</td>
-                  <td className="p-4 text-emerald-400">REST API + GitHub Action</td>
-                  <td className="p-4 text-muted-foreground">Build your own layer</td>
-                </tr>
-                <tr>
-                  <td className="p-4 text-foreground font-medium">Effort estimate</td>
-                  <td className="p-4 text-emerald-400">Included</td>
-                  <td className="p-4 text-muted-foreground">Only if you ask</td>
-                </tr>
-                <tr>
-                  <td className="p-4 text-foreground font-medium">Free tier</td>
-                  <td className="p-4 text-emerald-400">Yes (rate limited)</td>
-                  <td className="p-4 text-muted-foreground">Yes (GPT-3.5)</td>
-                </tr>
-                <tr>
-                  <td className="p-4 text-foreground font-medium">Best for</td>
-                  <td className="p-4 text-emerald-400">Volume, teams, automation</td>
-                  <td className="p-4 text-muted-foreground">1-2 items, custom prompts</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <h2 className="text-2xl font-semibold mt-12 mb-4">When should you use ChatGPT instead?</h2>
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: speclint/lint-issues@v1
+        with:
+          github-token: \${{ secrets.GITHUB_TOKEN }}
+          speclint-api-key: \${{ secrets.SPECLINT_API_KEY }}`}
+          </pre>
           <p className="text-muted-foreground leading-relaxed">
-            Let&apos;s be direct: there are real cases where raw ChatGPT is the better choice.
-          </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li><strong className="text-foreground">You&apos;re refining a single story</strong> and you&apos;re already in a ChatGPT conversation about the feature — just inline it</li>
-            <li><strong className="text-foreground">You need complete prompt control</strong> — maybe your team has a very specific story format that doesn&apos;t match standard templates</li>
-            <li><strong className="text-foreground">You want to explore multiple framings</strong> — ChatGPT&apos;s conversational nature is great for iterating on how a story is positioned</li>
-            <li><strong className="text-foreground">Budget is zero</strong> — ChatGPT free tier works fine for occasional manual use</li>
-          </ul>
-          <p className="text-muted-foreground leading-relaxed">
-            The honest version: ChatGPT is a great tool for backlog refinement when you&apos;re doing it manually and occasionally. The purpose-built tool wins on consistency, volume, and automation.
+            The action posts a structured comment with the <code className="text-emerald-400">completeness_score</code>, the failing dimensions, and suggested improvements. If the issue passes, it gets labeled <code className="text-emerald-400">agent_ready</code>. No manual review required.
           </p>
 
-          <h2 className="text-2xl font-semibold mt-12 mb-4">What do teams use in production pipelines?</h2>
+          <h2 className="text-2xl font-semibold mt-12 mb-4">Why this matters for Cursor and Codex workflows</h2>
           <p className="text-muted-foreground leading-relaxed">
-            The teams getting the most leverage from AI refinement aren&apos;t using it manually at all. They&apos;re running it automatically:
+            If you&apos;re running a small AI dev shop — 2–5 engineers using Cursor or Codex for the heavy lifting — the bottleneck isn&apos;t the agent&apos;s coding ability. It&apos;s the quality of the issues going into the pipeline. A good agent with a bad spec wastes 30–60 minutes of compute and human review time per iteration.
           </p>
-          <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>A GitHub Action that refines every new issue when it&apos;s labeled &quot;needs-refinement&quot;</li>
-            <li>A Jira webhook that fires when a story is moved to &quot;Refinement&quot; — auto-fills the description with structured AC and effort</li>
-            <li>A CLI command that batch-refines the entire next sprint&apos;s raw input before the planning meeting</li>
-          </ul>
           <p className="text-muted-foreground leading-relaxed">
-            None of these are possible with ChatGPT without significant engineering. They&apos;re 5-line scripts with the <Link href="https://refinebacklog.com/openapi.yaml" className="text-emerald-400 hover:underline">Refine Backlog API</Link>. For more on automating refinement in your workflow, see our guide to <Link href="/blog/backlog-refinement-best-practices" className="text-emerald-400 hover:underline">backlog refinement best practices</Link>.
+            Multiply that by 10–20 issues per week and you&apos;re looking at a significant drag on throughput. Speclint catches the bad specs before the agent starts — the same way ESLint catches syntax errors before your code ships.
           </p>
 
-          <h2 className="text-2xl font-semibold mt-12 mb-4">How to get started</h2>
+          <h2 className="text-2xl font-semibold mt-12 mb-4">Getting started</h2>
           <p className="text-muted-foreground leading-relaxed">
-            The simplest test: take 5 items from your next sprint&apos;s raw backlog. Run them through <Link href="/" className="text-emerald-400 hover:underline">Refine Backlog</Link> (free, no signup). Compare the output to what you&apos;d get from a ChatGPT prompt. See which one your team would rather walk into planning with.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            If you&apos;re evaluating for pipeline use, check out the <Link href="/openapi.yaml" className="text-emerald-400 hover:underline">OpenAPI spec</Link> or the <Link href="https://github.com/marketplace/actions/refine-backlog" className="text-emerald-400 hover:underline">GitHub Action</Link>. Both are free to start.
+            Get your API key at <Link href="https://speclint.ai/get-key" className="text-emerald-400 hover:underline">speclint.ai/get-key</Link>, add it as a repository secret (<code className="text-emerald-400">SPECLINT_API_KEY</code>), and install the GitHub Action. Your first 100 issue lints are free.
           </p>
         </div>
 
-        <div className="mt-16 p-8 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-center">
-          <h3 className="text-xl font-semibold mb-3">See it for yourself — no prompt engineering required</h3>
-          <p className="text-muted-foreground mb-6">Paste a raw backlog item. Get structured output with INVEST score, acceptance criteria, and effort estimate.</p>
+        <div className="mt-16 p-8 rounded-xl bg-emerald-500/5 border border-emerald-500/20">
+          <h3 className="text-xl font-semibold mb-3">Stop letting bad specs reach your agent</h3>
+          <p className="text-muted-foreground mb-4">Get your API key and install the GitHub Action in under 5 minutes.</p>
+          <pre className="bg-muted/30 rounded-lg p-4 text-sm text-emerald-300 overflow-x-auto mb-6">
+{`- uses: speclint/lint-issues@v1
+  with:
+    github-token: \${{ secrets.GITHUB_TOKEN }}
+    speclint-api-key: \${{ secrets.SPECLINT_API_KEY }}`}
+          </pre>
           <Button asChild className="bg-emerald-500 hover:bg-emerald-600">
-            <Link href="/#refiner">
-              Try Refine Backlog Free <ArrowRight className="ml-2 h-4 w-4" />
+            <Link href="https://speclint.ai/get-key">
+              Get Your API Key <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>

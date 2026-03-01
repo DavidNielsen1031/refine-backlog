@@ -196,6 +196,53 @@ export async function checkRateLimitKV(ip: string, limit: number, prefix = 'rate
   return { count: current, allowed: current <= limit }
 }
 
+// --- Free Key CRUD ---
+
+interface FreeKeyData {
+  plan: 'free'
+  email: string
+  status: 'active'
+  licenseKey: string
+}
+
+export async function setFreeKey(email: string, licenseKey: string): Promise<void> {
+  logKvStatus()
+  const normalizedEmail = email.toLowerCase().trim()
+  const data: FreeKeyData = { plan: 'free', email: normalizedEmail, status: 'active', licenseKey }
+  const r = getRedis()
+  if (r) {
+    try {
+      await r.set(`free:${normalizedEmail}`, JSON.stringify(data))
+      // Also store license lookup so rate-limit resolution works
+      await r.set(`license:${licenseKey}`, JSON.stringify({
+        customerId: normalizedEmail,
+        plan: 'free',
+        status: 'active',
+      }))
+    } catch (err) {
+      console.error('[KV] setFreeKey failed:', err)
+    }
+  }
+}
+
+export async function getFreeKey(email: string): Promise<string | null> {
+  logKvStatus()
+  const normalizedEmail = email.toLowerCase().trim()
+  const r = getRedis()
+  if (r) {
+    try {
+      const raw = await r.get<string>(`free:${normalizedEmail}`)
+      if (!raw) return null
+      const data: FreeKeyData = typeof raw === 'string' ? JSON.parse(raw) : raw as unknown as FreeKeyData
+      return data.licenseKey
+    } catch (err) {
+      console.error('[KV] getFreeKey failed:', err)
+      return null
+    }
+  }
+  return null
+}
+
 // --- Debug / Diagnostic ---
 
 export async function debugKvRoundTrip(): Promise<{ kvConnected: boolean; sampleReadWriteWorking: boolean }> {

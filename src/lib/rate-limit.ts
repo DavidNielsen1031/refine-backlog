@@ -24,12 +24,19 @@ export async function resolveUserTier(licenseKey?: string | null): Promise<PlanT
     return 'free'
   }
 
+  // SK-FREE keys are always free tier — no KV lookup needed
+  if (licenseKey.startsWith('SK-FREE-')) {
+    console.log(`[ENTITLEMENT] key=${maskKey(licenseKey)} tier=free source=prefix`)
+    return 'free'
+  }
+
   try {
     const data = await getLicenseData(licenseKey)
     if (data && data.status === 'active') {
       const source = isKvConnected() ? 'kv' : 'memory'
-      console.log(`[ENTITLEMENT] key=${maskKey(licenseKey)} tier=${data.plan} source=${source}`)
-      return data.plan
+      const tier = data.plan as PlanTier
+      console.log(`[ENTITLEMENT] key=${maskKey(licenseKey)} tier=${tier} source=${source}`)
+      return tier
     }
     console.log(`[ENTITLEMENT] key=${maskKey(licenseKey)} tier=free source=${isKvConnected() ? 'kv' : 'memory'} reason=${data ? 'inactive' : 'not_found'}`)
     return 'free'
