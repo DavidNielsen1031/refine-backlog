@@ -237,8 +237,16 @@ export async function POST(request: NextRequest) {
       ? Math.round(scores.reduce((sum, s) => sum + s.completeness_score, 0) / totalCount)
       : 0
 
+    // Embed score fields into each item (SL-028)
+    const itemsWithScores = refinedItems.map((item, i) => ({
+      ...item,
+      completeness_score: scores[i].completeness_score,
+      agent_ready: scores[i].agent_ready,
+      breakdown: scores[i].breakdown,
+    }))
+
     return NextResponse.json({
-      items: refinedItems,
+      items: itemsWithScores,
       scores,
       summary: {
         average_score: averageScore,
