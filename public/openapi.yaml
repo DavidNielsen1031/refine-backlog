@@ -23,6 +23,96 @@ servers:
     description: Production
 
 paths:
+  /api/rewrite:
+    post:
+      summary: AI-Assisted Spec Rewrite
+      description: |
+        Takes a spec that scored poorly on lint, along with identified gaps, and returns
+        an AI-improved version that addresses each gap while preserving developer intent.
+
+        **Free tier**: Returns a 100-char preview plus an upgrade message.
+        **Solo/Team tier**: Returns the full rewritten spec, change descriptions, and re-linted score.
+
+        The rewrite is a suggestion only — never auto-applied.
+      operationId: rewriteSpec
+      security:
+        - ApiKeyAuth: []
+        - {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [spec, gaps, score]
+              properties:
+                spec:
+                  type: string
+                  description: The original spec text to improve
+                  example: "Add search to dashboard"
+                gaps:
+                  type: array
+                  items:
+                    type: string
+                  description: Gap identifiers from lint results (e.g. has_measurable_outcome)
+                  example: ["has_measurable_outcome", "has_testable_criteria"]
+                score:
+                  type: number
+                  description: The original lint score (0-100)
+                  example: 40
+      responses:
+        "200":
+          description: Rewrite result
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - description: Solo/Team tier response
+                    type: object
+                    properties:
+                      original:
+                        type: string
+                        description: Echo of the original spec
+                      rewritten:
+                        type: string
+                        description: The improved spec text
+                      changes:
+                        type: array
+                        items:
+                          type: string
+                        description: Description of each change made
+                      new_score:
+                        type: number
+                        description: Lint score of the rewritten spec
+                  - description: Free tier response (preview only)
+                    type: object
+                    properties:
+                      original:
+                        type: string
+                      preview:
+                        type: string
+                        description: First 100 characters of the rewrite
+                      upgrade_message:
+                        type: string
+                        description: Upsell message for paid tier
+                      upgrade_url:
+                        type: string
+                      tier:
+                        type: string
+                        enum: [free]
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /api/lint:
     get:
       summary: API Info

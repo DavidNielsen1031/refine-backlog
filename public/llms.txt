@@ -148,6 +148,28 @@ https://speclint.ai/pricing
 ## Get an API Key
 https://speclint.ai/get-key
 
+## AI-Assisted Spec Rewrite (POST /api/rewrite)
+
+When a spec scores below threshold, use /api/rewrite to get an AI-improved version in seconds.
+
+Request body:
+```json
+{
+  "spec": "Add search to dashboard",
+  "gaps": ["has_measurable_outcome", "has_testable_criteria", "has_definition_of_done"],
+  "score": 40
+}
+```
+
+Pass the `x-license-key` header for Solo/Team tier access.
+
+**Free tier**: Returns `preview` (first 100 chars) + `upgrade_message`. No `rewritten` field.
+**Solo/Team tier**: Returns full `rewritten` spec, `changes` array, and `new_score` from re-lint.
+
+The rewrite is a suggestion only — never auto-applied. Review before committing.
+
+Recommended agent pattern: lint → if score < 70 → rewrite → review → commit.
+
 ## Recommended Agent Interaction Pattern
 
 Use /api/discover BEFORE /api/refine when the issue contains vague verbs ("improve", "optimize", "make better") or when it describes a solution without stating a problem.

@@ -20,7 +20,7 @@ export interface UsageEvent {
   /** Raw input items shown in Discord alerts — truncated for display */
   items?: string[]
   /** API endpoint that generated this event */
-  endpoint?: 'lint' | 'refine' | 'discover' | 'plan'
+  endpoint?: 'lint' | 'refine' | 'discover' | 'plan' | 'rewrite'
   /** Completeness scores per item (post-LLM) */
   scores?: { title: string; completeness_score: number; agent_ready: boolean }[]
   /** Average completeness score across all items */
@@ -116,6 +116,7 @@ async function notifyDiscord(event: UsageEvent): Promise<void> {
       'refine': '/refine',
       'discover': '/discover',
       'plan': '/plan',
+      'rewrite': '/rewrite',
     }
     const ep = event.endpoint ? ENDPOINT_SHORT[event.endpoint] ?? event.endpoint : ''
 
