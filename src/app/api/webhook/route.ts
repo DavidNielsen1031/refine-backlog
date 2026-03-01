@@ -24,7 +24,7 @@ async function sendLicenseEmail(params: {
 <html>
 <head><meta charset="utf-8"></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
-  <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">You're on Refine Backlog ${planLabel} ✅</h1>
+  <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">You're on Speclint ${planLabel} ✅</h1>
   <p style="color: #666; margin-bottom: 32px;">${planPrice} · ${itemLimit} · ${keyCount}</p>
 
   <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 32px;">
@@ -44,11 +44,11 @@ async function sendLicenseEmail(params: {
   <p style="font-size: 14px; margin-top: 24px; margin-bottom: 8px;"><strong>Option 2 — MCP (Claude Desktop)</strong></p>
   <pre style="background: #1a1a1a; color: #e5e5e5; padding: 16px; border-radius: 6px; font-size: 13px; overflow-x: auto;">{
   "mcpServers": {
-    "refine-backlog": {
+    "speclint": {
       "command": "npx",
-      "args": ["-y", "refine-backlog-mcp"],
+      "args": ["-y", "speclint-mcp"],
       "env": {
-        "REFINE_BACKLOG_KEY": "${params.licenseKey}"
+        "SPECLINT_KEY": "${params.licenseKey}"
       }
     }
   }
@@ -63,7 +63,7 @@ async function sendLicenseEmail(params: {
 </body>
 </html>`
 
-  const text = `You're on Refine Backlog ${planLabel}
+  const text = `You're on Speclint ${planLabel}
 
 Your license key: ${params.licenseKey}
 
@@ -83,10 +83,10 @@ Questions? Reply to this email or visit https://speclint.ai`
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: `Refine Backlog <${fromEmail}>`,
+        from: `Speclint <${fromEmail}>`,
         to: [params.to],
         reply_to: fromEmail,
-        subject: `Your Refine Backlog ${planLabel} license key`,
+        subject: `Your Speclint ${planLabel} license key`,
         html,
         text,
       }),
@@ -119,7 +119,7 @@ async function notifyTelegram(message: string): Promise<void> {
 
 async function notifyDiscord(message: string): Promise<void> {
   const token = process.env.DISCORD_BOT_TOKEN
-  const channelId = '1474028159233163358' // #refine-backlog
+  const channelId = '1474028159233163358' // #speclint
   if (!token) return
   try {
     await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
@@ -213,13 +213,13 @@ export async function POST(request: NextRequest) {
             // 💰 Notify David on Telegram + Discord (fire and forget)
             const planLabel = plan === 'team' ? 'Team $29/mo' : 'Pro $9/mo'
             const telegramMsg =
-              `💰 <b>New Refine Backlog subscriber!</b>\n\n` +
+              `💰 <b>New Speclint subscriber!</b>\n\n` +
               `📧 ${email}\n` +
               `📦 ${planLabel}\n` +
               `🔑 ${licenseKey}\n` +
               `👤 ${customerId}`
             const discordMsg =
-              `💰 **New Refine Backlog subscriber!**\n\n` +
+              `💰 **New Speclint subscriber!**\n\n` +
               `📧 ${email}\n` +
               `📦 ${planLabel}\n` +
               `🔑 \`${licenseKey}\`\n` +

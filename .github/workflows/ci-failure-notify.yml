@@ -36,7 +36,7 @@ jobs:
           actor  = os.environ.get("ACTOR", "?")
 
           content = (
-              f"🚨 **CI Failure — Refine Backlog**\n"
+              f"🚨 **CI Failure — Speclint**\n"
               f"Workflow: `{wf}` on `{branch}`\n"
               f"`{sha}` {commit}\n"
               f"Triggered by: {actor}\n"

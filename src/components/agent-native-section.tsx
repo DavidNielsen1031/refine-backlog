@@ -46,7 +46,7 @@ export function AgentNativeSection() {
             Built to Be Called by AI
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Refine Backlog isn&apos;t just a web app — it&apos;s an API-first service
+            Speclint isn&apos;t just a web app — it&apos;s an API-first service
             designed for agents, scripts, and pipelines. Every surface is
             machine-readable from day one.
           </p>

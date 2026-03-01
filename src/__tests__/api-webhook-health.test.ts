@@ -24,7 +24,7 @@ import { POST } from '@/app/api/webhook/route'
 // is missing or corrupt — a production incident. It must always be 400.
 describe('POST /api/webhook — signature guard (healthcheck regression)', () => {
   it('returns 400 with "signature" in error for unsigned requests', async () => {
-    const req = new NextRequest('https://refinebacklog.com/api/webhook', {
+    const req = new NextRequest('https://speclint.ai/api/webhook', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       // Deliberately NO stripe-signature header
@@ -37,7 +37,7 @@ describe('POST /api/webhook — signature guard (healthcheck regression)', () =>
   })
 
   it('REGRESSION: never returns 500 for missing signature', async () => {
-    const req = new NextRequest('https://refinebacklog.com/api/webhook', {
+    const req = new NextRequest('https://speclint.ai/api/webhook', {
       method: 'POST',
       body: JSON.stringify({}),
     })

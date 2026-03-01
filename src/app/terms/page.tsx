@@ -2,8 +2,8 @@ import { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Refine Backlog",
-  description: "Terms of Service for Refine Backlog. Plain English, no legalese.",
+  title: "Terms of Service — Speclint",
+  description: "Terms of Service for Speclint. Plain English, no legalese.",
   alternates: {
     canonical: "https://speclint.ai/terms",
   },
@@ -14,7 +14,7 @@ export default function TermsOfService() {
     <main className="min-h-screen bg-background">
       <article className="mx-auto max-w-3xl px-6 lg:px-8 py-24">
         <Link href="/" className="text-emerald-400 hover:underline text-sm mb-8 inline-block">
-          ← Back to Refine Backlog
+          ← Back to Speclint
         </Link>
 
         <header className="mb-12">
@@ -23,19 +23,19 @@ export default function TermsOfService() {
             Terms of Service
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            Plain English terms for using Refine Backlog. Operated by Perpetual Agility LLC.
+            Plain English terms for using Speclint. Operated by Perpetual Agility LLC.
           </p>
         </header>
 
         <div className="prose prose-invert prose-emerald max-w-none space-y-6">
           <h2 className="text-2xl font-semibold mt-12 mb-4">What This Service Does</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Refine Backlog is an AI-powered tool that transforms rough backlog items into structured user stories. It is a productivity tool, not a substitute for professional product management judgment.
+            Speclint is an AI-powered tool that transforms rough backlog items into structured user stories. It is a productivity tool, not a substitute for professional product management judgment.
           </p>
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Acceptable Use</h2>
           <p className="text-muted-foreground leading-relaxed">
-            <strong className="text-foreground">Do</strong> use Refine Backlog for product backlog items: feature requests, bug reports, user stories, and technical tasks.
+            <strong className="text-foreground">Do</strong> use Speclint for product backlog items: feature requests, bug reports, user stories, and technical tasks.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             <strong className="text-foreground">Do NOT submit:</strong>
@@ -76,7 +76,7 @@ export default function TermsOfService() {
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Limitation of Liability</h2>
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-            <li>Refine Backlog is provided &ldquo;as is&rdquo; without warranties of any kind</li>
+            <li>Speclint is provided &ldquo;as is&rdquo; without warranties of any kind</li>
             <li>We are not liable for any damages arising from use of the service</li>
             <li>Our total liability is limited to the amount you paid us in the 12 months preceding the claim</li>
           </ul>
@@ -95,7 +95,7 @@ export default function TermsOfService() {
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Contact</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Email: <a href="mailto:refinebacklog@gmail.com" className="text-emerald-400 hover:underline">refinebacklog@gmail.com</a>
+            Email: <a href="mailto:support@speclint.ai" className="text-emerald-400 hover:underline">support@speclint.ai</a>
           </p>
         </div>
       </article>

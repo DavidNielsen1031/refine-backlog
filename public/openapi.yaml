@@ -21,7 +21,7 @@ info:
 servers:
   - url: https://speclint.ai
     description: Production
-  - url: https://refinebacklog.com
+  - url: https://refinebacklog.com  # legacy redirect active
     description: Legacy (backward compat)
 
 paths:
@@ -49,7 +49,7 @@ paths:
                     example: "5 items per request (free tier), 25 (Pro), 50 (Team)"
 
     post:
-      summary: Refine Backlog Items
+      summary: Lint and Score Specs
       description: |
         Accepts an array of raw backlog item strings and returns structured, refined work items.
         Each item is enriched with a clean title, problem statement, acceptance criteria,

@@ -20,4 +20,4 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
-Sitemap: https://refinebacklog.com/sitemap.xml
+Sitemap: https://speclint.ai/sitemap.xml

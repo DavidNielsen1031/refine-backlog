@@ -87,7 +87,7 @@ vi.mock('@/lib/telemetry', () => ({
 // ---- Helpers ---------------------------------------------------------------
 
 function makeRequest(body: object, headers: Record<string, string> = {}) {
-  return new NextRequest('https://refinebacklog.com/api/plan', {
+  return new NextRequest('https://speclint.ai/api/plan', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify(body),

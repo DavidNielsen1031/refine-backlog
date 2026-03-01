@@ -1,11 +1,11 @@
-# Refine Backlog MCP Server
+# Speclint MCP Server
 
-Use Refine Backlog directly inside Claude Desktop, Cursor, or any MCP-compatible client.
+Use Speclint directly inside Claude Desktop, Cursor, or any MCP-compatible client.
 Tell your AI to refine your backlog and it calls the API automatically — no copy-paste required.
 
 ## What it does
 
-Exposes a single tool: `refine_backlog`
+Exposes a single tool: `speclint`
 
 Give it a list of rough backlog items. Get back structured work items with:
 - Clean, actionable titles
@@ -21,7 +21,7 @@ Give it a list of rough backlog items. Get back structured work items with:
 ### Option 1: npx (no install)
 
 ```bash
-npx refine-backlog-mcp
+npx speclint-mcp
 ```
 
 ### Option 2: Local build
@@ -40,9 +40,9 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 ```json
 {
   "mcpServers": {
-    "refine-backlog": {
+    "speclint": {
       "command": "npx",
-      "args": ["refine-backlog-mcp"]
+      "args": ["speclint-mcp"]
     }
   }
 }
@@ -53,9 +53,9 @@ With a license key (Pro/Team tier):
 ```json
 {
   "mcpServers": {
-    "refine-backlog": {
+    "speclint": {
       "command": "npx",
-      "args": ["refine-backlog-mcp"],
+      "args": ["speclint-mcp"],
       "env": {
         "REFINE_LICENSE_KEY": "your-license-key-here"
       }
@@ -64,7 +64,7 @@ With a license key (Pro/Team tier):
 }
 ```
 
-Restart Claude Desktop. You'll see "refine_backlog" in the tools list.
+Restart Claude Desktop. You'll see "speclint" in the tools list.
 
 ## Cursor Setup
 
@@ -73,9 +73,9 @@ Add to your Cursor MCP config (`~/.cursor/mcp.json`):
 ```json
 {
   "mcpServers": {
-    "refine-backlog": {
+    "speclint": {
       "command": "npx",
-      "args": ["refine-backlog-mcp"]
+      "args": ["speclint-mcp"]
     }
   }
 }
@@ -87,7 +87,7 @@ Once configured, just talk to your AI naturally:
 
 > "Refine these backlog items: fix login bug, add CSV export, improve dashboard load time"
 
-> "Take these 10 stories and run them through Refine Backlog. Context: we're building a B2B SaaS for HR teams."
+> "Take these 10 stories and run them through Speclint. Context: we're building a B2B SaaS for HR teams."
 
 > "Refine this backlog item as a user story with Gherkin acceptance criteria: users need to reset their password"
 
@@ -99,20 +99,20 @@ Once configured, just talk to your AI naturally:
 | Pro  | 25 | $9/month |
 | Team | 50 | $29/month |
 
-Get a license key at [refinebacklog.com/pricing](https://refinebacklog.com/pricing)
+Get a license key at [speclint.ai/pricing](https://speclint.ai/pricing)
 
 ## Prefer automation over chat?
 
-If you want to run Refine Backlog in scripts, GitHub Actions, or CI pipelines — without an LLM in the loop — use the CLI instead:
+If you want to run Speclint in scripts, GitHub Actions, or CI pipelines — without an LLM in the loop — use the CLI instead:
 
 ```bash
-npx refine-backlog-cli "Fix login bug" --gherkin
-cat backlog.txt | npx refine-backlog-cli --user-stories --format json
+npx speclint-cli "Fix login bug" --gherkin
+cat backlog.txt | npx speclint-cli --user-stories --format json
 ```
 
-**CLI repo:** [github.com/DavidNielsen1031/refine-backlog-cli](https://github.com/DavidNielsen1031/refine-backlog-cli)
+**CLI repo:** [github.com/DavidNielsen1031/speclint-cli](https://github.com/DavidNielsen1031/speclint-cli)
 
 ## API Reference
 
-Full API docs: [refinebacklog.com/llms.txt](https://refinebacklog.com/llms.txt)  
-OpenAPI spec: [refinebacklog.com/openapi.yaml](https://refinebacklog.com/openapi.yaml)
+Full API docs: [speclint.ai/llms.txt](https://speclint.ai/llms.txt)  
+OpenAPI spec: [speclint.ai/openapi.yaml](https://speclint.ai/openapi.yaml)

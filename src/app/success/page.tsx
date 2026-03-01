@@ -81,7 +81,7 @@ function SuccessContent() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-foreground">
-            Welcome to Refine Backlog Pro! 🎉
+            Welcome to Speclint Pro! 🎉
           </h1>
           <p className="text-lg text-muted-foreground">
             {licenseEmail ? `Subscription active for ${licenseEmail}.` : 'Your subscription is now active.'}
@@ -148,10 +148,10 @@ function SuccessContent() {
                 <div className="bg-muted/30 p-4 rounded-lg border border-muted space-y-2">
                   <h4 className="font-semibold text-sm text-foreground">Quick start — CLI</h4>
                   <code className="block text-xs font-mono text-emerald-400 break-all">
-                    npx refine-backlog-cli --key {licenseKey} &quot;Fix login bug&quot; &quot;Add dark mode&quot;
+                    npx speclint-cli --key {licenseKey} &quot;Fix login bug&quot; &quot;Add dark mode&quot;
                   </code>
                   <p className="text-xs text-muted-foreground">
-                    Or export <code className="font-mono">REFINE_BACKLOG_KEY={licenseKey}</code> and drop the flag.
+                    Or export <code className="font-mono">SPECLINT_KEY={licenseKey}</code> and drop the flag.
                   </p>
                 </div>
 
@@ -182,7 +182,7 @@ function SuccessContent() {
                     Retrieve my key at /get-key
                   </Link>
                   <a
-                    href="mailto:refinebacklog@gmail.com?subject=License%20Key%20Request&body=Hi%2C%20I%20just%20subscribed%20and%20my%20key%20hasn%27t%20appeared%20yet."
+                    href="mailto:support@speclint.ai?subject=License%20Key%20Request&body=Hi%2C%20I%20just%20subscribed%20and%20my%20key%20hasn%27t%20appeared%20yet."
                     className="flex items-center justify-center gap-2 rounded-lg border border-muted px-4 py-3 text-sm font-medium text-muted-foreground hover:border-foreground/30 transition-colors"
                   >
                     Contact support
@@ -211,7 +211,7 @@ function SuccessContent() {
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <a href="mailto:refinebacklog@gmail.com?subject=Refine%20Backlog%20Pro%20Support">
+              <a href="mailto:support@speclint.ai?subject=Refine%20Backlog%20Pro%20Support">
                 Get Help &amp; Support
               </a>
             </Button>
@@ -228,8 +228,8 @@ function SuccessContent() {
           </p>
           <p className="text-sm text-muted-foreground">
             Questions?{" "}
-            <a href="mailto:refinebacklog@gmail.com" className="text-emerald-400 hover:underline">
-              refinebacklog@gmail.com
+            <a href="mailto:support@speclint.ai" className="text-emerald-400 hover:underline">
+              support@speclint.ai
             </a>
           </p>
         </div>

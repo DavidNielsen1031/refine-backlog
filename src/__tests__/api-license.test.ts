@@ -18,8 +18,8 @@ import { getSubscriptionByCustomer } from '@/lib/kv'
 
 function makeRequest(sessionId?: string) {
   const url = sessionId
-    ? `https://refinebacklog.com/api/license?session_id=${sessionId}`
-    : 'https://refinebacklog.com/api/license'
+    ? `https://speclint.ai/api/license?session_id=${sessionId}`
+    : 'https://speclint.ai/api/license'
   return new NextRequest(url, { method: 'GET' })
 }
 

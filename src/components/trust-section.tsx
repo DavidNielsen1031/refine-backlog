@@ -31,7 +31,7 @@ export function TrustSection() {
           Your Data Stays Yours
         </h2>
         <p className="text-muted-foreground mb-12 max-w-2xl mx-auto">
-          We built Refine Backlog with privacy as a default, not an afterthought.
+          We built Speclint with privacy as a default, not an afterthought.
         </p>
 
         <div className="grid sm:grid-cols-2 gap-6 text-left mb-8">

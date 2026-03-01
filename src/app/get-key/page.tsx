@@ -141,7 +141,7 @@ export default function GetKeyPage() {
         {status === 'error' && (
           <p className="text-center text-sm text-red-400">
             Something went wrong. Try again or email{' '}
-            <a href="mailto:refinebacklog@gmail.com" className="underline">refinebacklog@gmail.com</a>.
+            <a href="mailto:support@speclint.ai" className="underline">support@speclint.ai</a>.
           </p>
         )}
 

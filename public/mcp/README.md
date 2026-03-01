@@ -5,7 +5,7 @@ Tell your AI to refine your backlog and it calls the API automatically — no co
 
 ## What it does
 
-Exposes a single tool: `refine_backlog`
+Exposes a single tool: `speclint`
 
 Give it a list of rough backlog items. Get back structured work items with:
 - Clean, actionable titles
@@ -22,7 +22,7 @@ Give it a list of rough backlog items. Get back structured work items with:
 ### Option 1: npx (no install)
 
 ```bash
-npx refine-backlog-mcp
+npx speclint-mcp
 ```
 
 ### Option 2: Local build
@@ -44,7 +44,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
   "mcpServers": {
     "speclint": {
       "command": "npx",
-      "args": ["-y", "refine-backlog-mcp"]
+      "args": ["-y", "speclint-mcp"]
     }
   }
 }
@@ -56,9 +56,9 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
   "mcpServers": {
     "speclint": {
       "command": "npx",
-      "args": ["-y", "refine-backlog-mcp"],
+      "args": ["-y", "speclint-mcp"],
       "env": {
-        "REFINE_BACKLOG_KEY": "your-license-key-here"
+        "SPECLINT_KEY": "your-license-key-here"
       }
     }
   }
@@ -74,7 +74,7 @@ With a license key (Pro/Team tier):
   "mcpServers": {
     "speclint": {
       "command": "npx",
-      "args": ["refine-backlog-mcp"],
+      "args": ["speclint-mcp"],
       "env": {
         "REFINE_LICENSE_KEY": "your-license-key-here"
       }
@@ -83,7 +83,7 @@ With a license key (Pro/Team tier):
 }
 ```
 
-Restart Claude Desktop. You'll see "refine_backlog" in the tools list.
+Restart Claude Desktop. You'll see "speclint" in the tools list.
 
 ## Cursor Setup
 
@@ -94,7 +94,7 @@ Add to your Cursor MCP config (`~/.cursor/mcp.json`):
   "mcpServers": {
     "speclint": {
       "command": "npx",
-      "args": ["refine-backlog-mcp"]
+      "args": ["speclint-mcp"]
     }
   }
 }

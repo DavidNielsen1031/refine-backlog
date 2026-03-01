@@ -1,4 +1,4 @@
-name: Refine Backlog File
+name: Speclint File
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ jobs:
 
       - name: Refine backlog
         id: refine
-        uses: DavidNielsen1031/refine-backlog-action@v1
+        uses: DavidNielsen1031/speclint-action@v1
         with:
           file: ${{ inputs.file }}
           output-file: refined.json
@@ -29,7 +29,7 @@ jobs:
       - name: Commit refined output
         run: |
           git config user.email "action@github.com"
-          git config user.name "Refine Backlog Action"
+          git config user.name "Speclint Action"
           git add refined.json
           git diff --staged --quiet || git commit -m "chore: update refined backlog (${{ steps.refine.outputs.count }} items)"
           git push

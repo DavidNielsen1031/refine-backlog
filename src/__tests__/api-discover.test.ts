@@ -117,7 +117,7 @@ vi.mock('@/lib/telemetry', () => ({
 // ---- Helpers ---------------------------------------------------------------
 
 function makeRequest(body: object, headers: Record<string, string> = {}) {
-  return new NextRequest('https://refinebacklog.com/api/discover', {
+  return new NextRequest('https://speclint.ai/api/discover', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
     body: JSON.stringify(body),
@@ -310,7 +310,7 @@ describe('POST /api/discover', () => {
 
   // GET endpoint
   it('GET /api/discover returns API info', async () => {
-    const req = new NextRequest('https://refinebacklog.com/api/discover', { method: 'GET' })
+    const req = new NextRequest('https://speclint.ai/api/discover', { method: 'GET' })
     const res = await GET()
     expect(res.status).toBe(200)
     const data = await res.json()

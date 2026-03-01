@@ -12,7 +12,7 @@ import { POST } from '@/app/api/retrieve-key/route'
 import { getSubscriptionByEmail } from '@/lib/kv'
 
 function makeRequest(body: object) {
-  return new NextRequest('https://refinebacklog.com/api/retrieve-key', {
+  return new NextRequest('https://speclint.ai/api/retrieve-key', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

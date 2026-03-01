@@ -1,19 +1,19 @@
-# Release workflow for the Refine Backlog app + MCP server.
+# Release workflow for the Speclint app + MCP server.
 #
 # Runs after CI passes on every push to main.
 # Detects what changed, publishes only what's new, then runs healthcheck.
 #
 # Surfaces managed here:
 #   - App (Vercel, auto-deploy on push — we just verify it)
-#   - MCP server (npm: refine-backlog-mcp)
+#   - MCP server (npm: speclint-mcp)
 #   - Agent-native docs (llms.txt, openapi.yaml, mcp/README.md)
 #
 # Secrets required (Settings → Secrets → Actions):
 #   NPM_TOKEN            — npm publish token (npmjs.com)
-#   DISCORD_WEBHOOK_URL  — #refine-backlog channel webhook
+#   DISCORD_WEBHOOK_URL  — #speclint channel webhook
 #   REFINE_BACKLOG_PRO_KEY — Pro license key for healthcheck
 #
-# See: products/refine-backlog/RELEASE_CONFIG.yaml for the surface map.
+# See: products/speclint/RELEASE_CONFIG.yaml for the surface map.
 
 name: Release
 
@@ -58,7 +58,7 @@ jobs:
         if: steps.filter.outputs.mcp == 'true'
         run: |
           LOCAL=$(node -p "require('./mcp/package.json').version")
-          PUBLISHED=$(npm view refine-backlog-mcp version 2>/dev/null || echo "0.0.0")
+          PUBLISHED=$(npm view speclint-mcp version 2>/dev/null || echo "0.0.0")
           echo "local=$LOCAL published=$PUBLISHED"
           if [ "$LOCAL" != "$PUBLISHED" ]; then
             echo "changed=true" >> $GITHUB_OUTPUT
@@ -99,10 +99,10 @@ jobs:
       - name: Verify published version
         run: |
           sleep 10  # npm index delay
-          PUBLISHED=$(npm view refine-backlog-mcp version)
+          PUBLISHED=$(npm view speclint-mcp version)
           EXPECTED=$(node -p "require('./mcp/package.json').version")
           if [ "$PUBLISHED" = "$EXPECTED" ]; then
-            echo "✅ refine-backlog-mcp@$PUBLISHED live on npm"
+            echo "✅ speclint-mcp@$PUBLISHED live on npm"
           else
             echo "::error::Expected $EXPECTED but npm shows $PUBLISHED"
             exit 1
@@ -122,9 +122,9 @@ jobs:
         run: |
           FAILED=0
           for URL in \
-            "https://refinebacklog.com/llms.txt" \
-            "https://refinebacklog.com/openapi.yaml" \
-            "https://refinebacklog.com/mcp/README.md"; do
+            "https://speclint.com/llms.txt" \
+            "https://speclint.com/openapi.yaml" \
+            "https://speclint.com/mcp/README.md"; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
             if [ "$STATUS" = "200" ]; then
               echo "✅ $URL → $STATUS"
@@ -170,14 +170,14 @@ jobs:
             fi
           }
 
-          check "GET /pricing"   "https://refinebacklog.com/pricing"  "200"
-          check "GET /success"   "https://refinebacklog.com/success"  "200"
-          check "GET /get-key"   "https://refinebacklog.com/get-key"  "200"
-          check "GET /blog"      "https://refinebacklog.com/blog"     "200"
-          check "GET /llms.txt"  "https://refinebacklog.com/llms.txt" "200"
+          check "GET /pricing"   "https://speclint.com/pricing"  "200"
+          check "GET /success"   "https://speclint.com/success"  "200"
+          check "GET /get-key"   "https://speclint.com/get-key"  "200"
+          check "GET /blog"      "https://speclint.com/blog"     "200"
+          check "GET /llms.txt"  "https://speclint.com/llms.txt" "200"
 
           # API end-to-end test
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://refinebacklog.com/api/refine \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://speclint.com/api/refine \
             -H "Content-Type: application/json" \
             -H "x-license-key: ${REFINE_BACKLOG_PRO_KEY}" \
             -d '{"items":["Fix login bug"]}')
@@ -194,7 +194,7 @@ jobs:
           fi
 
           # Webhook health (bad secret should return 400, not 500)
-          WH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST https://refinebacklog.com/api/webhook \
+          WH_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST https://speclint.com/api/webhook \
             -H "Content-Type: application/json" \
             -d '{"type":"test"}')
           if [ "$WH_STATUS" = "400" ]; then
@@ -250,7 +250,7 @@ jobs:
           import json, urllib.request, os
           payload = {
             'embeds': [{
-              'title': '🚀 Refine Backlog — Deployed',
+              'title': '🚀 Speclint — Deployed',
               'description': f\"\"\"{os.environ['COMMIT_MSG']}\n\n**What shipped:**{os.environ['SHIPPED']}\n\n{os.environ['HEALTH_LINE']}\"\"\",
               'color': int(os.environ['COLOR']),
               'footer': {'text': f\"${SHORT_SHA} by {os.environ['ACTOR']}\"},
@@ -260,7 +260,7 @@ jobs:
           req = urllib.request.Request(
             f"https://discord.com/api/v10/channels/{os.environ['DISCORD_CHANNEL_ID']}/messages",
             data=json.dumps(payload).encode(),
-            headers={'Content-Type': 'application/json', 'Authorization': f"Bot {os.environ['DISCORD_BOT_TOKEN']}", 'User-Agent': 'DiscordBot (refinebacklog.com, 1)'}
+            headers={'Content-Type': 'application/json', 'Authorization': f"Bot {os.environ['DISCORD_BOT_TOKEN']}", 'User-Agent': 'DiscordBot (speclint.com, 1)'}
           )
           urllib.request.urlopen(req)
           print('✅ Discord notified')

@@ -2,8 +2,8 @@ import { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Refine Backlog",
-  description: "How Refine Backlog handles your data. Plain English, no legalese.",
+  title: "Privacy Policy — Speclint",
+  description: "How Speclint handles your data. Plain English, no legalese.",
   alternates: {
     canonical: "https://speclint.ai/privacy",
   },
@@ -14,7 +14,7 @@ export default function PrivacyPolicy() {
     <main className="min-h-screen bg-background">
       <article className="mx-auto max-w-3xl px-6 lg:px-8 py-24">
         <Link href="/" className="text-emerald-400 hover:underline text-sm mb-8 inline-block">
-          ← Back to Refine Backlog
+          ← Back to Speclint
         </Link>
 
         <header className="mb-12">
@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
             Privacy Policy
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed">
-            Plain English explanation of how Refine Backlog handles your data. Operated by Perpetual Agility LLC.
+            Plain English explanation of how Speclint handles your data. Operated by Perpetual Agility LLC.
           </p>
         </header>
 
@@ -86,7 +86,7 @@ export default function PrivacyPolicy() {
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Contact</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Email: <a href="mailto:refinebacklog@gmail.com" className="text-emerald-400 hover:underline">refinebacklog@gmail.com</a>
+            Email: <a href="mailto:support@speclint.ai" className="text-emerald-400 hover:underline">support@speclint.ai</a>
           </p>
 
           <h2 className="text-2xl font-semibold mt-12 mb-4">Changes</h2>

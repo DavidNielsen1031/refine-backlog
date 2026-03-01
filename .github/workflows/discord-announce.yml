@@ -29,7 +29,7 @@ jobs:
           url    = os.environ.get("COMMIT_URL", "")
           sha    = os.environ.get("COMMIT_SHA", "")[:7]
 
-          content = f"\U0001f680 **Merged to main** \u2014 `refine-backlog`\n`{sha}` {msg}\nAuthor: {author}\n<{url}>"
+          content = f"\U0001f680 **Merged to main** \u2014 `speclint`\n`{sha}` {msg}\nAuthor: {author}\n<{url}>"
           payload = json.dumps({"content": content}).encode()
 
           req = Request(

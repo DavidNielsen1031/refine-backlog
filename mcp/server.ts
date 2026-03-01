@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Refine Backlog MCP Server
+ * Speclint MCP Server
  *
- * Exposes Refine Backlog (https://refinebacklog.com) as a Model Context Protocol tool.
+ * Exposes Speclint (https://speclint.ai) as a Model Context Protocol tool.
  * Compatible with Claude Desktop, Cursor, and any MCP-capable client.
  *
- * Usage: npx refine-backlog-mcp
+ * Usage: npx speclint-mcp
  */
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
@@ -16,11 +16,11 @@ import {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 
-const API_BASE = "https://refinebacklog.com";
+const API_BASE = "https://speclint.ai";
 
-// License key from MCP server environment — set REFINE_BACKLOG_KEY in Claude Desktop config.
+// License key from MCP server environment — set SPECLINT_KEY in Claude Desktop config.
 // This is the preferred way for MCP users with a paid subscription.
-const ENV_LICENSE_KEY = process.env.REFINE_BACKLOG_KEY ?? null;
+const ENV_LICENSE_KEY = process.env.SPECLINT_KEY ?? null;
 
 interface RefinedItem {
   title: string;
@@ -80,7 +80,7 @@ function formatRefinedItems(items: RefinedItem[]): string {
 }
 
 const REFINE_TOOL: Tool = {
-  name: "refine_backlog",
+  name: "speclint",
   description:
     "Refine messy backlog items into structured, actionable work items. " +
     "Returns each item with a clean title, problem statement, acceptance criteria, " +
@@ -90,9 +90,9 @@ const REFINE_TOOL: Tool = {
     "1. Would you like titles formatted as user stories? (\"As a [user], I want [goal], so that [benefit]\")\n" +
     "2. Would you like acceptance criteria in Gherkin format? (Given/When/Then)\n" +
     "Set useUserStories and useGherkin accordingly based on their answers. Both default to false.\n\n" +
-    "LICENSE KEY: For unlimited requests and higher item limits, set REFINE_BACKLOG_KEY in your MCP server " +
+    "LICENSE KEY: For unlimited requests and higher item limits, set SPECLINT_KEY in your MCP server " +
     "environment config (Claude Desktop → claude_desktop_config.json → env section). " +
-    "Get a key at https://refinebacklog.com/pricing",
+    "Get a key at https://speclint.ai/pricing",
   inputSchema: {
     type: "object",
     required: ["items"],
@@ -115,9 +115,9 @@ const REFINE_TOOL: Tool = {
       licenseKey: {
         type: "string",
         description:
-          "Optional. Refine Backlog license key for Pro or Team tier. " +
-          "Preferred: set REFINE_BACKLOG_KEY in your MCP server env config instead of passing inline. " +
-          "Get a key at https://refinebacklog.com/pricing. Free tier (5 items, 3 req/day) works without a key.",
+          "Optional. Speclint license key for Pro or Team tier. " +
+          "Preferred: set SPECLINT_KEY in your MCP server env config instead of passing inline. " +
+          "Get a key at https://speclint.ai/pricing. Free tier (5 items, 3 req/day) works without a key.",
       },
       useUserStories: {
         type: "boolean",
@@ -140,9 +140,9 @@ const PLAN_TOOL: Tool = {
     "Returns a sprint_goal, an ordered execution_queue with parallel groups and dependency chains, " +
     "and deferred items that didn't fit the budget.\n\n" +
     "Ideal for: CI pipelines, GitHub Actions, AI coding agents that need a machine-ready work queue.\n\n" +
-    "Items can be plain strings or objects from refine_backlog output.\n\n" +
+    "Items can be plain strings or objects from speclint output.\n\n" +
     "LICENSE KEY: Pro/Team tier required for dependency mapping (parallel_group, depends_on) and deferred queue. " +
-    "Set REFINE_BACKLOG_KEY in your MCP env config. Get a key at https://refinebacklog.com/pricing",
+    "Set SPECLINT_KEY in your MCP env config. Get a key at https://speclint.ai/pricing",
   inputSchema: {
     type: "object",
     required: ["items"],
@@ -153,7 +153,7 @@ const PLAN_TOOL: Tool = {
         minItems: 1,
         maxItems: 50,
         description:
-          "Array of backlog items. Can be plain strings or objects from refine_backlog output " +
+          "Array of backlog items. Can be plain strings or objects from speclint output " +
           "(with title, estimate, priority, tags fields).",
       },
       budget: {
@@ -183,7 +183,7 @@ const PLAN_TOOL: Tool = {
         type: "string",
         description:
           "Optional. License key for Pro/Team tier (dependency mapping). " +
-          "Preferred: set REFINE_BACKLOG_KEY in MCP env config. Get a key at https://refinebacklog.com/pricing",
+          "Preferred: set SPECLINT_KEY in MCP env config. Get a key at https://speclint.ai/pricing",
       },
     },
   },
@@ -191,7 +191,7 @@ const PLAN_TOOL: Tool = {
 
 const server = new Server(
   {
-    name: "refine-backlog",
+    name: "speclint",
     version: "1.0.0",
   },
   {
@@ -206,7 +206,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 }));
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name !== "refine_backlog" && request.params.name !== "plan_sprint") {
+  if (request.params.name !== "speclint" && request.params.name !== "plan_sprint") {
     return {
       content: [{ type: "text", text: `Unknown tool: ${request.params.name}` }],
       isError: true,
@@ -250,7 +250,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [{
             type: "text",
-            text: `⚠️ ${b.error ?? "Rate limit reached."}\n\n👉 Upgrade at https://refinebacklog.com/pricing`,
+            text: `⚠️ ${b.error ?? "Rate limit reached."}\n\n👉 Upgrade at https://speclint.ai/pricing`,
           }],
           isError: true,
         };
@@ -258,7 +258,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       if (planResponse.status === 503) {
         return {
-          content: [{ type: "text", text: "Refine Backlog AI service is temporarily unavailable. Please try again." }],
+          content: [{ type: "text", text: "Speclint API is temporarily unavailable. Please try again." }],
           isError: true,
         };
       }
@@ -374,7 +374,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       return {
         content: [{
           type: "text",
-          text: `⚠️ ${msg}\n\n👉 Upgrade at https://refinebacklog.com/pricing\n\nOnce you have a key, add it to your Claude Desktop config:\n{\n  "mcpServers": {\n    "refine-backlog": {\n      "command": "npx",\n      "args": ["-y", "refine-backlog-mcp"],\n      "env": { "REFINE_BACKLOG_KEY": "your-key-here" }\n    }\n  }\n}`,
+          text: `⚠️ ${msg}\n\n👉 Upgrade at https://speclint.ai/pricing\n\nOnce you have a key, add it to your Claude Desktop config:\n{\n  "mcpServers": {\n    "speclint": {\n      "command": "npx",\n      "args": ["-y", "speclint-mcp"],\n      "env": { "SPECLINT_KEY": "your-key-here" }\n    }\n  }\n}`,
         }],
         isError: true,
       };
@@ -382,7 +382,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (response.status === 503) {
       return {
-        content: [{ type: "text", text: "Refine Backlog AI service is temporarily unavailable. Please try again in a moment." }],
+        content: [{ type: "text", text: "Speclint API is temporarily unavailable. Please try again in a moment." }],
         isError: true,
       };
     }
@@ -400,14 +400,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return {
           content: [{
             type: "text",
-            text: `⚠️ ${body.error}\n\n👉 Upgrade at https://refinebacklog.com/pricing\n\nOnce you have a license key, pass it in your request as the \`licenseKey\` parameter.`,
+            text: `⚠️ ${body.error}\n\n👉 Upgrade at https://speclint.ai/pricing\n\nOnce you have a license key, pass it in your request as the \`licenseKey\` parameter.`,
           }],
           isError: true,
         };
       }
 
       return {
-        content: [{ type: "text", text: `Error from Refine Backlog API: ${body.error ?? response.statusText}` }],
+        content: [{ type: "text", text: `Error from Speclint API: ${body.error ?? response.statusText}` }],
         isError: true,
       };
     }
@@ -430,7 +430,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return {
-      content: [{ type: "text", text: `Failed to reach Refine Backlog API: ${message}` }],
+      content: [{ type: "text", text: `Failed to reach Speclint API: ${message}` }],
       isError: true,
     };
   }
@@ -439,7 +439,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Refine Backlog MCP server running on stdio");
+  console.error("Speclint MCP server running on stdio");
 }
 
 main().catch((err) => {

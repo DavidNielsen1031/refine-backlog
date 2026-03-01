@@ -236,7 +236,7 @@ const MOCK_PLAN_BUDGET_CONSTRAINED = {
 // ---- Helpers ---------------------------------------------------------------
 
 function makeDiscoverRequest(item: string, context?: string) {
-  return new NextRequest('https://refinebacklog.com/api/discover', {
+  return new NextRequest('https://speclint.ai/api/discover', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ item, ...(context ? { context } : {}) }),
@@ -247,7 +247,7 @@ function makeRefineRequest(
   items: string[],
   opts: { context?: string; discovery_context?: object; licenseKey?: string } = {}
 ) {
-  return new NextRequest('https://refinebacklog.com/api/refine', {
+  return new NextRequest('https://speclint.ai/api/refine', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -265,7 +265,7 @@ function makePlanRequest(
   items: object[],
   opts: { budget?: object; goal_hint?: string; context?: string; licenseKey?: string } = {}
 ) {
-  return new NextRequest('https://refinebacklog.com/api/plan', {
+  return new NextRequest('https://speclint.ai/api/plan', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -484,7 +484,7 @@ describe('E2E Pipeline: Discover → Refine → Plan', () => {
   it('e2e_error_handling — each stage correctly rejects empty/missing input', async () => {
     // Discover: missing item
     const badDiscover = await discoverPOST(
-      new NextRequest('https://refinebacklog.com/api/discover', {
+      new NextRequest('https://speclint.ai/api/discover', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -496,7 +496,7 @@ describe('E2E Pipeline: Discover → Refine → Plan', () => {
 
     // Refine: empty items array
     const badRefine = await refinePOST(
-      new NextRequest('https://refinebacklog.com/api/refine', {
+      new NextRequest('https://speclint.ai/api/refine', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ items: [] }),
@@ -508,7 +508,7 @@ describe('E2E Pipeline: Discover → Refine → Plan', () => {
 
     // Plan: missing items
     const badPlan = await planPOST(
-      new NextRequest('https://refinebacklog.com/api/plan', {
+      new NextRequest('https://speclint.ai/api/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
