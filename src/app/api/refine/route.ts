@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
       ip: ip,
       source,
       items,
-      endpoint: 'refine',
+      endpoint: request.nextUrl.pathname.split('/').pop() ?? 'refine',
     }).catch(() => {}) // fire-and-forget
 
     // Compute completeness scores (deterministic, post-LLM)
