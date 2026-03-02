@@ -110,8 +110,16 @@ function ChartCard({ title, children }: ChartCardProps) {
   )
 }
 
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex items-center justify-center h-[220px] text-zinc-500 text-sm font-mono">
+      {message}
+    </div>
+  )
+}
+
 export function DashboardCharts({ data }: { data: DashboardData }) {
-  const { scoreTrend, agentReadyFunnel, callVolume, sourceAttribution, stats } = data
+  const { scoreTrend, agentReadyFunnel, callVolume, sourceAttribution, stats, perLicenseEmpty } = data
 
   // Pie data — only include sources with > 0
   const pieData = Object.entries(sourceAttribution)
@@ -128,6 +136,11 @@ export function DashboardCharts({ data }: { data: DashboardData }) {
   const totalReady = agentReadyFunnel.reduce((s, p) => s + p.ready, 0)
   const totalItems = agentReadyFunnel.reduce((s, p) => s + p.total, 0)
   const overallPct = totalItems > 0 ? Math.round((totalReady / totalItems) * 100) : null
+
+  // Empty state checks
+  const hasScoreData = scoreTrend.some((p) => p.avgScore !== null)
+  const hasCallData = callVolume.some((p) => p.calls > 0)
+  const hasAgentReadyData = totalItems > 0
 
   return (
     <div className="space-y-6">
@@ -157,99 +170,129 @@ export function DashboardCharts({ data }: { data: DashboardData }) {
         />
       </div>
 
+      {/* "Try it now" prompt — only when per-license data is empty */}
+      {perLicenseEmpty && (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+          <p className="text-zinc-400 text-xs font-mono mb-2">
+            Make your first API call:
+          </p>
+          <pre className="text-emerald-400 text-xs font-mono bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 overflow-x-auto whitespace-pre-wrap break-all">
+{`curl -X POST https://speclint.ai/api/lint \\
+  -H 'x-license-key: YOUR_KEY' \\
+  -d '{"items":["your spec here"]}'`}
+          </pre>
+          <p className="text-zinc-600 text-xs font-mono mt-2">
+            Your personal metrics will appear here after your first call. Switch to{' '}
+            <span className="text-zinc-400">All Data</span> to see global platform stats.
+          </p>
+        </div>
+      )}
+
       {/* Charts grid: 2x2 on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Chart 1: Score Trend */}
         <ChartCard title="Score Trend — last 30 days">
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={scoreTrend} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
-              <XAxis
-                dataKey="day"
-                tickFormatter={tickFormatter}
-                tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
-                tickLine={false}
-                axisLine={{ stroke: '#3f3f46' }}
-              />
-              <YAxis
-                domain={[0, 100]}
-                tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip content={<ChartTooltip />} />
-              <ReferenceLine
-                y={70}
-                stroke={AMBER}
-                strokeDasharray="5 3"
-                label={{ value: 'agent-ready', fill: AMBER, fontSize: 10, fontFamily: 'monospace', position: 'insideTopRight' }}
-              />
-              <Line
-                type="monotone"
-                dataKey="avgScore"
-                name="Avg Score"
-                stroke={EMERALD}
-                strokeWidth={2}
-                dot={false}
-                connectNulls={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {hasScoreData ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <LineChart data={scoreTrend} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                <XAxis
+                  dataKey="day"
+                  tickFormatter={tickFormatter}
+                  tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#3f3f46' }}
+                />
+                <YAxis
+                  domain={[0, 100]}
+                  tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip content={<ChartTooltip />} />
+                <ReferenceLine
+                  y={70}
+                  stroke={AMBER}
+                  strokeDasharray="5 3"
+                  label={{ value: 'agent-ready', fill: AMBER, fontSize: 10, fontFamily: 'monospace', position: 'insideTopRight' }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="avgScore"
+                  name="Avg Score"
+                  stroke={EMERALD}
+                  strokeWidth={2}
+                  dot={false}
+                  connectNulls={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyState message="No score data yet — scores appear after your next lint call" />
+          )}
         </ChartCard>
 
         {/* Chart 2: Agent-Ready Funnel */}
         <ChartCard title={`Agent-Ready Funnel${overallPct !== null ? ` — ${overallPct}% overall` : ''}`}>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={agentReadyFunnel} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
-              <XAxis
-                dataKey="day"
-                tickFormatter={tickFormatter}
-                tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
-                tickLine={false}
-                axisLine={{ stroke: '#3f3f46' }}
-              />
-              <YAxis
-                tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
-                tickLine={false}
-                axisLine={false}
-                allowDecimals={false}
-              />
-              <Tooltip content={<ChartTooltip />} />
-              <Legend
-                wrapperStyle={{ fontSize: 11, fontFamily: 'monospace', color: ZINC_400 }}
-                iconType="rect"
-                iconSize={8}
-              />
-              <Bar dataKey="total" name="Total Items" fill={ZINC_600} radius={[2, 2, 0, 0]} />
-              <Bar dataKey="ready" name="Agent-Ready" fill={EMERALD} radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {hasAgentReadyData ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={agentReadyFunnel} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                <XAxis
+                  dataKey="day"
+                  tickFormatter={tickFormatter}
+                  tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#3f3f46' }}
+                />
+                <YAxis
+                  tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip content={<ChartTooltip />} />
+                <Legend
+                  wrapperStyle={{ fontSize: 11, fontFamily: 'monospace', color: ZINC_400 }}
+                  iconType="rect"
+                  iconSize={8}
+                />
+                <Bar dataKey="total" name="Total Items" fill={ZINC_600} radius={[2, 2, 0, 0]} />
+                <Bar dataKey="ready" name="Agent-Ready" fill={EMERALD} radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyState message="No data yet" />
+          )}
         </ChartCard>
 
         {/* Chart 3: Call Volume */}
         <ChartCard title="Call Volume — last 30 days">
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={callVolume} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
-              <XAxis
-                dataKey="day"
-                tickFormatter={tickFormatter}
-                tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
-                tickLine={false}
-                axisLine={{ stroke: '#3f3f46' }}
-              />
-              <YAxis
-                tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
-                tickLine={false}
-                axisLine={false}
-                allowDecimals={false}
-              />
-              <Tooltip content={<ChartTooltip />} />
-              <Bar dataKey="calls" name="API Calls" fill={EMERALD} radius={[2, 2, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {hasCallData ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={callVolume} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                <XAxis
+                  dataKey="day"
+                  tickFormatter={tickFormatter}
+                  tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
+                  tickLine={false}
+                  axisLine={{ stroke: '#3f3f46' }}
+                />
+                <YAxis
+                  tick={{ fill: ZINC_400, fontSize: 10, fontFamily: 'monospace' }}
+                  tickLine={false}
+                  axisLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip content={<ChartTooltip />} />
+                <Bar dataKey="calls" name="API Calls" fill={EMERALD} radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyState message="No calls recorded yet" />
+          )}
         </ChartCard>
 
         {/* Chart 4: Source Attribution */}
@@ -288,9 +331,7 @@ export function DashboardCharts({ data }: { data: DashboardData }) {
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[220px] text-zinc-600 text-sm font-mono">
-              No source data yet
-            </div>
+            <EmptyState message="No source data yet" />
           )}
         </ChartCard>
       </div>
