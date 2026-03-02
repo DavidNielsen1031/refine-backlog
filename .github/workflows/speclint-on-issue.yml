@@ -21,3 +21,4 @@ jobs:
           gherkin: "true"
           user-stories: "true"
           key: ${{ secrets.REFINE_BACKLOG_KEY }}
+          suggest-rewrites: "true"
