@@ -17,6 +17,7 @@ export function Footer() {
                 { label: "GitHub Action", href: "https://github.com/speclint-ai/speclint-action" },
                 { label: "npx speclint", href: "#" },
                 { label: "Blog", href: "/blog" },
+                { label: "Dashboard", href: "/dashboard" },
                 { label: "llms.txt", href: "/llms.txt" },
               ].map((l) => (
                 <li key={l.label}>
