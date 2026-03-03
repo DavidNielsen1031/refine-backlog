@@ -1,24 +1,21 @@
-name: Refine on Issue Open
+name: Speclint on Issue Open
 
 on:
   issues:
-    types: [opened]
+    types: [opened, edited]
 
 jobs:
-  refine:
+  lint:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Refine issue
-        uses: DavidNielsen1031/speclint-action@v1
+      - name: Lint issue spec with Speclint
+        id: speclint
+        uses: speclint-ai/speclint-action@473fe71c3fc6af325b23e6abc3554964af0bfc55
         with:
-          items: ${{ github.event.issue.title }}
-          context: "B2B SaaS, solo indie founder, AI-powered backlog refinement tool for software teams. Next.js on Vercel, Stripe payments, Upstash Redis. Live product at speclint.com. No design team or legal team — all work is done by one developer."
-          write-back: "true"
-          gherkin: "true"
-          user-stories: "true"
-          key: ${{ secrets.REFINE_BACKLOG_KEY }}
-          suggest-rewrites: "true"
+          api-key: ${{ secrets.SPECLINT_KEY }}
+          threshold: "75"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
