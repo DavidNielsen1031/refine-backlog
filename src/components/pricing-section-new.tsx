@@ -104,6 +104,11 @@ export function PricingSection() {
           </p>
         </div>
 
+        <div className="bg-red-500/5 border border-red-500/20 rounded-lg px-6 py-4 mb-10">
+          <p className="text-red-400/90 text-sm font-mono font-semibold">
+            Do the math: One bad spec wastes 2+ hours of agent time. That&apos;s more than a year of Speclint. You&apos;re already paying for bad specs — you&apos;re just paying in rework.
+          </p>
+        </div>
         <p className="text-zinc-500 text-sm font-mono mb-10">
           Your GitHub issues already contain specs. Speclint tells you if they&apos;re good enough.
         </p>

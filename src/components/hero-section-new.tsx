@@ -68,8 +68,14 @@ export function HeroSection() {
               Better specs in.<br />
               <span className="text-emerald-400">Better code out.</span>
             </h1>
+            <p className="text-lg text-zinc-400 mb-2 leading-relaxed max-w-lg">
+              Your AI coding agents build exactly what you ask for. The problem is what you&apos;re asking for.
+            </p>
+            <p className="text-base text-red-400/80 mb-4 leading-relaxed max-w-lg font-mono">
+              One vague spec → 4 hours of agent rework → $200 in wasted compute. Every time.
+            </p>
             <p className="text-lg text-zinc-400 mb-4 leading-relaxed max-w-lg">
-              Your AI coding agents build exactly what you ask for. The problem is what you&apos;re asking for. Speclint is the quality gate that makes you write specs worth building.
+              Speclint is the quality gate that makes you write specs worth building.
             </p>
             <p className="text-base text-zinc-500 mb-5 font-mono">
               // Lint your specs before agents touch them
