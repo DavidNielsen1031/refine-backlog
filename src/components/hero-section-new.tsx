@@ -61,9 +61,16 @@ export function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left: copy */}
           <div>
-            <Badge className="mb-6 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs px-3 py-1">
-              v1.0 — GitHub Action available
-            </Badge>
+            <div className="flex flex-wrap gap-2 mb-6">
+              <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono text-xs px-3 py-1">
+                v1.0 — GitHub Action available
+              </Badge>
+              <a href="https://github.com/speclint-ai/speclint" target="_blank" rel="noopener noreferrer">
+                <Badge className="bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono text-xs px-3 py-1 hover:border-zinc-500 transition-colors cursor-pointer">
+                  ⭐ Open Source — MIT
+                </Badge>
+              </a>
+            </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] mb-4">
               Better specs in.<br />
               <span className="text-emerald-400">Better code out.</span>

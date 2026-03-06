@@ -14,6 +14,7 @@ export function Footer() {
             <ul className="space-y-2">
               {[
                 { label: "/api/lint docs", href: "/openapi.yaml" },
+                { label: "GitHub (Open Source)", href: "https://github.com/speclint-ai/speclint" },
                 { label: "GitHub Action", href: "https://github.com/speclint-ai/speclint-action" },
                 { label: "npx speclint", href: "#" },
                 { label: "Blog", href: "/blog" },
