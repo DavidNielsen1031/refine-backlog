@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
   // remaining_today: only meaningful for free tier (3 req/day cap)
   // Pro/team tiers are unlimited — return null
   let remainingToday: number | null = null
-  if (data.plan === 'free') {
+  if ((data.plan as string) === 'free') {
     const usedToday = await getKeyUsageToday(licenseKey)
     remainingToday = Math.max(0, FREE_DAILY_LIMIT - usedToday)
   }
