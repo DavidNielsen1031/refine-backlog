@@ -10,7 +10,14 @@ const DECLARATIVE_AC_RE = /\b(is visible|is displayed|is enabled|is disabled|is 
 const DOD_RE = /\d+|logged in|returns? \d+|visible|enabled|disabled|less than|within|at least|greater than|no more than|exactly|complete|success|fail|error|approved|rejected|active|inactive/i
 
 // Detect verification language — signals the author has thought about how to prove it works
-const VERIFICATION_RE = /\b(verify|confirm|test that|assert|expect|run .{0,40} and check|unit test|integration test|e2e test|end.to.end test|test passes|manually check|open the page and verify|curl .{0,60} returns|check that|proves?|validated|validates?)\b/i
+const VERIFICATION_RE = /(?:^|\n|\b)(?:verification(?:\s*steps?)?|verify|confirm|test that|assert|expect|run .{0,40} and check|unit test|integration test|e2e test|end.to.end test|test passes|manually check|open the page and verify|curl .{0,60} returns|check that|proves?|validated|validates?)\b/i
+
+// Detect measurable outcomes across all text (title, problem, ACs, assumptions)
+const MEASURABLE_OUTCOME_RE = /(?:^|\n|\b)(?:measurable outcome|measure|goal|target|kpi|metric|\d+|measur|observ|track|monitor|reduc|increas|decreas|faster|slower|less|more|%|rate|time|count|number)\b/i
+
+// Detect constraints/assumptions in the overall text (title, problem, ACs, assumptions)
+const CONSTRAINTS_RE = /(?:^|\n|\b)(?:constraints|limitations|assumptions|rules|scope|out of scope)\b/i
+
 
 export function computeCompletenessScore(item: RefinedItem): {
   score: number
@@ -18,22 +25,30 @@ export function computeCompletenessScore(item: RefinedItem): {
   missing: string[]
 } {
   const missing: string[] = []
+  const ac = item.acceptanceCriteria ?? []
+  // Combine all relevant text fields for comprehensive regex matching
+  const allText = [
+    item.title,
+    item.problem,
+    ...ac,
+    ...(item.assumptions || []).map(a => `Assumption: ${a}`), // Prefix assumptions for better signal
+  ].join('\n') // Use newline to preserve "start of line" context for regexes
+
 
   // has_measurable_outcome: problem field contains measurable/observable outcome (20 pts)
-  const measurableRe = /\d+|measur|observ|track|monitor|reduc|increas|decreas|faster|slower|less|more|%|rate|time|count|number|metric|kpi/i
-  const has_measurable_outcome = measurableRe.test(item.problem)
+  const has_measurable_outcome = MEASURABLE_OUTCOME_RE.test(item.problem)
 
   // has_testable_criteria: at least 2 acceptance criteria starting with action verbs (25 pts)
-  const ac = item.acceptanceCriteria ?? []
   const testableCount = ac.filter(c => {
     const trimmed = c.trim()
     return ACTION_VERB_RE.test(trimmed) || DECLARATIVE_AC_RE.test(trimmed)
   }).length
   const has_testable_criteria = testableCount >= 2
 
-  // has_constraints: tags >= 2 OR assumptions present and non-empty (20 pts)
+  // has_constraints: tags >= 2 OR assumptions present and non-empty, OR constraints in content (20 pts)
   const has_constraints = (item.tags && item.tags.length >= 2) ||
-    (Array.isArray(item.assumptions) && item.assumptions.length > 0)
+    (Array.isArray(item.assumptions) && item.assumptions.length > 0) ||
+    CONSTRAINTS_RE.test(allText) // New check for constraints within the overall text
 
   // no_vague_verbs: title does NOT contain vague verbs without specificity (20 pts)
   const titleWords = item.title.trim().split(/\s+/)
@@ -57,8 +72,6 @@ export function computeCompletenessScore(item: RefinedItem): {
   const has_definition_of_done = ac.some(c => DOD_RE.test(c))
 
   // has_verification_steps: spec contains language showing HOW to verify it works (15 pts)
-  // Search across problem, ACs, and title for verification intent
-  const allText = [item.title, item.problem, ...ac].join(' ')
   const has_verification_steps = VERIFICATION_RE.test(allText)
   if (!has_verification_steps) {
     missing.push('No verification steps — how will you know this works?')
