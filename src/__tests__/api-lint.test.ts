@@ -33,6 +33,7 @@ vi.mock('@/lib/kv', () => ({
   isKvConnected: vi.fn(() => false),
   getSubscriptionByCustomer: vi.fn().mockResolvedValue(null),
   storeLintReceipt: vi.fn().mockResolvedValue(undefined),
+  storeTrace: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('@/lib/telemetry', () => ({

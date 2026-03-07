@@ -273,6 +273,83 @@ export async function getLintReceipt(lintId: string): Promise<LintReceiptData | 
   }
 }
 
+// --- Full Trace Storage (SL-060) ---
+
+export interface TraceData {
+  traceId: string          // = requestId (UUID)
+  lintId: string           // "spl_" + 8 chars
+  timestamp: string        // ISO 8601
+  tier: string
+  endpoint: string
+  inputItems: string[]     // raw input specs (truncated at 2000 chars each)
+  refinedOutput: object[]  // full LLM output (RefinedItem array)
+  scores: { title: string; completeness_score: number; agent_ready: boolean; breakdown: Record<string, boolean | string> }[]
+  averageScore: number
+  agentReadyCount: number
+  model: string
+  inputTokens: number
+  outputTokens: number
+  latencyMs: number
+}
+
+const MAX_TRACES_PER_DAY = 500
+const TRACE_TTL_SECONDS = 30 * 24 * 3600 // 30 days
+
+function traceKey(date: string): string {
+  return `traces:${date}`
+}
+
+/**
+ * Store a full trace for eval analysis.
+ * Fire-and-forget safe — catch errors externally with .catch(() => {})
+ */
+export async function storeTrace(data: TraceData): Promise<void> {
+  const r = getRedis()
+  if (!r) return
+
+  const date = data.timestamp.slice(0, 10) // YYYY-MM-DD
+  const key = traceKey(date)
+
+  try {
+    // Check daily cap
+    const count = await r.llen(key)
+    if (count >= MAX_TRACES_PER_DAY) return
+
+    const serialized = JSON.stringify(data)
+    const newCount = await r.rpush(key, serialized)
+
+    // Set TTL only on first push
+    if (newCount === 1) {
+      await r.expire(key, TRACE_TTL_SECONDS)
+    }
+  } catch (err) {
+    console.error('[KV] storeTrace failed:', err)
+  }
+}
+
+/**
+ * Fetch traces for a given date (YYYY-MM-DD).
+ * Used for eval analysis.
+ */
+export async function getTraces(date: string, limit = 50): Promise<TraceData[]> {
+  const r = getRedis()
+  if (!r) return []
+
+  const clampedLimit = Math.min(limit, 200)
+  const key = traceKey(date)
+
+  try {
+    const raw = await r.lrange(key, 0, clampedLimit - 1)
+    return raw.map(item => {
+      if (typeof item === 'string') return JSON.parse(item) as TraceData
+      return item as unknown as TraceData
+    })
+  } catch (err) {
+    console.error('[KV] getTraces failed:', err)
+    return []
+  }
+}
+
 // --- Debug / Diagnostic ---
 
 export async function debugKvRoundTrip(): Promise<{ kvConnected: boolean; sampleReadWriteWorking: boolean }> {

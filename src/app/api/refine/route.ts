@@ -5,7 +5,7 @@ import { RefinedItemsSchema, type RefinedItem } from '@/lib/schemas'
 import { trackUsage, calculateCost, detectSource } from '@/lib/telemetry'
 import { detectInjection } from '@/lib/injection-monitor'
 import { computeCompletenessScore, isAgentReady } from '@/lib/scoring'
-import { storeLintReceipt } from '@/lib/kv'
+import { storeLintReceipt, storeTrace } from '@/lib/kv'
 import { anthropic } from '@/lib/anthropic'
 
 interface IssueInput {
@@ -325,6 +325,29 @@ export async function POST(request: NextRequest) {
         agent_ready: firstScore.agent_ready,
       }).catch(() => {}) // fire-and-forget
     }
+
+    // Store full trace for eval analysis (SL-060)
+    storeTrace({
+      traceId: requestId,
+      lintId,
+      timestamp: new Date().toISOString(),
+      tier,
+      endpoint: resolvedEndpoint,
+      inputItems: items.map(i => i.slice(0, 2000)),
+      refinedOutput: refinedItems,
+      scores: scores.map(s => ({
+        title: s.title,
+        completeness_score: s.completeness_score,
+        agent_ready: s.agent_ready,
+        breakdown: s.breakdown,
+      })),
+      averageScore,
+      agentReadyCount,
+      model: MODEL,
+      inputTokens,
+      outputTokens,
+      latencyMs,
+    }).catch(() => {}) // fire-and-forget
 
     // Fire telemetry AFTER scores are computed so notifications include them
     trackUsage({
