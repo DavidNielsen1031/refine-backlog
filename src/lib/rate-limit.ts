@@ -30,6 +30,13 @@ export async function resolveUserTier(licenseKey?: string | null): Promise<PlanT
     return 'free'
   }
 
+  // SK-INTERNAL keys are always team tier — hardcoded, no KV lookup needed.
+  // This prevents transient Redis failures from downgrading internal keys to free tier.
+  if (licenseKey.startsWith('SK-INTERNAL-')) {
+    console.log(`[ENTITLEMENT] key=${maskKey(licenseKey)} tier=team source=prefix`)
+    return 'team'
+  }
+
   try {
     const data = await getLicenseData(licenseKey)
     if (data && data.status === 'active') {
