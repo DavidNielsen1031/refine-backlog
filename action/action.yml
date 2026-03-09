@@ -1,0 +1,211 @@
+name: 'Speclint'
+description: 'Lint issue specs with Speclint and optionally suggest or auto-apply rewrites'
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  api-key:
+    description: 'Speclint API key (license key)'
+    required: true
+  threshold:
+    description: 'Minimum completeness score (0-100) to pass. Issues below this threshold will be flagged.'
+    required: false
+    default: '70'
+  write-back:
+    description: 'When true, post lint results as a comment on the issue.'
+    required: false
+    default: 'true'
+  suggest-rewrites:
+    description: 'When true, call the refine API with auto_rewrite=true to generate rewrite suggestions for low-scoring specs.'
+    required: false
+    default: 'false'
+  auto-apply-rewrites:
+    description: 'When true, automatically edit the issue body with the rewritten spec (original preserved in a details block). Requires write-back: true and suggest-rewrites: true.'
+    required: false
+    default: 'false'
+  api-url:
+    description: 'Speclint API base URL'
+    required: false
+    default: 'https://speclint.ai'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Lint issue spec
+      id: lint
+      shell: bash
+      env:
+        SPECLINT_API_KEY: ${{ inputs.api-key }}
+        SPECLINT_API_URL: ${{ inputs.api-url }}
+        SPECLINT_THRESHOLD: ${{ inputs.threshold }}
+        SUGGEST_REWRITES: ${{ inputs.suggest-rewrites }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      run: |
+        ISSUE_TITLE="${{ github.event.issue.title }}"
+        ISSUE_BODY=$(jq -r '.issue.body // ""' "$GITHUB_EVENT_PATH")
+        ISSUE_NUMBER="${{ github.event.issue.number }}"
+        REPO="${{ github.repository }}"
+
+        # Build request body
+        if [ "$SUGGEST_REWRITES" = "true" ]; then
+          BODY=$(jq -n \
+            --arg title "$ISSUE_TITLE" \
+            --arg body "$ISSUE_BODY" \
+            '{items: [("Title: " + $title + "\n\nBody: " + $body)], auto_rewrite: true, preserve_structure: true}')
+        else
+          BODY=$(jq -n \
+            --arg title "$ISSUE_TITLE" \
+            --arg body "$ISSUE_BODY" \
+            '{items: [("Title: " + $title + "\n\nBody: " + $body)], preserve_structure: true}')
+        fi
+
+        # Call Speclint API
+        RESPONSE=$(curl -s -w "\n%{http_code}" \
+          -X POST "${SPECLINT_API_URL}/api/refine" \
+          -H "Content-Type: application/json" \
+          -H "x-license-key: ${SPECLINT_API_KEY}" \
+          -H "x-source: github-action" \
+          -d "$BODY")
+
+        HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+        RESULT=$(echo "$RESPONSE" | sed '$d')
+
+        if [ "$HTTP_CODE" != "200" ]; then
+          echo "::error::Speclint API returned HTTP $HTTP_CODE"
+          echo "result=$RESULT" >> "$GITHUB_OUTPUT"
+          exit 1
+        fi
+
+        # Extract score and agent_ready
+        SCORE=$(echo "$RESULT" | jq -r '.items[0].completeness_score // 0')
+        AGENT_READY=$(echo "$RESULT" | jq -r '.items[0].agent_ready // false')
+        LINT_ID=$(echo "$RESULT" | jq -r '.lint_id // ""')
+
+        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+        echo "agent_ready=$AGENT_READY" >> "$GITHUB_OUTPUT"
+        echo "lint_id=$LINT_ID" >> "$GITHUB_OUTPUT"
+
+        # Save full result for downstream steps
+        echo "$RESULT" > /tmp/speclint-result.json
+
+        # Check threshold
+        if [ "$SCORE" -lt "$SPECLINT_THRESHOLD" ]; then
+          echo "::warning::Spec score ($SCORE) is below threshold ($SPECLINT_THRESHOLD)"
+          echo "passed=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "passed=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Post lint results
+      if: inputs.write-back == 'true' && github.event_name == 'issues'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      run: |
+        SCORE="${{ steps.lint.outputs.score }}"
+        PASSED="${{ steps.lint.outputs.passed }}"
+        LINT_ID="${{ steps.lint.outputs.lint_id }}"
+        ISSUE_NUMBER="${{ github.event.issue.number }}"
+        REPO="${{ github.repository }}"
+
+        RESULT=$(cat /tmp/speclint-result.json)
+        BREAKDOWN=$(echo "$RESULT" | jq -r '.items[0].breakdown | to_entries | map(
+          if .value == true then "- ✅ " + .key
+          elif .value == false then "- ❌ " + .key
+          else "- ℹ️ " + .key + ": " + (.value | tostring)
+          end
+        ) | join("\n")')
+
+        if [ "$PASSED" = "true" ]; then
+          EMOJI="✅"
+          STATUS="passed"
+        else
+          EMOJI="⚠️"
+          STATUS="needs improvement"
+        fi
+
+        COMMENT="## ${EMOJI} Speclint Results
+
+**Score:** ${SCORE}/100 — ${STATUS}
+**Lint ID:** \`${LINT_ID}\`
+
+### Breakdown
+${BREAKDOWN}
+"
+
+        # Add rewrite suggestion if available
+        HAS_REWRITE=$(echo "$RESULT" | jq -r '.items[0].rewrite != null')
+        if [ "$HAS_REWRITE" = "true" ]; then
+          REWRITTEN=$(echo "$RESULT" | jq -r '.items[0].rewrite.rewritten // ""')
+          NEW_SCORE=$(echo "$RESULT" | jq -r '.items[0].rewrite.new_score // 0')
+          CHANGES=$(echo "$RESULT" | jq -r '.items[0].rewrite.changes // [] | map("- " + .) | join("\n")')
+          COMMENT="${COMMENT}
+### Suggested Rewrite (score: ${NEW_SCORE}/100)
+<details><summary>View rewritten spec</summary>
+
+${REWRITTEN}
+
+**Changes:**
+${CHANGES}
+</details>
+"
+        fi
+
+        COMMENT="${COMMENT}
+---
+*Powered by [Speclint](https://speclint.ai)*"
+
+        gh api "repos/${REPO}/issues/${ISSUE_NUMBER}/comments" \
+          -X POST \
+          --field body="$COMMENT"
+
+    - name: Auto-apply rewrite
+      if: inputs.auto-apply-rewrites == 'true' && inputs.write-back == 'true' && inputs.suggest-rewrites == 'true' && github.event_name == 'issues'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+      run: |
+        ISSUE_NUMBER="${{ github.event.issue.number }}"
+        REPO="${{ github.repository }}"
+
+        RESULT=$(cat /tmp/speclint-result.json)
+        HAS_REWRITE=$(echo "$RESULT" | jq -r '.items[0].rewrite != null')
+
+        if [ "$HAS_REWRITE" != "true" ]; then
+          echo "No rewrite available (spec already passing or rewrite failed). Skipping auto-apply."
+          exit 0
+        fi
+
+        OLD_SCORE=$(echo "$RESULT" | jq -r '.items[0].completeness_score // 0')
+        NEW_SCORE=$(echo "$RESULT" | jq -r '.items[0].rewrite.new_score // 0')
+        REWRITTEN=$(echo "$RESULT" | jq -r '.items[0].rewrite.rewritten // ""')
+
+        if [ -z "$REWRITTEN" ]; then
+          echo "Rewritten spec is empty. Skipping auto-apply."
+          exit 0
+        fi
+
+        # Get current issue body
+        CURRENT_BODY=$(gh api "repos/${REPO}/issues/${ISSUE_NUMBER}" --jq '.body')
+
+        # Build new body: rewritten spec + original in details block
+        NEW_BODY="${REWRITTEN}
+
+---
+
+<details><summary>Original spec (before auto-fix)</summary>
+
+${CURRENT_BODY}
+
+</details>"
+
+        # Update issue body
+        gh api "repos/${REPO}/issues/${ISSUE_NUMBER}" \
+          -X PATCH \
+          --field body="$NEW_BODY"
+
+        # Post a comment about the auto-fix
+        gh api "repos/${REPO}/issues/${ISSUE_NUMBER}/comments" \
+          -X POST \
+          --field body="✅ Spec auto-fixed by Speclint. Score: ${OLD_SCORE} → ${NEW_SCORE}. Original preserved below."
