@@ -1,19 +1,19 @@
-## What does this PR do?
-<!-- One sentence summary -->
+## Description
+<!-- What does this PR do? -->
 
-## Related Issue
-Closes #<!-- issue number -->
+## Testing
+- [ ] Tests pass (`npm test`)
+- [ ] Build succeeds (`npm run build`)
 
-## Acceptance Criteria
-<!-- Copy the ACs from the linked issue and check them off -->
-- [ ] 
-- [ ] 
+## Hygiene
+- [ ] `npm audit --audit-level=moderate` returns 0 issues
+- [ ] No stale dev artifacts committed (REFINEMENT_LOG.md, .axon/, test-*.js)
+- [ ] `.gitignore` updated if new tooling was added
+- [ ] For open-source products: repo visibility confirmed Public
 
-## How was this tested?
-<!-- What did you run/check to verify this works? -->
-- [ ] Ran locally
-- [ ] Healthcheck passes
-- [ ] No TypeScript errors (`npx tsc --noEmit`)
-
-## Notes for reviewer
-<!-- Anything unusual, shortcuts taken, follow-ups needed -->
+## Type
+- [ ] Feature
+- [ ] Bug fix
+- [ ] Refactor
+- [ ] Docs
+- [ ] CI/Process
