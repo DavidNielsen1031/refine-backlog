@@ -38,6 +38,7 @@ export function computeCompletenessScore(item: RefinedItem): {
     item.problem,
     ...ac,
     ...(item.assumptions || []).map(a => `Assumption: ${a}`), // Prefix assumptions for better signal
+    ...(item.verificationSteps || []).map(v => `Verification: ${v}`), // Include verification steps in scoring
   ].join('\n') // Use newline to preserve "start of line" context for regexes
 
 
