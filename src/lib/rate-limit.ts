@@ -1,6 +1,22 @@
 // Hybrid rate limiting: in-memory + optional KV persistence
 import { checkRateLimitKV, getLicenseData, isKvConnected } from '@/lib/kv'
 
+// In-memory rate limit backstop when KV is unavailable
+const inMemoryCounter = new Map<string, { count: number; resetAt: number }>()
+const MAX_REQUESTS_FALLBACK = 500 // hard ceiling per IP per day
+
+function checkInMemoryFallback(ip: string): boolean {
+  const now = Date.now()
+  const key = `fallback:${ip}`
+  const entry = inMemoryCounter.get(key)
+  if (!entry || now > entry.resetAt) {
+    inMemoryCounter.set(key, { count: 1, resetAt: now + 86400000 })
+    return true
+  }
+  entry.count++
+  return entry.count <= MAX_REQUESTS_FALLBACK
+}
+
 const TIER_LIMITS = {
   free: { maxItems: 5, maxRequestsPerDay: 3, maxRewritesPerDay: 1 },
   lite: { maxItems: 5, maxRequestsPerDay: Infinity, maxRewritesPerDay: 10 },
@@ -67,12 +83,16 @@ export async function checkRateLimit(identifier: string, tier: PlanTier, prefix 
   } catch (err) {
     console.error('[RATE_LIMIT] checkRateLimit failed:', err)
     // Fail-closed for free tier: deny request if Redis is unreachable
-    // Fail-open for paid tiers to avoid disrupting paying customers
+    // Fail-open for paid tiers, but apply in-memory backstop to prevent abuse
     if (tier === 'free') {
       console.error('[RATE_LIMIT] Free tier fail-closed: returning 429')
       return { allowed: false, remaining: 0, tier }
     }
-    return { allowed: true, remaining: -1, tier } // -1 signals KV unavailable, actual limit not enforced
+    const backstopAllowed = checkInMemoryFallback(identifier)
+    if (!backstopAllowed) {
+      console.warn(`[RATE_LIMIT] In-memory backstop triggered for ${tier} identifier=${identifier}`)
+    }
+    return { allowed: backstopAllowed, remaining: -1, tier } // -1 signals KV unavailable
   }
 }
 
@@ -99,6 +119,10 @@ export async function checkRewriteRateLimit(identifier: string, tier: PlanTier):
     if (tier === 'free') {
       return { allowed: false, remaining: 0, tier }
     }
-    return { allowed: true, remaining: -1, tier } // -1 signals KV unavailable, actual limit not enforced
+    const backstopAllowed = checkInMemoryFallback(identifier)
+    if (!backstopAllowed) {
+      console.warn(`[RATE_LIMIT] In-memory backstop triggered (rewrite) for ${tier} identifier=${identifier}`)
+    }
+    return { allowed: backstopAllowed, remaining: -1, tier } // -1 signals KV unavailable
   }
 }

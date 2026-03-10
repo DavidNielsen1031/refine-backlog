@@ -17,6 +17,7 @@ import {
   checkRateLimitKV,
 } from '@/lib/kv'
 import { getClientIp } from '@/lib/ip'
+import { sendLicenseEmail } from '@/lib/email'
 
 const FREE_DAILY_LIMIT = 3
 
@@ -92,6 +93,12 @@ export async function GET(request: NextRequest) {
             })
 
             console.log(`[KEY] Fast-path license generated for customer=${customerId}`)
+
+            // Send license email (fire and forget — don't delay response)
+            const customerEmail = session.customer_details?.email
+            if (customerEmail) {
+              sendLicenseEmail({ to: customerEmail, plan, licenseKey }).catch(() => {})
+            }
 
             return NextResponse.json({
               licenseKey,
