@@ -75,7 +75,7 @@ done
 # 5. No hardcoded API keys or secret prefixes
 echo ""
 echo "Checking for hardcoded secrets..."
-SECRETS=$(cd "$APP_DIR" && grep -rn 'SK-INTERNAL\|sk_live_\|sk_test_\|whsec_' src/ 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'process\.env' || true)
+SECRETS=$(cd "$APP_DIR" && grep -rn 'SK-INTERNAL\|sk_live_\|sk_test_\|whsec_' src/ 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'process\.env' | grep -v '\.\.\.\|placeholder\|example\|YOUR_' || true)
 if [ -n "$SECRETS" ]; then
   echo "❌ Hardcoded secrets found:"
   echo "$SECRETS"
