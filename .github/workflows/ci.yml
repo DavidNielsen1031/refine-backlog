@@ -52,6 +52,12 @@ jobs:
           [ "$FAIL" -eq 0 ] && echo "✅ Repo hygiene OK"
           exit $FAIL
 
+      - name: Security scan
+        run: bash scripts/security-scan.sh .
+
+      - name: Pricing consistency audit
+        run: bash scripts/pricing-audit.sh .
+
       - name: Run tests
         run: npm test
         env:
@@ -69,3 +75,16 @@ jobs:
           STRIPE_TEAM_PRICE_ID: price_test_team
           KV_REST_API_URL: https://mock.upstash.io
           KV_REST_API_TOKEN: mock-token
+
+  open-source-audit:
+    name: Open-Source Readiness
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Public repo audit
+        run: bash scripts/public-repo-audit.sh DavidNielsen1031/speclint .
+        env:
+          GH_TOKEN: ${{ github.token }}
