@@ -31,10 +31,10 @@ export async function resolveUserTier(licenseKey?: string | null): Promise<PlanT
     return 'free'
   }
 
-  // SK-INTERNAL keys are always team tier — hardcoded, no KV lookup needed.
-  // This prevents transient Redis failures from downgrading internal keys to free tier.
-  if (licenseKey.startsWith('SK-INTERNAL-')) {
-    console.log(`[ENTITLEMENT] key=${maskKey(licenseKey)} tier=team source=prefix`)
+  // Internal keys must match the INTERNAL_API_KEY env var exactly.
+  // Previously used a guessable SK-INTERNAL- prefix — fixed for public repo security.
+  if (process.env.INTERNAL_API_KEY && licenseKey === process.env.INTERNAL_API_KEY) {
+    console.log(`[ENTITLEMENT] key=${maskKey(licenseKey)} tier=team source=internal`)
     return 'team'
   }
 

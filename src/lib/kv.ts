@@ -130,9 +130,8 @@ export async function getSubscriptionByCustomer(customerId: string): Promise<Sub
 }
 
 export async function getLicenseData(licenseKey: string): Promise<LicenseData | null> {
-  // SK-INTERNAL keys are always team tier — not stored in Redis.
-  // Returning a synthetic record prevents 401s at /api/traces, /api/key-info, etc.
-  if (licenseKey.startsWith('SK-INTERNAL-')) {
+  // Internal keys must match the INTERNAL_API_KEY env var exactly.
+  if (process.env.INTERNAL_API_KEY && licenseKey === process.env.INTERNAL_API_KEY) {
     return { customerId: 'internal', plan: 'team', status: 'active' }
   }
   logKvStatus()
