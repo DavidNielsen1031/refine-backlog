@@ -53,6 +53,11 @@ runs:
     - name: Validate inputs
       shell: bash
       run: |
+        # Mask sensitive inputs from GitHub Actions logs
+        if [ -n "${{ inputs.codebase-context }}" ]; then
+          echo "::add-mask::${{ inputs.codebase-context }}"
+        fi
+
         # Warn on misconfigured auto-apply-rewrites
         if [ "${{ inputs.auto-apply-rewrites }}" = "true" ]; then
           if [ "${{ inputs.write-back }}" != "true" ] || [ "${{ inputs.suggest-rewrites }}" != "true" ]; then

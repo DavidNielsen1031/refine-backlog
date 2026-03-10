@@ -1,20 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { randomBytes } from 'crypto'
-import { getFreeKey, setFreeKey, checkRateLimitKV } from '@/lib/kv'
+import { getFreeKey, setFreeKey, checkRateLimitKV, getKV } from '@/lib/kv'
 
 function generateFreeKey(): string {
   const chars = randomBytes(9).toString('hex').toUpperCase().slice(0, 12)
   return `SK-FREE-${chars}`
 }
 
-// Disposable email domains — block the most common ones
-const DISPOSABLE_DOMAINS = new Set([
+// Hardcoded fallback — overridable via KV key 'config:disposable-domains' (JSON array)
+const DEFAULT_DISPOSABLE_DOMAINS = new Set([
   'mailinator.com', 'guerrillamail.com', 'tempmail.com', 'throwaway.email',
   'yopmail.com', 'sharklasers.com', 'guerrillamailblock.com', 'grr.la',
   'dispostable.com', 'trashmail.com', 'temp-mail.org', 'fakeinbox.com',
   'mailnesia.com', 'maildrop.cc', 'discard.email', 'mailsac.com',
   'getnada.com', '10minutemail.com', 'tempail.com', 'harakirimail.com',
 ])
+
+let cachedDisposableDomains: Set<string> | null = null
+let cacheExpiry = 0
+
+async function getDisposableDomains(): Promise<Set<string>> {
+  const now = Date.now()
+  if (cachedDisposableDomains && now < cacheExpiry) return cachedDisposableDomains
+
+  try {
+    const kvDomains = await getKV('config:disposable-domains')
+    if (kvDomains && Array.isArray(JSON.parse(kvDomains))) {
+      cachedDisposableDomains = new Set(JSON.parse(kvDomains))
+      cacheExpiry = now + 3600_000 // Cache for 1 hour
+      return cachedDisposableDomains
+    }
+  } catch {
+    // KV unavailable or invalid — fall through to hardcoded
+  }
+
+  cachedDisposableDomains = DEFAULT_DISPOSABLE_DOMAINS
+  cacheExpiry = now + 300_000 // Cache fallback for 5 minutes
+  return cachedDisposableDomains
+}
 
 /**
  * Normalize email to prevent alias farming:
@@ -99,9 +122,10 @@ export async function POST(request: NextRequest) {
 
     const normalizedEmail = normalizeEmail(email)
 
-    // Block disposable email domains
+    // Block disposable email domains (KV-overridable with hardcoded fallback)
+    const disposableDomains = await getDisposableDomains()
     const domain = normalizedEmail.split('@')[1]
-    if (domain && DISPOSABLE_DOMAINS.has(domain)) {
+    if (domain && disposableDomains.has(domain)) {
       return NextResponse.json(
         { error: 'Please use a non-disposable email address.' },
         { status: 400 }

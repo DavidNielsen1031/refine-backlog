@@ -12,7 +12,7 @@ const faqs = [
   },
   {
     q: "Is Speclint free?",
-    a: "Yes, Speclint has a free tier: 5 items per request, 3 requests per day, no credit card required. Solo ($29/month) and Team ($79/month) plans unlock unlimited requests, larger batch sizes, and advanced features like codebase context."
+    a: "Yes, Speclint has a free tier: 5 items per request, 3 requests per day, 1 AI rewrite per day, no credit card required. Lite ($9/month), Solo ($29/month), and Team ($79/month) plans unlock more rewrites, larger batch sizes, and advanced features like codebase context and agent-targeted output."
   },
   {
     q: "Does Speclint work with Cursor, Codex, and Claude Code?",
@@ -29,6 +29,10 @@ const faqs = [
   {
     q: "Can I use Speclint via API without GitHub?",
     a: "Yes, Speclint has a REST API at speclint.ai/api/lint. Send a POST request with your issues as JSON and get back scored, refined specs. Works with any CI/CD pipeline, issue tracker, or custom tooling."
+  },
+  {
+    q: "Can't I just use ChatGPT to improve my specs?",
+    a: "ChatGPT optimizes for readability — it makes your spec sound better. Speclint optimizes for agent task completion — it makes your spec work better. The difference is measurable: Speclint scores each spec on 5 dimensions (testable criteria, constraints, measurable outcomes, verification steps, vague verb detection), rewrites only the failing parts, then re-scores to prove improvement. ChatGPT can't score, can't re-score, and can't gate your CI pipeline."
   },
   {
     q: "How is Speclint different from just writing better tickets?",

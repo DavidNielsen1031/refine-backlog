@@ -51,6 +51,19 @@ function logKvStatus() {
   }
 }
 
+// --- Generic KV get (for config values) ---
+
+export async function getKV(key: string): Promise<string | null> {
+  const r = getRedis()
+  if (!r) return null
+  try {
+    const val = await r.get(key)
+    return typeof val === 'string' ? val : val ? JSON.stringify(val) : null
+  } catch {
+    return null
+  }
+}
+
 // --- Subscription CRUD ---
 
 export async function setSubscription(customerId: string, data: SubscriptionData): Promise<void> {

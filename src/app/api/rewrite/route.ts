@@ -96,8 +96,10 @@ export async function POST(request: NextRequest) {
       max_iterations,
     } = body
 
-    // B2: Accept license key from Authorization: Bearer header, x-license-key header (compat),
-    // or fall back to license_key in body (deprecated).
+    // B2: Accept license key from auth sources in strict priority order:
+    //   1. Authorization: Bearer <key> (preferred — standard HTTP auth)
+    //   2. x-license-key header (backwards compat for early adopters)
+    //   3. license_key in request body (DEPRECATED — logged, will be removed)
     const authHeader = request.headers.get('authorization')
     const xLicenseKey = request.headers.get('x-license-key')
     let license_key: string | null = null
