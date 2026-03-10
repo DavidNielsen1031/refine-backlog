@@ -3,7 +3,7 @@
 import { Redis } from '@upstash/redis'
 
 interface SubscriptionData {
-  plan: 'pro' | 'team'
+  plan: 'lite' | 'pro' | 'team'
   status: 'active' | 'canceled'
   email?: string
   licenseKey: string
@@ -12,7 +12,7 @@ interface SubscriptionData {
 
 interface LicenseData {
   customerId: string
-  plan: 'pro' | 'team'
+  plan: 'lite' | 'pro' | 'team'
   status: 'active' | 'canceled'
 }
 
@@ -48,6 +48,19 @@ function logKvStatus() {
   if (!kvStatusLogged) {
     kvStatusLogged = true
     console.log(kvAvailable() ? 'KV: connected' : 'KV: fallback (in-memory)')
+  }
+}
+
+// --- Generic KV get (for config values) ---
+
+export async function getKV(key: string): Promise<string | null> {
+  const r = getRedis()
+  if (!r) return null
+  try {
+    const val = await r.get(key)
+    return typeof val === 'string' ? val : val ? JSON.stringify(val) : null
+  } catch {
+    return null
   }
 }
 

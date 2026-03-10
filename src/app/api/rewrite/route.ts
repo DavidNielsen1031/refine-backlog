@@ -1,39 +1,54 @@
-// /api/rewrite — AI-assisted spec rewrite endpoint (SL-027)
-import Anthropic from '@anthropic-ai/sdk'
+// /api/rewrite — Thin adapter that delegates to /api/refine with auto_rewrite: true
+//
+// This endpoint exists for backward compatibility. All rewrite logic now lives
+// in /api/refine's auto_rewrite path. This adapter converts the rewrite-specific
+// request shape (spec + gaps + score) into a refine request, then extracts the
+// rewrite result from the refine response.
+//
+// Auth priority: Bearer > x-license-key > body (deprecated)
+
 import { NextRequest, NextResponse } from 'next/server'
-import { checkRateLimit, resolveUserTier } from '@/lib/rate-limit'
-import { trackUsage } from '@/lib/telemetry'
-import { detectInjection } from '@/lib/injection-monitor'
-import { anthropic } from '@/lib/anthropic'
-
-const MODEL = 'claude-haiku-4-5'
-
-const SYSTEM_PROMPT = `You are a spec improvement assistant. You will receive a specification that scored poorly on a quality lint, along with the specific gaps that were identified.
-
-Your job is to REWRITE the spec to address each gap while preserving the developer's original intent and voice. Do not replace the spec — enhance it by adding the missing elements.
-
-For each gap, add concrete, specific content:
-- "has_measurable_outcome": Add a quantifiable business outcome to the problem statement
-- "has_testable_criteria": Add 2+ acceptance criteria starting with action verbs (Verify, Confirm, Validate, Check, Assert)
-- "has_constraints": Add technical constraints, scope limits, or assumptions
-- "no_vague_verbs": Make the title specific — replace "improve X" with what specifically changes
-- "has_definition_of_done": Add specific states, values, or thresholds that define completion
-
-Return ONLY valid JSON, no markdown fences:
-{
-  "rewritten": "the full improved spec text",
-  "changes": ["Description of change 1", "Description of change 2"]
-}`
+import { POST as refineHandler } from '@/app/api/refine/route'
 
 export async function POST(request: NextRequest) {
-  const startTime = Date.now()
-  const requestId = crypto.randomUUID()
-
   try {
     const body = await request.json()
-    const { spec, gaps, score } = body
+    const {
+      spec,
+      gaps,
+      score,
+      codebase_context,
+      breakdown,
+      mode,
+      target_agent,
+      max_iterations,
+    } = body
 
-    // Validate input
+    // ─── Auth: resolve license key from 3 sources ───
+    const authHeader = request.headers.get('authorization')
+    const xLicenseKey = request.headers.get('x-license-key')
+    let license_key: string | null = null
+    if (authHeader?.startsWith('Bearer ')) {
+      license_key = authHeader.slice(7)
+    } else if (xLicenseKey) {
+      license_key = xLicenseKey
+    } else if (body.license_key && typeof body.license_key === 'string') {
+      console.warn('[REWRITE] license_key in request body is deprecated; use Authorization: Bearer <key> header instead')
+      license_key = body.license_key
+    }
+
+    if (!license_key || typeof license_key !== 'string') {
+      return NextResponse.json(
+        { error: 'A free license key is required for rewrites. Get one at https://speclint.ai/get-key — it takes 10 seconds.' },
+        { status: 401 }
+      )
+    }
+
+    if (license_key.length > 256) {
+      return NextResponse.json({ error: 'Invalid license key format' }, { status: 400 })
+    }
+
+    // ─── Validate required rewrite inputs ───
     if (!spec || typeof spec !== 'string' || spec.trim() === '') {
       return NextResponse.json({ error: "'spec' is required and must be a non-empty string" }, { status: 400 })
     }
@@ -44,135 +59,158 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "'score' is required and must be a number" }, { status: 400 })
     }
 
-    // Resolve tier from license key
-    const licenseKey = request.headers.get('x-license-key')
-    const tier = await resolveUserTier(licenseKey)
-
-    // Rate limiting
-    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-               request.headers.get('x-real-ip') ||
-               'unknown'
-    const rateCheck = await checkRateLimit(ip, tier, 'ratelimit-rewrite')
-
-    if (!rateCheck.allowed) {
-      return NextResponse.json(
-        {
-          error: 'Daily request limit reached on the free tier (3 requests/day). Upgrade to Solo for unlimited requests at $29/month.',
-          upgrade: 'https://speclint.ai/pricing',
-          tier: rateCheck.tier,
-        },
-        { status: 429 }
-      )
+    // ─── Validate optional params ───
+    if (codebase_context !== undefined) {
+      if (typeof codebase_context !== 'object' || codebase_context === null || Array.isArray(codebase_context)) {
+        return NextResponse.json(
+          { error: "'codebase_context' must be an object with optional stack, patterns, and constraints arrays" },
+          { status: 400 }
+        )
+      }
+      const { stack, patterns, constraints } = codebase_context
+      if (stack !== undefined && (!Array.isArray(stack) || !stack.every((s: unknown) => typeof s === 'string'))) {
+        return NextResponse.json({ error: "'codebase_context.stack' must be an array of strings" }, { status: 400 })
+      }
+      if (patterns !== undefined && (!Array.isArray(patterns) || !patterns.every((s: unknown) => typeof s === 'string'))) {
+        return NextResponse.json({ error: "'codebase_context.patterns' must be an array of strings" }, { status: 400 })
+      }
+      if (constraints !== undefined && (!Array.isArray(constraints) || !constraints.every((s: unknown) => typeof s === 'string'))) {
+        return NextResponse.json({ error: "'codebase_context.constraints' must be an array of strings" }, { status: 400 })
+      }
     }
 
-    // SEC-005: Prompt injection monitoring (non-blocking, monitor only)
-    const injectionResult = detectInjection(spec)
+    if (mode !== undefined) {
+      const { VALID_MODES } = await import('@/lib/rewrite-types')
+      if (!VALID_MODES.includes(mode)) {
+        return NextResponse.json({ error: `'mode' must be one of: ${VALID_MODES.join(', ')}` }, { status: 400 })
+      }
+    }
 
-    // Call LLM to generate rewrite
-    const userMessage = `Original spec:\n${spec}\n\nGaps to address:\n${gaps.join('\n')}\n\nOriginal score: ${score}/100`
+    if (target_agent !== undefined) {
+      const { VALID_TARGET_AGENTS } = await import('@/lib/rewrite-types')
+      if (!VALID_TARGET_AGENTS.includes(target_agent)) {
+        return NextResponse.json({ error: `'target_agent' must be one of: ${VALID_TARGET_AGENTS.join(', ')}` }, { status: 400 })
+      }
+    }
 
-    const response = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userMessage }],
+    if (max_iterations !== undefined) {
+      if (typeof max_iterations !== 'number' || !Number.isInteger(max_iterations) || max_iterations < 1 || max_iterations > 3) {
+        return NextResponse.json({ error: "'max_iterations' must be an integer between 1 and 3" }, { status: 400 })
+      }
+    }
+
+    // ─── Build refine request with auto_rewrite: true ───
+    const refineBody = {
+      items: [spec],
+      preserve_structure: true,
+      auto_rewrite: true,
+      rewrite_mode: mode,
+      target_agent,
+      max_iterations,
+      codebase_context,
+      // Pass rewrite-specific metadata for the refine endpoint to use
+      _rewrite_adapter: {
+        gaps,
+        score,
+        breakdown,
+      },
+    }
+
+    // Forward with license key as x-license-key header
+    const headers = new Headers()
+    headers.set('Content-Type', 'application/json')
+    headers.set('x-license-key', license_key)
+    headers.set('x-forwarded-endpoint', 'rewrite')
+
+    const refineReq = new NextRequest(new URL('/api/refine', request.url), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(refineBody),
     })
 
-    const rawText = response.content[0].type === 'text' ? response.content[0].text : ''
-    let rewritten: string
-    let changes: string[]
+    const refineRes = await refineHandler(refineReq)
+    const refineData = await refineRes.json()
 
-    try {
-      const cleaned = rawText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-      const parsed = JSON.parse(cleaned)
-      rewritten = parsed.rewritten ?? ''
-      changes = parsed.changes ?? []
-    } catch {
-      return NextResponse.json({ error: 'Failed to parse LLM response' }, { status: 500 })
+    // If refine returned an error, pass it through
+    if (!refineRes.ok) {
+      return NextResponse.json(refineData, { status: refineRes.status })
     }
 
-    const latencyMs = Date.now() - startTime
+    // ─── Extract rewrite result from refine response ───
+    const item = refineData.items?.[0]
+    if (!item) {
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    }
 
-    // Free tier: preview only
+    const rewriteResult = item.rewrite
+    const tier = refineData._meta?.tier || 'free'
+
+    // Build rate limit headers from refine response metadata
+    const rlHeaders = new Headers()
+    // Pass through any rate limit headers from refine
+    const refineRlLimit = refineRes.headers.get('X-RateLimit-Limit')
+    const refineRlRemaining = refineRes.headers.get('X-RateLimit-Remaining')
+    if (refineRlLimit) rlHeaders.set('X-RateLimit-Limit', refineRlLimit)
+    if (refineRlRemaining) rlHeaders.set('X-RateLimit-Remaining', refineRlRemaining)
+
+    if (!rewriteResult) {
+      // Item scored above threshold or rewrite failed — return score info
+      return NextResponse.json({
+        original: spec,
+        rewritten: spec,
+        changes: [],
+        new_score: item.completeness_score,
+        message: 'Spec already meets quality threshold; no rewrite needed.',
+      }, { headers: rlHeaders })
+    }
+
+    // Free tier: return preview only
     if (tier === 'free') {
-      await trackUsage({
-        requestId,
-        timestamp: new Date().toISOString(),
-        model: MODEL,
-        tier,
-        itemCount: 1,
-        inputTokens: response.usage.input_tokens,
-        outputTokens: response.usage.output_tokens,
-        costUsd: 0,
-        latencyMs,
-        retried: false,
-        ip,
-        endpoint: 'rewrite',
-        licenseKey: licenseKey ?? undefined,
-        injection_detected: injectionResult.detected,
-        injection_patterns: injectionResult.patterns,
-      })
+      // Build section-based preview
+      const rewritten = rewriteResult.rewritten || ''
+      const sectionBreaks = ['\n\n', '\n- ', '\n* ', '\n1.', '\n## ']
+      let previewEnd = 500
+      for (const br of sectionBreaks) {
+        const idx = rewritten.indexOf(br, 150)
+        if (idx > 0 && idx < previewEnd) {
+          previewEnd = idx
+          break
+        }
+      }
+      if (previewEnd === 500) {
+        const sentenceEnd = rewritten.lastIndexOf('. ', 500)
+        if (sentenceEnd > 150) previewEnd = sentenceEnd + 1
+      }
 
       return NextResponse.json({
         original: spec,
-        preview: rewritten.slice(0, 100),
-        upgrade_message: 'Full AI-assisted rewrite available on Solo plan ($29/mo)',
+        preview: rewritten.slice(0, previewEnd).trim(),
+        changes: rewriteResult.changes || [],
+        new_score: rewriteResult.new_score,
+        trajectory: rewriteResult.trajectory?.length > 0 ? rewriteResult.trajectory : undefined,
+        upgrade_message: 'Full rewritten spec available on Solo plan ($29/mo)',
         upgrade_url: 'https://speclint.ai/pricing',
         tier: 'free',
-      })
+      }, { headers: rlHeaders })
     }
 
-    // Solo/Team tier: re-lint the rewritten spec to get new_score
-    let newScore = score
-    try {
-      const origin = new URL(request.url).origin
-      const lintResponse = await fetch(`${origin}/api/lint`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(licenseKey ? { 'x-license-key': licenseKey } : {}),
-        },
-        body: JSON.stringify({ items: [rewritten], preserve_structure: true }),
-      })
-
-      if (lintResponse.ok) {
-        const lintData = await lintResponse.json()
-        // Extract score from lint response
-        const items = lintData.items ?? lintData.refined ?? []
-        if (items.length > 0 && items[0].completeness_score !== undefined) {
-          newScore = items[0].completeness_score
-        } else if (lintData.averageScore !== undefined) {
-          newScore = lintData.averageScore
-        }
-      }
-    } catch (err) {
-      console.error('[REWRITE] Re-lint failed, using original score:', err)
-    }
-
-    await trackUsage({
-      requestId,
-      timestamp: new Date().toISOString(),
-      model: MODEL,
-      tier,
-      itemCount: 1,
-      inputTokens: response.usage.input_tokens,
-      outputTokens: response.usage.output_tokens,
-      costUsd: 0,
-      latencyMs,
-      retried: false,
-      ip,
-      endpoint: 'rewrite',
-      licenseKey: licenseKey ?? undefined,
-      injection_detected: injectionResult.detected,
-      injection_patterns: injectionResult.patterns,
-    })
-
-    return NextResponse.json({
+    // Paid tier: full response
+    const responseBody: Record<string, unknown> = {
       original: spec,
-      rewritten,
-      changes,
-      new_score: newScore,
-    })
+      rewritten: rewriteResult.rewritten,
+      changes: rewriteResult.changes || [],
+      new_score: rewriteResult.new_score,
+    }
+
+    if (rewriteResult.structured && tier !== 'lite') {
+      responseBody.structured = rewriteResult.structured
+    }
+
+    if (rewriteResult.trajectory?.length > 0) {
+      responseBody.trajectory = rewriteResult.trajectory
+    }
+
+    return NextResponse.json(responseBody, { headers: rlHeaders })
   } catch (err) {
     console.error('[REWRITE] Unexpected error:', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
