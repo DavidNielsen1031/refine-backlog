@@ -218,6 +218,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Guard against oversized keys (KV key-length protection)
+    if (license_key.length > 256) {
+      return NextResponse.json(
+        { error: 'Invalid license key format' },
+        { status: 400 }
+      )
+    }
+
     // Validate required input
     if (!spec || typeof spec !== 'string' || spec.trim() === '') {
       return NextResponse.json(
@@ -342,11 +350,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Rate limiting keyed by license key (not IP)
+    // IP for telemetry only (not used for rate limiting — keyed by license key)
     const ip =
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
       request.headers.get('x-real-ip') ||
       'unknown'
+
+    // Rate limiting keyed by license key (not IP)
     const rateCheck = await checkRewriteRateLimit(licenseKey, tier)
 
     if (!rateCheck.allowed) {

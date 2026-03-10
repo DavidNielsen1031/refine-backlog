@@ -2,9 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { setSubscription, cancelSubscriptionByCustomer, getSubscriptionByCustomer } from '@/lib/kv'
 
+type PaidPlan = 'lite' | 'pro' | 'team'
+
+const VALID_PLANS: PaidPlan[] = ['lite', 'pro', 'team']
+
+const PLAN_DETAILS: Record<PaidPlan, { label: string; price: string; itemLimit: string; rewriteLimit: string; keyCount: string }> = {
+  lite:  { label: 'Lite',  price: '$9/month',  itemLimit: '5 specs per request',  rewriteLimit: '10 rewrites/day', keyCount: '1 license key' },
+  pro:   { label: 'Pro',   price: '$29/month', itemLimit: '25 specs per request', rewriteLimit: 'Unlimited rewrites', keyCount: '1 license key' },
+  team:  { label: 'Team',  price: '$79/month', itemLimit: '50 specs per request', rewriteLimit: 'Unlimited rewrites', keyCount: '5 license keys' },
+}
+
+function validatePlan(raw: unknown): PaidPlan {
+  if (typeof raw === 'string' && VALID_PLANS.includes(raw as PaidPlan)) {
+    return raw as PaidPlan
+  }
+  console.warn(`[WEBHOOK] Unknown plan "${raw}", defaulting to pro`)
+  return 'pro'
+}
+
 async function sendLicenseEmail(params: {
   to: string
-  plan: 'lite' | 'pro' | 'team'
+  plan: PaidPlan
   licenseKey: string
 }): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY
@@ -14,10 +32,11 @@ async function sendLicenseEmail(params: {
     return
   }
 
-  const planLabel = params.plan === 'team' ? 'Team' : params.plan === 'pro' ? 'Pro' : 'Lite'
-  const planPrice = params.plan === 'team' ? '$79/month' : params.plan === 'pro' ? '$29/month' : '$9/month'
-  const itemLimit = params.plan === 'team' ? '50 specs per request' : params.plan === 'pro' ? '25 specs per request' : '5 specs per request'
-  const keyCount = params.plan === 'team' ? '5 license keys' : '1 license key'
+  const details = PLAN_DETAILS[params.plan]
+  const planLabel = details.label
+  const planPrice = details.price
+  const itemLimit = details.itemLimit
+  const keyCount = details.keyCount
 
   const html = `
 <!DOCTYPE html>
@@ -25,7 +44,7 @@ async function sendLicenseEmail(params: {
 <head><meta charset="utf-8"></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 560px; margin: 0 auto; padding: 40px 20px; color: #1a1a1a;">
   <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">You're on Speclint ${planLabel} ✅</h1>
-  <p style="color: #666; margin-bottom: 32px;">${planPrice} · ${itemLimit} · ${keyCount}</p>
+  <p style="color: #666; margin-bottom: 32px;">${planPrice} · ${itemLimit} · ${details.rewriteLimit} · ${keyCount}</p>
 
   <div style="background: #f5f5f5; border-radius: 8px; padding: 20px; margin-bottom: 32px;">
     <p style="font-size: 12px; color: #888; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.05em;">Your License Key</p>
@@ -63,7 +82,7 @@ async function sendLicenseEmail(params: {
 </body>
 </html>`
 
-  const text = `You're on Speclint ${planLabel}
+  const text = `You're on Speclint ${planLabel} (${planPrice} · ${details.rewriteLimit})
 
 Your license key: ${params.licenseKey}
 
@@ -191,7 +210,7 @@ export async function POST(request: NextRequest) {
         customerId = (session.customer as string) || 'unknown'
 
         if (session.mode === 'subscription' && session.subscription && session.customer) {
-          const plan = (session.metadata?.plan as 'lite' | 'pro' | 'team') || 'pro'
+          const plan = validatePlan(session.metadata?.plan)
 
           // Idempotency check — license/route.ts may have already created a key on fast path
           const existing = await getSubscriptionByCustomer(customerId)
@@ -219,7 +238,7 @@ export async function POST(request: NextRequest) {
             }
 
             // 💰 Notify David on Telegram + Discord (fire and forget)
-            const planLabel = plan === 'team' ? 'Team $79/mo' : plan === 'pro' ? 'Pro $29/mo' : 'Lite $9/mo'
+            const planLabel = `${PLAN_DETAILS[plan].label} ${PLAN_DETAILS[plan].price.replace('month', 'mo')}`
             const telegramMsg =
               `💰 <b>New Speclint subscriber!</b>\n\n` +
               `📧 ${email}\n` +

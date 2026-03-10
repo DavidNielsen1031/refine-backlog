@@ -197,9 +197,13 @@ export function SpecTesterSection() {
   const handleRewrite = useCallback(async () => {
     if (!lintResult) return
 
-    // If no license key, show the key acquisition form
+    // If no license key, show the key acquisition form and scroll to it
     if (!licenseKey) {
       setShowKeyForm(true)
+      // Scroll to the key form after next render
+      setTimeout(() => {
+        document.getElementById('key-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
       return
     }
 
@@ -219,6 +223,14 @@ export function SpecTesterSection() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
+        // If key was revoked/invalid, clear it and re-show the form
+        if (res.status === 401) {
+          localStorage.removeItem(LICENSE_KEY_STORAGE_KEY)
+          setLicenseKey(null)
+          setShowKeyForm(true)
+          setError('Your license key is no longer valid. Please enter your email to get a new one.')
+          return
+        }
         throw new Error(data.error || `Rewrite failed (${res.status})`)
       }
 
@@ -430,7 +442,7 @@ export function SpecTesterSection() {
 
                     {/* Inline key acquisition form */}
                     {showKeyForm && !licenseKey && (
-                      <div className="mt-3 bg-[#111] border border-emerald-500/20 rounded-lg p-4">
+                      <div id="key-form" className="mt-3 bg-[#111] border border-emerald-500/20 rounded-lg p-4">
                         <p className="text-zinc-300 text-sm mb-3">
                           Create a free account to save your lint history and unlock Fix It
                         </p>
@@ -469,7 +481,7 @@ export function SpecTesterSection() {
                         setLicenseKey(null)
                         setShowKeyForm(false)
                       }}
-                      className="text-zinc-500 hover:text-zinc-300 underline transition-colors"
+                      className="text-zinc-500 hover:text-zinc-300 underline transition-colors min-h-[44px] min-w-[44px] flex items-center px-2"
                     >
                       change key
                     </button>
