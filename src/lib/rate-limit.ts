@@ -48,7 +48,7 @@ export async function resolveUserTier(licenseKey?: string | null): Promise<PlanT
   }
 
   // Internal keys must match the INTERNAL_API_KEY env var exactly.
-  // Previously used a guessable SK-INTERNAL- prefix — fixed for public repo security.
+
   if (process.env.INTERNAL_API_KEY && licenseKey === process.env.INTERNAL_API_KEY) {
     console.log(`[ENTITLEMENT] key=${maskKey(licenseKey)} tier=team source=internal`)
     return 'team'

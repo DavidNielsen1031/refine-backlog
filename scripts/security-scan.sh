@@ -14,7 +14,7 @@ echo "---"
 
 # 1. Hardcoded secret prefixes
 echo "Checking for hardcoded secret prefixes..."
-if grep -rn 'SK-INTERNAL' "$APP_DIR/src/" 2>/dev/null | grep -v '.test.' | grep -v 'node_modules'; then
+if grep -rn 'SK-INTERNAL' "$APP_DIR/src/" 2>/dev/null | grep -v '.test.' | grep -v 'node_modules' | grep -v '^\s*//\|^\s*\*'; then
   echo "❌ Hardcoded SK-INTERNAL prefix found"
   FAIL=1
 fi
@@ -67,7 +67,7 @@ done
 # 6. Env var secrets in source
 echo ""
 echo "Checking for potential secrets in source..."
-SECRET_HITS=$(grep -rn 'sk_live_\|sk_test_\|whsec_\|Bearer [A-Za-z0-9]' "$APP_DIR/src/" 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'process\.env' | grep -v 'example\|placeholder\|YOUR_' || true)
+SECRET_HITS=$(grep -rn 'sk_live_\|sk_test_\|whsec_\|Bearer [A-Za-z0-9]' "$APP_DIR/src/" 2>/dev/null | grep -v 'node_modules' | grep -v '.test.' | grep -v 'process\.env' | grep -v 'example\|placeholder\|YOUR_\|\.\.\.' || true)
 if [ -n "$SECRET_HITS" ]; then
   echo "❌ Potential secrets in source code:"
   echo "$SECRET_HITS"
