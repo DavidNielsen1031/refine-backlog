@@ -108,3 +108,9 @@ If it scores well, great. You have confirmation. If it scores in the 50s or 60s,
 The spec is always cheaper to fix than the code.
 
 → Run your next spec through Speclint before you write the first line of code: [speclint.ai](https://speclint.ai)
+
+---
+
+## Related Posts
+
+- [From 50 to 100: What Failing Specs Taught Us About Writing Better Ones](/blog/from-50-to-100-failing-specs) — See how we improved scores and what we learned about the patterns that make specs fail.

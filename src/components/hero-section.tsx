@@ -76,8 +76,11 @@ export function HeroSection() {
               <span className="text-white">Clean spec in. Clean code out.</span><br />
               <span className="text-emerald-400">FIX THE SPEC.</span>
             </h1>
-            <p className="text-lg text-zinc-400 mb-4 leading-relaxed max-w-lg">
+            <p className="text-lg text-zinc-400 mb-2 leading-relaxed max-w-lg">
               Speclint scores your specs before agents touch them — and rewrites the ones that fail.
+            </p>
+            <p className="text-sm text-zinc-500 mb-4 leading-relaxed max-w-lg">
+              For dev teams using Cursor, Codex, or Claude Code to write code from specs.
             </p>
             <p className="text-base text-zinc-500 mb-5 font-mono">
               // lint first. ship right.
@@ -85,29 +88,29 @@ export function HeroSection() {
             <p className="text-sm text-zinc-500 mb-10 font-mono">
               completeness_score: 85 → agent_ready: true
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-3 mb-4">
               <Button
                 className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold px-6 py-3 text-base"
-                onClick={() => window.location.href = '/get-key'}
+                onClick={() => document.getElementById('try-it')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Lint your first spec — free
+                Try it now
               </Button>
-              <Button
-                variant="outline"
-                className="border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white px-6 py-3 text-base font-mono"
+            </div>
+            <div className="flex flex-wrap gap-4">
+              <button
+                className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors underline underline-offset-2"
                 onClick={() => document.getElementById('github-action')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 View GitHub Action ↓
-              </Button>
-              <Button
-                variant="ghost"
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800 px-6 py-3 text-base"
+              </button>
+              <button
+                className="text-sm text-zinc-500 hover:text-zinc-300 transition-colors underline underline-offset-2"
                 onClick={() => window.location.href = '/pricing'}
               >
                 See Pricing
-              </Button>
+              </button>
             </div>
-            <p className="mt-4 text-xs text-zinc-600 font-mono">No signup · 5 lints/day free · open source</p>
+            <p className="mt-4 text-xs text-zinc-600 font-mono">No signup · 3 requests/day free · open source</p>
           </div>
 
           {/* Right: animated score visualization */}

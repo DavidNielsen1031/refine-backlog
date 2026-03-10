@@ -8,7 +8,7 @@ const faqs = [
   },
   {
     q: "Is this free?",
-    a: "The scoring engine, CLI (npx speclint), and GitHub Action are MIT open source — free forever. The cloud API has a free tier: 5 lints/day, 1 rewrite preview per day, no credit card required. Paid plans: Lite ($9/mo) for full rewrites, Solo ($29/mo) for unlimited rewrites + codebase_context, Team ($79/mo) for batch operations + cross-spec context."
+    a: "The scoring engine, CLI (npx speclint), and GitHub Action are MIT open source — free forever. The cloud API has a free tier: 3 requests/day · 5 items per request, 1 rewrite preview per day, no credit card required. Paid plans: Lite ($9/mo) for full rewrites, Solo ($29/mo) for unlimited rewrites + codebase_context, Team ($79/mo) for batch operations + cross-spec context."
   },
   {
     q: "Can't I just use ChatGPT to improve my specs?",

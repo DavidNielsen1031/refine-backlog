@@ -19,6 +19,10 @@ function formatDate(dateStr: string): string {
   }
 }
 
+function estimateReadingTime(content: string): number {
+  return Math.ceil(content.split(/\s+/).length / 200)
+}
+
 export default function BlogIndex() {
   const posts = getAllPosts()
 
@@ -67,9 +71,10 @@ export default function BlogIndex() {
                       {post.description}
                     </p>
                   </div>
-                  <span className="text-zinc-500 text-sm font-mono whitespace-nowrap mt-1 shrink-0">
-                    {formatDate(post.date)}
-                  </span>
+                  <div className="text-zinc-500 text-sm font-mono whitespace-nowrap mt-1 shrink-0 text-right">
+                    <div>{formatDate(post.date)}</div>
+                    <div>{estimateReadingTime(post.content)} min read</div>
+                  </div>
                 </div>
               </article>
             </Link>

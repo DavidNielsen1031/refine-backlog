@@ -17,9 +17,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const post = getPostBySlug(slug)
   if (!post) return {}
   return {
-    title: `${post.title} — Speclint Blog`,
+    title: `${post.title} | Speclint Blog`,
     description: post.description,
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      type: 'article',
+      publishedTime: post.date,
+    },
   }
+}
+
+function estimateReadingTime(content: string): number {
+  return Math.ceil(content.split(/\s+/).length / 200)
 }
 
 function formatDate(dateStr: string): string {
@@ -81,6 +91,8 @@ export default async function BlogPostPage({ params }: Props) {
             <span>{post.author}</span>
             <span>·</span>
             <time dateTime={post.date}>{formatDate(post.date)}</time>
+            <span>·</span>
+            <span>{estimateReadingTime(post.content)} min read</span>
           </div>
         </header>
 
@@ -89,6 +101,26 @@ export default async function BlogPostPage({ params }: Props) {
           className="text-zinc-300 leading-relaxed [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-white [&_h1]:mt-8 [&_h1]:mb-4 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-white [&_h3]:mt-8 [&_h3]:mb-3 [&_p]:my-4 [&_p]:leading-7 [&_ul]:my-4 [&_ol]:my-4 [&_li]:leading-7 [&_pre]:my-6 [&_a]:text-emerald-400 [&_a:hover]:text-emerald-300 [&_hr]:border-zinc-800 [&_hr]:my-8 [&_strong]:text-zinc-100 [&_strong]:font-semibold"
           dangerouslySetInnerHTML={{ __html: html }}
         />
+
+        {/* Social sharing */}
+        <div className="flex gap-4 mt-8 pt-4 border-t border-zinc-800">
+          <a
+            href={`https://x.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(`https://speclint.ai/blog/${post.slug}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-zinc-500 hover:text-zinc-100 font-mono transition-colors"
+          >
+            Share on X
+          </a>
+          <a
+            href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(`https://speclint.ai/blog/${post.slug}`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-zinc-500 hover:text-zinc-100 font-mono transition-colors"
+          >
+            Share on LinkedIn
+          </a>
+        </div>
       </div>
     </main>
   )

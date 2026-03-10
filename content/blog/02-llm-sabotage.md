@@ -138,3 +138,9 @@ If you ship an AI pipeline that evaluates structured text — specs, requirement
 ---
 
 Building an AI pipeline that scores or evaluates structured text? Test your evaluator against LLM-reformatted inputs — not just clean originals. See how Speclint handles it in practice at [speclint.ai](https://speclint.ai).
+
+---
+
+## Related Posts
+
+- [The Quality Gate That Changed How Our AI Agent Writes Code](/blog/spec-quality-gate) — How we solved output drift with a single quality gate that stops the agent before it sees a bad spec.

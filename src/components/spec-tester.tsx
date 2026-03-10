@@ -239,7 +239,7 @@ export function SpecTesterSection() {
         }
       } else {
         // Item scored above threshold — no rewrite needed
-        setError('Spec already meets quality threshold — no rewrite needed.')
+        setError(`✓ Your spec is agent-ready! Score: ${item.completeness_score}/100 — no rewrite needed.`)
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -350,20 +350,34 @@ export function SpecTesterSection() {
                 {specText.length.toLocaleString()} / 10,000
               </span>
             </div>
-            <button
-              onClick={handleLint}
-              disabled={linting || !specText.trim()}
-              className="w-full sm:w-auto px-6 py-3 bg-white text-black font-semibold text-sm rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {linting ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Linting…
-                </span>
-              ) : (
-                'Lint it'
-              )}
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleLint}
+                disabled={linting || !specText.trim()}
+                className="flex-1 sm:flex-none px-6 py-3 bg-white text-black font-semibold text-sm rounded-lg hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {linting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    Linting…
+                  </span>
+                ) : (
+                  'Lint it'
+                )}
+              </button>
+              <button
+                onClick={() => {
+                  setSpecText('As a user I want to be able to do things in the app so that stuff works better and the experience is improved for everyone involved in the process')
+                  setLintResult(null)
+                  setRewriteResult(null)
+                  setError(null)
+                  setDisplayScore(0)
+                }}
+                className="px-4 py-3 bg-transparent border border-zinc-700 text-zinc-400 font-mono text-xs rounded-lg hover:border-zinc-500 hover:text-zinc-200 transition-all"
+              >
+                Try a bad spec
+              </button>
+            </div>
           </div>
 
           {/* ---- RIGHT: Results ---- */}
@@ -380,10 +394,10 @@ export function SpecTesterSection() {
               </div>
             )}
 
-            {/* Error */}
+            {/* Error / Success message */}
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-                <p className="text-red-400 text-sm">{error}</p>
+              <div className={`rounded-lg p-4 ${error.startsWith('✓') ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+                <p className={`text-sm ${error.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>{error}</p>
               </div>
             )}
 

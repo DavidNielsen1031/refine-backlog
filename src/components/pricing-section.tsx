@@ -12,7 +12,7 @@ const PLANS = [
     per: null,
     description: "Kick the tires. No credit card.",
     features: [
-      "5 lints/day",
+      "3 requests/day · 5 items per request",
       "All 5 scoring dimensions",
       "JSON response via /api/lint",
       "1 rewrite preview/day (250-char preview + score delta)",
@@ -63,7 +63,7 @@ const PLANS = [
       "50 issues per batch request",
       "Rewrite chain (iterative refinement across multiple passes)",
       "Cross-spec context (score specs relative to your existing backlog)",
-      "Team analytics dashboard (coming soon)",
+      "Usage dashboard (Solo, Team)",
       "SLA + dedicated support",
     ],
     cta: "Start Team",
@@ -122,6 +122,9 @@ export function PricingSection() {
           <p className="text-zinc-500 text-sm mt-3 font-mono">
             Scoring engine, CLI, and GitHub Action are free and open source. Cloud features are where the paid plans start.
           </p>
+          <div className="mt-4 inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-4 py-1.5">
+            <span className="text-emerald-400 text-xs font-semibold">💡 Save 20% with annual billing — coming soon</span>
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -200,7 +203,7 @@ export function PricingSection() {
 
         <div className="mt-8 bg-[#0f0f0f] border border-[#1e1e1e] rounded-lg p-6 text-center">
           <p className="text-white font-semibold mb-2">Buying for a team?</p>
-          <p className="text-zinc-400 text-sm mb-4">Team plan includes batch linting, cross-spec context, and an analytics dashboard (coming soon). No per-seat pricing, ever.</p>
+          <p className="text-zinc-400 text-sm mb-4">Team plan includes batch linting, cross-spec context, and a usage dashboard. No per-seat pricing, ever.</p>
           <Button
             className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold"
             onClick={() => handleClick("Team")}

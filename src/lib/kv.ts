@@ -189,11 +189,16 @@ export async function cancelSubscriptionById(subscriptionId: string): Promise<vo
 
 // --- Rate Limiting (KV-backed) ---
 
-export async function checkRateLimitKV(ip: string, limit: number, prefix = 'ratelimit'): Promise<{ count: number; allowed: boolean }> {
+export async function checkRateLimitKV(ip: string, limit: number, prefix = 'ratelimit'): Promise<{ count: number; allowed: boolean; limit: number; reset: number }> {
   logKvStatus()
   const today = new Date().toISOString().slice(0, 10)
   const key = `${prefix}:${ip}:${today}`
   const r = getRedis()
+
+  // Reset timestamp: midnight UTC of the next day (end of today's window)
+  const tomorrow = new Date(today + 'T00:00:00Z')
+  tomorrow.setUTCDate(tomorrow.getUTCDate() + 1)
+  const reset = Math.floor(tomorrow.getTime() / 1000)
 
   if (r) {
     try {
@@ -201,7 +206,7 @@ export async function checkRateLimitKV(ip: string, limit: number, prefix = 'rate
       if (count === 1) {
         await r.expire(key, 86400)
       }
-      return { count, allowed: count <= limit }
+      return { count, allowed: count <= limit, limit, reset }
     } catch (err) {
       console.error('[KV] checkRateLimitKV failed, using memory fallback:', err)
     }
@@ -210,7 +215,7 @@ export async function checkRateLimitKV(ip: string, limit: number, prefix = 'rate
   const memKey = `${ip}:${today}`
   const current = (memRateLimits.get(memKey) ?? 0) + 1
   memRateLimits.set(memKey, current)
-  return { count: current, allowed: current <= limit }
+  return { count: current, allowed: current <= limit, limit, reset }
 }
 
 // --- Free Key CRUD ---

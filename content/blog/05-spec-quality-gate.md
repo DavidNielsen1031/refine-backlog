@@ -147,3 +147,9 @@ Upgrading your specs is not a planning tax. It's a force multiplier on every age
 Add `enforce` mode to your agent workflow in under 10 minutes: [speclint.ai/docs/enforce](https://speclint.ai/docs/enforce)
 
 Not using Speclint yet? Score your first spec free at [speclint.ai](https://speclint.ai).
+
+---
+
+## Related Posts
+
+- [Why Your AI Spec Linter Needs preserve_structure](/blog/preserve-structure) — How we handle existing spec formats and why chunking strategy matters as much as the scorer itself.
