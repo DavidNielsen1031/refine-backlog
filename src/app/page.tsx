@@ -15,14 +15,22 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-[#0a0a0a]">
       <HeroSection />
-      <HowItWorksSection />
-      <SpecTesterSection />
-      <ScoreBreakdownSection />
+      <div id="how-it-works" className="scroll-mt-16">
+        <HowItWorksSection />
+      </div>
+      <div id="try-it" className="scroll-mt-16">
+        <SpecTesterSection />
+      </div>
+      <div id="scoring" className="scroll-mt-16">
+        <ScoreBreakdownSection />
+      </div>
       <RemediationSection />
       <AgentPipelineSection />
       <CustomerZeroSection />
       <GitHubActionSection />
-      <PricingSection />
+      <div id="pricing" className="scroll-mt-16">
+        <PricingSection />
+      </div>
       <FAQSection />
       <ForAIAgentsSection />
       <Footer />
