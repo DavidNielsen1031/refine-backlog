@@ -73,8 +73,8 @@ export function HeroSection() {
               </a>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-4">
-              <span className="text-white">Garbage spec in. Garbage code out.</span><br />
-              <span className="text-emerald-400">FIX THE INPUT.</span>
+              <span className="text-white">Clean spec in. Clean code out.</span><br />
+              <span className="text-emerald-400">FIX THE SPEC.</span>
             </h1>
             <p className="text-lg text-zinc-400 mb-4 leading-relaxed max-w-lg">
               Speclint scores your specs before agents touch them — and rewrites the ones that fail.
