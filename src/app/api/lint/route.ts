@@ -2,8 +2,11 @@
 // /api/refine is kept as a backward-compatible alias
 import { POST as refineHandler, GET } from '@/app/api/refine/route'
 import { NextRequest, NextResponse } from 'next/server'
+import { corsOptions } from '@/lib/cors'
 
 export { GET }
+
+export { corsOptions as OPTIONS }
 
 export async function POST(request: NextRequest) {
   // Content-Type guard
@@ -22,5 +25,16 @@ export async function POST(request: NextRequest) {
     headers,
     body,
   })
-  return refineHandler(newReq)
+  const response = await refineHandler(newReq)
+
+  // Add CORS headers to the response
+  const newResponse = new NextResponse(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  })
+  newResponse.headers.set('Access-Control-Allow-Origin', '*')
+  newResponse.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  newResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-License-Key')
+  return newResponse
 }

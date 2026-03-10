@@ -231,7 +231,28 @@ async function getDailyRunningTotal(day: string): Promise<{ calls: number; costU
   }
 }
 
+/**
+ * Hash a raw IP address for privacy-safe storage.
+ * Uses HMAC-SHA256 with an optional salt from environment.
+ */
+function hashIp(rawIp: string): string {
+  return createHash('sha256')
+    .update(rawIp + (process.env.IP_SALT || 'speclint'))
+    .digest('hex')
+    .slice(0, 16)
+}
+
 export async function trackUsage(event: UsageEvent): Promise<void> {
+  // Hash IP before any storage or notification (PII protection)
+  if (event.ip && !event.ip.startsWith('fp:')) {
+    event = { ...event, ip: hashIp(event.ip) }
+  }
+
+  // Truncate stored items aggressively (500 chars max) to limit PII exposure
+  if (event.items) {
+    event = { ...event, items: event.items.map(i => i.slice(0, 500)) }
+  }
+
   // Fire Discord notification immediately (non-blocking)
   notifyDiscord(event).catch(() => {})
 

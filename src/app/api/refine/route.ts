@@ -11,6 +11,9 @@ import { VALID_TARGET_AGENTS, VALID_MODES } from '@/lib/rewrite-types'
 import type { TargetAgent, RewriteMode } from '@/lib/rewrite-types'
 import { buildSystemPrompt } from '@/lib/rewrite-prompt'
 import { getClientIp } from '@/lib/ip'
+import { corsOptions, CORS_HEADERS } from '@/lib/cors'
+
+export { corsOptions as OPTIONS }
 
 interface IssueInput {
   title: string
@@ -249,6 +252,13 @@ export async function POST(request: NextRequest) {
     const ip = getClientIp(request)
     const rateCheck = await checkRateLimit(ip, tier)
 
+    const rateLimitHeaders = {
+      'X-RateLimit-Limit': String(rateCheck.limit === Infinity ? 'unlimited' : rateCheck.limit),
+      'X-RateLimit-Remaining': String(rateCheck.remaining === Infinity ? 'unlimited' : Math.max(0, rateCheck.remaining)),
+      'X-RateLimit-Reset': String(rateCheck.reset),
+      ...CORS_HEADERS,
+    }
+
     if (!rateCheck.allowed) {
       return NextResponse.json(
         {
@@ -256,7 +266,7 @@ export async function POST(request: NextRequest) {
           upgrade: 'https://speclint.ai/pricing',
           tier: rateCheck.tier,
         },
-        { status: 429 }
+        { status: 429, headers: rateLimitHeaders }
       )
     }
 
@@ -611,7 +621,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       tier,
       endpoint: resolvedEndpoint,
-      inputItems: items.map(i => i.slice(0, 2000)),
+      inputItems: items.map(i => i.slice(0, 500)),
       refinedOutput: refinedItems,
       scores: scores.map(s => ({
         title: s.title,
@@ -677,7 +687,7 @@ export async function POST(request: NextRequest) {
         tier,
         codebase_context_used: codebaseContextUsed,
       }
-    }, { status: 200 })
+    }, { status: 200, headers: rateLimitHeaders })
 
   } catch (error) {
     console.error('API Error:', error)
