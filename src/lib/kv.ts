@@ -3,7 +3,7 @@
 import { Redis } from '@upstash/redis'
 
 interface SubscriptionData {
-  plan: 'pro' | 'team'
+  plan: 'lite' | 'pro' | 'team'
   status: 'active' | 'canceled'
   email?: string
   licenseKey: string
@@ -12,7 +12,7 @@ interface SubscriptionData {
 
 interface LicenseData {
   customerId: string
-  plan: 'pro' | 'team'
+  plan: 'lite' | 'pro' | 'team'
   status: 'active' | 'canceled'
 }
 
@@ -48,6 +48,19 @@ function logKvStatus() {
   if (!kvStatusLogged) {
     kvStatusLogged = true
     console.log(kvAvailable() ? 'KV: connected' : 'KV: fallback (in-memory)')
+  }
+}
+
+// --- Generic KV get (for config values) ---
+
+export async function getKV(key: string): Promise<string | null> {
+  const r = getRedis()
+  if (!r) return null
+  try {
+    const val = await r.get(key)
+    return typeof val === 'string' ? val : val ? JSON.stringify(val) : null
+  } catch {
+    return null
   }
 }
 
@@ -117,6 +130,11 @@ export async function getSubscriptionByCustomer(customerId: string): Promise<Sub
 }
 
 export async function getLicenseData(licenseKey: string): Promise<LicenseData | null> {
+  // SK-INTERNAL keys are always team tier — not stored in Redis.
+  // Returning a synthetic record prevents 401s at /api/traces, /api/key-info, etc.
+  if (licenseKey.startsWith('SK-INTERNAL-')) {
+    return { customerId: 'internal', plan: 'team', status: 'active' }
+  }
   logKvStatus()
   const r = getRedis()
   if (r) {
@@ -247,7 +265,7 @@ export async function getFreeKey(email: string): Promise<string | null> {
 
 export interface LintReceiptData {
   score: number
-  breakdown: Record<string, boolean>
+  breakdown: Record<string, boolean | string>
   title: string
   timestamp: string
   tier: string
@@ -273,7 +291,102 @@ export async function getLintReceipt(lintId: string): Promise<LintReceiptData | 
   }
 }
 
+// --- Full Trace Storage (SL-060) ---
+
+export interface TraceData {
+  traceId: string          // = requestId (UUID)
+  lintId: string           // "spl_" + 8 chars
+  timestamp: string        // ISO 8601
+  tier: string
+  endpoint: string
+  inputItems: string[]     // raw input specs (truncated at 2000 chars each)
+  refinedOutput: object[]  // full LLM output (RefinedItem array)
+  scores: { title: string; completeness_score: number; agent_ready: boolean; breakdown: Record<string, boolean | string> }[]
+  averageScore: number
+  agentReadyCount: number
+  model: string
+  inputTokens: number
+  outputTokens: number
+  latencyMs: number
+}
+
+const MAX_TRACES_PER_DAY = 500
+const TRACE_TTL_SECONDS = 30 * 24 * 3600 // 30 days
+
+function traceKey(date: string): string {
+  return `traces:${date}`
+}
+
+/**
+ * Store a full trace for eval analysis.
+ * Fire-and-forget safe — catch errors externally with .catch(() => {})
+ */
+export async function storeTrace(data: TraceData): Promise<void> {
+  const r = getRedis()
+  if (!r) return
+
+  const date = data.timestamp.slice(0, 10) // YYYY-MM-DD
+  const key = traceKey(date)
+
+  try {
+    // Check daily cap
+    const count = await r.llen(key)
+    if (count >= MAX_TRACES_PER_DAY) return
+
+    const serialized = JSON.stringify(data)
+    const newCount = await r.rpush(key, serialized)
+
+    // Set TTL only on first push
+    if (newCount === 1) {
+      await r.expire(key, TRACE_TTL_SECONDS)
+    }
+  } catch (err) {
+    console.error('[KV] storeTrace failed:', err)
+  }
+}
+
+/**
+ * Fetch traces for a given date (YYYY-MM-DD).
+ * Used for eval analysis.
+ */
+export async function getTraces(date: string, limit = 50): Promise<TraceData[]> {
+  const r = getRedis()
+  if (!r) return []
+
+  const clampedLimit = Math.min(limit, 200)
+  const key = traceKey(date)
+
+  try {
+    const raw = await r.lrange(key, 0, clampedLimit - 1)
+    return raw.map(item => {
+      if (typeof item === 'string') return JSON.parse(item) as TraceData
+      return item as unknown as TraceData
+    })
+  } catch (err) {
+    console.error('[KV] getTraces failed:', err)
+    return []
+  }
+}
+
 // --- Debug / Diagnostic ---
+
+/**
+ * Read how many times a license key has been used today.
+ * Uses the per-license telemetry list: telemetry:license:{key}:daily:{YYYY-MM-DD}
+ * Returns 0 if KV is not connected or the key has never been used today.
+ */
+export async function getKeyUsageToday(licenseKey: string): Promise<number> {
+  const r = getRedis()
+  if (!r) return 0
+  const today = new Date().toISOString().slice(0, 10)
+  try {
+    const count = await r.llen(`telemetry:license:${licenseKey}:daily:${today}`)
+    return count ?? 0
+  } catch (err) {
+    console.error('[KV] getKeyUsageToday failed:', err)
+    return 0
+  }
+}
 
 export async function debugKvRoundTrip(): Promise<{ kvConnected: boolean; sampleReadWriteWorking: boolean }> {
   const r = getRedis()

@@ -38,6 +38,7 @@ vi.mock('@/lib/kv', () => ({
   checkRateLimitKV: vi.fn().mockResolvedValue({ count: 1, allowed: true }),
   isKvConnected: vi.fn(() => false),
   storeLintReceipt: vi.fn().mockResolvedValue(undefined),
+  storeTrace: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('@/lib/telemetry', () => ({

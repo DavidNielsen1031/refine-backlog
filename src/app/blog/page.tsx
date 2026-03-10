@@ -33,6 +33,7 @@ export default function BlogIndex() {
           <nav className="flex items-center gap-6 text-sm font-mono">
             <Link href="/pricing" className="text-zinc-400 hover:text-zinc-100 transition-colors">pricing</Link>
             <Link href="/blog" className="text-emerald-400">blog</Link>
+            <Link href="/dashboard" className="text-zinc-400 hover:text-zinc-100 transition-colors">dashboard</Link>
             <Link href="/get-key" className="bg-emerald-500 hover:bg-emerald-400 text-black px-3 py-1.5 rounded transition-colors font-semibold">
               get key
             </Link>

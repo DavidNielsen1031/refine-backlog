@@ -10,15 +10,31 @@ const PLANS = [
     name: "Free",
     price: 0,
     per: null,
-    description: "Kick the tires. No commitment.",
+    description: "Kick the tires. No credit card.",
     features: [
-      "5 specs per day",
+      "5 lints/day",
       "All 5 scoring dimensions",
       "JSON response via /api/lint",
-      "No API key required — or get a free key to track usage",
+      "1 rewrite preview/day (250-char preview + score delta)",
+      "No signup required — or get a free key to track usage",
       "Community support",
     ],
-    cta: "Get Started Free",
+    cta: "Lint your first spec",
+    highlighted: false,
+  },
+  {
+    name: "Lite",
+    price: 9,
+    per: "/mo",
+    description: "When you want the full rewrite, not just the preview.",
+    features: [
+      "Everything in Free",
+      "10 full rewrites/day (complete rewritten spec, not preview)",
+      "Changes list + score improvement per rewrite",
+      "API access with license key",
+      "Email support",
+    ],
+    cta: "Start Lite",
     highlighted: false,
   },
   {
@@ -27,10 +43,11 @@ const PLANS = [
     per: "/mo",
     description: "For devs running agents daily.",
     features: [
-      "Unlimited lints",
-      "25 issues per request",
-      "codebase_context scoring",
-      "agent_ready label automation",
+      "Unlimited lints + rewrites",
+      "Full rewrite text with structured output",
+      "codebase_context scoring (spec scored against your actual stack)",
+      "Agent profiles (target rewrites for Cursor, Codex, Claude Code)",
+      "25 issues per batch request",
       "Priority support",
     ],
     cta: "Start Solo",
@@ -40,11 +57,12 @@ const PLANS = [
     name: "Team",
     price: 79,
     per: "/mo",
-    description: "For firms where bad specs cost real money.",
+    description: "For teams where bad specs cost real money.",
     features: [
-      "Unlimited lints",
-      "50 issues per request",
-      "Dependency mapping (coming soon)",
+      "Everything in Solo",
+      "50 issues per batch request",
+      "Rewrite chain (iterative refinement across multiple passes)",
+      "Cross-spec context (score specs relative to your existing backlog)",
       "Team analytics dashboard (coming soon)",
       "SLA + dedicated support",
     ],
@@ -56,7 +74,7 @@ const PLANS = [
 export function PricingSection() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
-  const handleCheckout = async (plan: "pro" | "team") => {
+  const handleCheckout = async (plan: "lite" | "pro" | "team") => {
     setLoadingPlan(plan)
     try {
       const response = await fetch("/api/checkout", {
@@ -81,6 +99,8 @@ export function PricingSection() {
   const handleClick = (planName: string) => {
     if (planName === "Free") {
       window.location.href = "/get-key"
+    } else if (planName === "Lite") {
+      handleCheckout("lite")
     } else if (planName === "Solo") {
       handleCheckout("pro")
     } else {
@@ -94,22 +114,27 @@ export function PricingSection() {
         <div className="mb-16">
           <p className="text-emerald-400 font-mono text-sm mb-3">// pricing</p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-            Simple pricing. No seat games.
+            Pay for what you use. Cancel anytime.
           </h2>
           <p className="text-zinc-400 max-w-xl">
-            You&apos;re spending $1,000/day on AI coding agents. Are you spending $0 making sure they build the right thing?
+            If your team runs coding agents, a bad spec costs more than any of these plans. The math is simple.
+          </p>
+          <p className="text-zinc-500 text-sm mt-3 font-mono">
+            Scoring engine, CLI, and GitHub Action are free and open source. Cloud features are where the paid plans start.
           </p>
         </div>
 
-        <p className="text-zinc-500 text-sm font-mono mb-10">
-          Your GitHub issues already contain specs. Speclint tells you if they&apos;re good enough.
-        </p>
-
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {PLANS.map((plan) => (
+            <div key={plan.name} className="flex flex-col">
+              {/* Mobile-only "Most Popular" label before Solo card */}
+              {plan.name === "Solo" && (
+                <div className="block sm:hidden text-center text-emerald-400 text-xs font-mono font-semibold mb-2">
+                  ↓ Most Popular
+                </div>
+              )}
             <div
-              key={plan.name}
-              className={`relative rounded-lg border p-6 flex flex-col ${
+              className={`relative rounded-lg border p-6 flex flex-col flex-1 ${
                 plan.highlighted
                   ? "border-emerald-500/40 bg-emerald-500/5"
                   : "border-[#222] bg-[#0f0f0f]"
@@ -148,11 +173,12 @@ export function PricingSection() {
                 onClick={() => handleClick(plan.name)}
                 disabled={loadingPlan !== null}
               >
-                {loadingPlan === (plan.name === "Solo" ? "pro" : plan.name === "Team" ? "team" : null) && (
+                {loadingPlan === (plan.name === "Lite" ? "lite" : plan.name === "Solo" ? "pro" : plan.name === "Team" ? "team" : null) && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 {plan.cta}
               </Button>
+            </div>
             </div>
           ))}
         </div>
@@ -167,9 +193,20 @@ export function PricingSection() {
             <div className="text-zinc-400 text-sm mt-1">per lint response</div>
           </div>
           <div>
-            <div className="text-white font-mono text-xl font-bold">100%</div>
-            <div className="text-zinc-400 text-sm mt-1">cancel anytime</div>
+            <div className="text-white font-mono text-xl font-bold">MIT</div>
+            <div className="text-zinc-400 text-sm mt-1">open source scoring engine</div>
           </div>
+        </div>
+
+        <div className="mt-8 bg-[#0f0f0f] border border-[#1e1e1e] rounded-lg p-6 text-center">
+          <p className="text-white font-semibold mb-2">Buying for a team?</p>
+          <p className="text-zinc-400 text-sm mb-4">Team plan includes batch linting, cross-spec context, and an analytics dashboard (coming soon). No per-seat pricing, ever.</p>
+          <Button
+            className="bg-emerald-500 hover:bg-emerald-400 text-black font-semibold"
+            onClick={() => handleClick("Team")}
+          >
+            Start Team Trial →
+          </Button>
         </div>
       </div>
     </section>

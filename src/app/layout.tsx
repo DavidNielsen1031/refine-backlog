@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { Analytics } from '@vercel/analytics/react';
+import Link from "next/link";
 import "./globals.css";
 
 const inter = Inter({
@@ -129,7 +130,20 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased bg-background text-foreground min-h-screen`}
       >
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/80 backdrop-blur-sm border-b border-zinc-800/50">
+          <div className="max-w-6xl mx-auto px-6 h-12 flex items-center justify-between">
+            <Link href="/" className="text-white font-semibold font-mono text-sm tracking-tight">speclint</Link>
+            <div className="flex items-center gap-5 text-sm font-mono">
+              <Link href="/blog" className="text-zinc-400 hover:text-zinc-100 transition-colors">blog</Link>
+              <Link href="/dashboard" className="text-zinc-400 hover:text-zinc-100 transition-colors">dashboard</Link>
+              <Link href="/docs/enforce" className="text-zinc-400 hover:text-zinc-100 transition-colors">docs</Link>
+              <Link href="/get-key" className="bg-emerald-500 hover:bg-emerald-400 text-black px-3 py-1 rounded text-xs font-semibold transition-colors">get key</Link>
+            </div>
+          </div>
+        </nav>
+        <div className="pt-12">
         {children}
+        </div>
         <Analytics />
       </body>
     </html>

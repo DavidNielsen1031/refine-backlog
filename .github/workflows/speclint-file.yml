@@ -18,13 +18,13 @@ jobs:
 
       - name: Refine backlog
         id: refine
-        uses: DavidNielsen1031/speclint-action@v1
+        uses: speclint-ai/speclint-action@473fe71c3fc6af325b23e6abc3554964af0bfc55
         with:
           file: ${{ inputs.file }}
           output-file: refined.json
           user-stories: "true"
           gherkin: "true"
-          key: ${{ secrets.REFINE_BACKLOG_KEY }}
+          key: ${{ secrets.SPECLINT_KEY }}
 
       - name: Commit refined output
         run: |
