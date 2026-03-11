@@ -497,7 +497,7 @@ export async function POST(request: NextRequest) {
     // Compute completeness scores (deterministic, post-LLM)
     const scores = refinedItems.map((item, i) => {
       const { score: rawScore, breakdown } = computeCompletenessScore(item)
-      const inputQuality = inputQualities[i]
+      const inputQuality = inputQualities[i] ?? { score: 100, isSpeculative: false }
       // Cap score at 60 for speculative inputs (garbage-in guard)
       const score = capScoreForSpeculativeInput(rawScore, inputQuality)
       // Extract persona fields from LLM output (if persona was provided and paid tier)
