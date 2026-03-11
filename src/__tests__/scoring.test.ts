@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeCompletenessScore, isAgentReady } from '@/lib/scoring'
+import { computeCompletenessScore, isAgentReady, capScoreForSpeculativeInput } from '@/lib/scoring'
 import type { RefinedItem } from '@/lib/schemas'
 
 function makeItem(overrides: Partial<RefinedItem> = {}): RefinedItem {
@@ -405,5 +405,21 @@ describe('isAgentReady', () => {
     expect(isAgentReady(0)).toBe(false)
     expect(isAgentReady(45)).toBe(false)
     expect(isAgentReady(69)).toBe(false)
+  })
+})
+
+describe('capScoreForSpeculativeInput', () => {
+  it('caps score at 60 when input is speculative', () => {
+    expect(capScoreForSpeculativeInput(100, { isSpeculative: true })).toBe(60)
+    expect(capScoreForSpeculativeInput(80, { isSpeculative: true })).toBe(60)
+    expect(capScoreForSpeculativeInput(60, { isSpeculative: true })).toBe(60)
+    expect(capScoreForSpeculativeInput(45, { isSpeculative: true })).toBe(45)
+    expect(capScoreForSpeculativeInput(0, { isSpeculative: true })).toBe(0)
+  })
+
+  it('returns score unchanged when input is not speculative', () => {
+    expect(capScoreForSpeculativeInput(100, { isSpeculative: false })).toBe(100)
+    expect(capScoreForSpeculativeInput(75, { isSpeculative: false })).toBe(75)
+    expect(capScoreForSpeculativeInput(0, { isSpeculative: false })).toBe(0)
   })
 })

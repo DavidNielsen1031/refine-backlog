@@ -124,3 +124,17 @@ export function computeCompletenessScore(item: RefinedItem): {
 export function isAgentReady(score: number): boolean {
   return score >= 70
 }
+
+/**
+ * Cap a completeness score when the input quality is speculative.
+ * The output may be well-formatted but it's not a real refinement — cap at 60.
+ */
+export function capScoreForSpeculativeInput(
+  score: number,
+  inputQuality: { isSpeculative: boolean },
+): number {
+  if (inputQuality.isSpeculative) {
+    return Math.min(score, 60)
+  }
+  return score
+}

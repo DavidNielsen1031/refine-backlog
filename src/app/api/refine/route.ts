@@ -4,7 +4,8 @@ import { checkRateLimit, checkRewriteRateLimit, getMaxItems, getTierLimits, reso
 import { RefinedItemsSchema, type RefinedItem } from '@/lib/schemas'
 import { trackUsage, calculateCost, detectSource } from '@/lib/telemetry'
 import { detectInjection } from '@/lib/injection-monitor'
-import { computeCompletenessScore, isAgentReady } from '@/lib/scoring'
+import { computeCompletenessScore, isAgentReady, capScoreForSpeculativeInput } from '@/lib/scoring'
+import { assessInputQuality } from '@/lib/input-quality'
 import { storeLintReceipt, storeTrace } from '@/lib/kv'
 import { anthropic } from '@/lib/anthropic'
 import { VALID_TARGET_AGENTS, VALID_MODES } from '@/lib/rewrite-types'
@@ -365,6 +366,10 @@ export async function POST(request: NextRequest) {
     }
 
     const items = cleanItems.slice(0, maxItems)
+
+    // Assess input quality for each item (garbage-in detector)
+    const inputQualities = items.map(item => assessInputQuality(item))
+
     const contextLine = body.context ? `\n\nProject context: ${body.context}` : ''
     const isPaidTier = tier === 'pro' || tier === 'team'
     const codebaseContextUsed = isPaidTier && !!body.codebase_context
@@ -490,8 +495,11 @@ export async function POST(request: NextRequest) {
     const resolvedEndpoint = (['lint', 'refine', 'discover', 'plan'].includes(request.headers.get('x-forwarded-endpoint') ?? '') ? request.headers.get('x-forwarded-endpoint') : (request.nextUrl.pathname.split('/').pop() ?? 'refine')) as 'lint' | 'refine' | 'discover' | 'plan'
 
     // Compute completeness scores (deterministic, post-LLM)
-    const scores = refinedItems.map(item => {
-      const { score, breakdown } = computeCompletenessScore(item)
+    const scores = refinedItems.map((item, i) => {
+      const { score: rawScore, breakdown } = computeCompletenessScore(item)
+      const inputQuality = inputQualities[i]
+      // Cap score at 60 for speculative inputs (garbage-in guard)
+      const score = capScoreForSpeculativeInput(rawScore, inputQuality)
       // Extract persona fields from LLM output (if persona was provided and paid tier)
       let personaAlignment: number | null = null
       let personaGaps: string[] | null = null
@@ -591,16 +599,24 @@ export async function POST(request: NextRequest) {
     // Generate lint_id before building itemsWithScores so it can be embedded per item
     const lintId = 'spl_' + crypto.randomUUID().replace(/-/g, '').slice(0, 8)
 
-    const itemsWithScores = refinedItems.map((item, i) => ({
-      ...item,
-      lint_id: lintId,
-      completeness_score: scores[i].completeness_score,
-      agent_ready: scores[i].agent_ready,
-      breakdown: scores[i].breakdown,
-      persona_alignment: freeWithPersona ? null : scores[i].persona_alignment ?? null,
-      persona_gaps: freeWithPersona ? null : scores[i].persona_gaps ?? null,
-      rewrite: rewrites[i] ?? null,
-    }))
+    const SPECULATIVE_WARNING =
+      'This spec was generated from very limited input. The acceptance criteria and verification steps are speculative — treat this as a starting point, not a validated refinement.'
+
+    const itemsWithScores = refinedItems.map((item, i) => {
+      const inputQuality = inputQualities[i]
+      return {
+        ...item,
+        lint_id: lintId,
+        completeness_score: scores[i].completeness_score,
+        agent_ready: scores[i].agent_ready,
+        breakdown: scores[i].breakdown,
+        persona_alignment: freeWithPersona ? null : scores[i].persona_alignment ?? null,
+        persona_gaps: freeWithPersona ? null : scores[i].persona_gaps ?? null,
+        rewrite: rewrites[i] ?? null,
+        input_quality_score: inputQuality.score,
+        ...(inputQuality.isSpeculative ? { warning: SPECULATIVE_WARNING } : {}),
+      }
+    })
 
     // Store lint receipt (SL-037)
     const firstScore = scores[0]
