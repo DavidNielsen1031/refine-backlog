@@ -74,4 +74,3 @@ Pass your license key via `x-license-key` header or the MCP server config.
 
 ---
 *Part of: [[products/speclint/BACKLOG|speclint Backlog]] · [[MEMORY|Memory]]*
-# test
