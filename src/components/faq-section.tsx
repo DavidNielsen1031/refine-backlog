@@ -11,6 +11,10 @@ const faqs = [
     a: "The scoring engine, CLI (npx speclint), and GitHub Action are MIT open source — free forever. The cloud API has a free tier: 3 requests/day · 5 items per request, 1 rewrite preview per day, no credit card required. Paid plans: Lite ($9/mo) for full rewrites, Solo ($29/mo) for unlimited rewrites + codebase_context, Team ($79/mo) for batch operations + cross-spec context."
   },
   {
+    q: "How does the AI know what acceptance criteria to write for a vague spec?",
+    a: "It doesn't know your codebase — it infers the most likely requirements based on patterns from millions of specs, bug tickets, and user stories. \"Fix login bug\" gets ACs about error handling, valid/invalid credentials, and session persistence because those are what login bugs almost always involve. Think of it as a first draft from a senior PM who knows the pattern but hasn't talked to your users yet. Two things make it better than generic: (1) auto-context detection reads your project files (README, package.json, AGENTS.md, Prisma schema) so specs are tailored to your stack, and (2) the assumptions field explicitly flags what Speclint is guessing — so you know what to verify before your agent starts coding. The value isn't perfect accuracy. It's completeness: an agent with 4 ACs where 1 needs tweaking will outperform an agent with 0 ACs guessing at everything."
+  },
+  {
     q: "Can't I just use ChatGPT to improve my specs?",
     a: "ChatGPT makes specs sound better. Speclint makes specs work better. The difference is measurable: Speclint scores each spec on 5 defined dimensions, rewrites only the failing parts, then re-scores to prove improvement. ChatGPT doesn't score, can't gate your CI pipeline, and optimizes for coherent prose rather than agent task completion. The other difference: Speclint integrates with GitHub Issues natively. ChatGPT is a conversation. One runs in your workflow; the other interrupts it."
   },
