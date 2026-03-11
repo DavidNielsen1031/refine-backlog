@@ -55,7 +55,7 @@ describe('GET /api/key-info', () => {
 
   it('returns 200 with tier=team and null remaining_today for team key', async () => {
     vi.mocked(getLicenseData).mockResolvedValue({ customerId: 'cus_123', plan: 'team', status: 'active' })
-    const res = await GET(makeRequest({ 'x-license-key': 'SK-INTERNAL-8157AD2B79F752B4004593BE' }))
+    const res = await GET(makeRequest({ 'x-license-key': 'SK-INTERNAL-REDACTED' }))
     expect(res.status).toBe(200)
     const data = await res.json()
     expect(data.tier).toBe('team')
@@ -106,12 +106,12 @@ describe('GET /api/key-info', () => {
 
   it('masks the key in the response (first 6 + last 4)', async () => {
     vi.mocked(getLicenseData).mockResolvedValue({ customerId: 'cus_123', plan: 'team', status: 'active' })
-    const res = await GET(makeRequest({ 'x-license-key': 'SK-INTERNAL-8157AD2B79F752B4004593BE' }))
+    const res = await GET(makeRequest({ 'x-license-key': 'SK-INTERNAL-REDACTED' }))
     const data = await res.json()
-    // "SK-INTERNAL-8157AD2B79F752B4004593BE" → first 6 = "SK-INT", last 4 = "93BE"
+    // "SK-INTERNAL-REDACTED" → first 6 = "SK-INT", last 4 = "93BE"
     expect(data.key).toBe('SK-INT...93BE')
     // Raw key must not be present in the response
-    expect(data.key).not.toBe('SK-INTERNAL-8157AD2B79F752B4004593BE')
+    expect(data.key).not.toBe('SK-INTERNAL-REDACTED')
   })
 
   // --- Canceled key ---

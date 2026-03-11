@@ -20,7 +20,7 @@
 ## Items
 
 ### DOG-001: Fix SK-INTERNAL key tier recognition (S)
-**Problem:** The internal key `SK-INTERNAL-8157AD2B79F752B4004593BE` exists in Redis as `team` tier but sometimes resolves as free tier, hitting the 3/day rate limit.
+**Problem:** The internal key `SK-INTERNAL-REDACTED` exists in Redis as `team` tier but sometimes resolves as free tier, hitting the 3/day rate limit.
 **Solution:** Debug the rate-limit middleware tier resolution path. Check if the key lookup in `rate-limit.ts` correctly queries Redis and passes tier through. Add logging to trace tier resolution. Fix the root cause.
 **Verification:** Run `curl` with the internal key 5 times in a row — all should succeed without 429. Check the tier field in the response.
 **Measurable Outcome:** Internal key never hits free tier limits. Healthcheck API calls succeed at team tier 100% of the time.
