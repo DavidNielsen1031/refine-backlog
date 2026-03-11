@@ -603,7 +603,7 @@ export async function POST(request: NextRequest) {
       'This spec was generated from very limited input. The acceptance criteria and verification steps are speculative — treat this as a starting point, not a validated refinement.'
 
     const itemsWithScores = refinedItems.map((item, i) => {
-      const inputQuality = inputQualities[i]
+      const inputQuality = inputQualities[i] ?? { score: 100, isSpeculative: false }
       return {
         ...item,
         lint_id: lintId,
