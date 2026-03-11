@@ -92,6 +92,20 @@ Or set in your environment:
 export SPECLINT_KEY=sk-your-key-here
 ```
 
+## How It Works (And What It Doesn't Know)
+
+Speclint doesn't know your codebase. It infers the most likely acceptance criteria based on patterns from millions of specs, bug tickets, and user stories. "Fix login bug" gets ACs about error handling, valid/invalid credentials, and session persistence because those are what login bugs almost always involve.
+
+Think of it as a **first draft from a senior PM** who knows the pattern but hasn't talked to your users yet.
+
+Two things make it better than generic guessing:
+
+1. **Auto-context detection** — when run from your project directory, Speclint reads your README, package.json, AGENTS.md, and Prisma schema. So "fix login bug" in a Next.js + Supabase project gets different ACs than in a Django project.
+
+2. **The assumptions field** — Speclint explicitly flags what it's guessing. "Assumes OAuth, not email/password" or "Assumes existing error handling middleware." These are signals to check before your agent starts coding.
+
+**The value isn't perfect accuracy — it's completeness.** An agent with 4 ACs where 1 needs tweaking will outperform an agent with 0 ACs guessing at everything. You review the spec in 10 seconds; the agent executes it in 10 minutes. That tradeoff is worth it.
+
 ## Why This Matters
 
 Coding agents execute specs literally. Ambiguous specs waste tokens and produce wrong code.
