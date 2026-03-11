@@ -64,7 +64,7 @@ ${failingDimensions.map((d) => `- ${d}`).join('\n')}`
   // Standard gap guidance
   parts.push(
     `\nFor each gap, add concrete, specific content:
-- "has_measurable_outcome": Add a quantifiable business outcome to the problem statement
+- "has_measurable_outcome": The outcome must be **observable and quantified**. Add a "Success Metric:" line that states a concrete, testable result — not just what the feature does. Examples: "Success Metric: API endpoint returns HTTP 200 with JSON body in < 300ms under load", "Success Metric: Error count in Sentry drops to 0 within 24h of deploy", "Success Metric: User can complete checkout in < 3 clicks, confirmed by QA walkthrough", "Success Metric: Unit test coverage for this module increases from N% to ≥ 80%". Avoid: "users will be able to…", "the system should…" — these are behaviors, not metrics.
 - "has_testable_criteria": Add 2+ acceptance criteria starting with action verbs (Verify, Confirm, Validate, Check, Assert)
 - "has_constraints": Add technical constraints, scope limits, or assumptions
 - "no_vague_verbs": Make the title specific — replace "improve X" with what specifically changes
