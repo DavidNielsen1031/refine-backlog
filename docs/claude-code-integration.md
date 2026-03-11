@@ -81,7 +81,7 @@ npx speclint --file backlog.txt --format json
 npx speclint --file backlog.txt --gherkin
 ```
 
-### Pro/Team tier (unlimited requests)
+### Paid tiers (more requests + full rewrites)
 
 ```bash
 npx speclint "task" --key sk-your-key-here
@@ -118,9 +118,10 @@ One `npx speclint` call (~2 seconds) saves 5-10 minutes of agent thrashing.
 
 ## Pricing
 
-- **Free:** 5 items/request, 3 requests/day — no signup, no API key
-- **Pro ($9/mo):** 25 items/request, unlimited
-- **Team ($29/mo):** 50 items/request, unlimited
+- **Free:** 3 requests/day, 5 items per request, 1 rewrite preview/day — no signup required
+- **Lite ($9/mo):** 10 full rewrites/day (complete rewritten spec, not just preview)
+- **Solo ($29/mo):** Unlimited lints + rewrites, codebase_context scoring, agent profiles
+- **Team ($79/mo):** Everything in Solo + 50-issue batch, cross-spec context, SLA
 
 Free tier is plenty for individual Claude Code users refining specs one at a time.
 
