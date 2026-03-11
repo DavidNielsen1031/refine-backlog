@@ -44,6 +44,60 @@ Refine your backlog automatically in CI. Trigger on issue open, manual dispatch,
 
 → [GitHub Marketplace](https://github.com/marketplace/actions/speclint) · [Full docs + examples](https://github.com/DavidNielsen1031/speclint-action#readme)
 
+## Claude Code / Codex / Coding Agents
+
+Add Speclint as a quality gate in your agent workflow. Drop this into your project's `AGENTS.md` or `CLAUDE.md`:
+
+```markdown
+## Spec Quality Gate
+Before implementing any task or issue, refine it through Speclint:
+  npx speclint "the task description"
+Only proceed if the completeness score is ≥ 70 (agent-ready).
+Use the refined acceptance criteria and verification steps as your implementation checklist.
+```
+
+The CLI auto-detects project context from your repo (README, package.json, AGENTS.md, Prisma schema) so refined specs are tailored to your stack.
+
+### Full agent workflow
+
+```bash
+# 1. Refine before building
+npx speclint "Add Stripe webhook handler for subscription events" --format json
+
+# 2. Pipe a whole backlog file
+npx speclint --file backlog.txt --gherkin
+
+# 3. Refine a GitHub issue title before implementation
+npx speclint "$(gh issue view 42 --json title -q .title)"
+```
+
+### MCP server (Claude Desktop / Claude Code)
+
+For deeper integration, run Speclint as an MCP tool:
+
+```json
+{
+  "mcpServers": {
+    "speclint": {
+      "command": "npx",
+      "args": ["speclint-mcp"]
+    }
+  }
+}
+```
+
+Then ask Claude: *"Refine this spec before implementing: add user export to CSV"*
+
+### Why this matters for agents
+
+Coding agents execute specs literally. Vague input → wasted tokens and wrong code. Speclint ensures every spec has:
+- **Testable acceptance criteria** (action-verb format agents can verify)
+- **Verification steps** (concrete commands: `curl`, `npm test`, "open page and check...")
+- **Constraints and assumptions** (scope boundaries agents respect)
+- **Size estimate** (agents can flag XL specs for decomposition)
+
+A 30-second `npx speclint` call saves 10 minutes of agent thrashing on ambiguous requirements.
+
 ## API
 
 Direct REST API for scripts, automations, and pipelines:
