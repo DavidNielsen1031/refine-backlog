@@ -23,7 +23,7 @@ export interface UsageEvent {
   /** Raw input items shown in Discord alerts — truncated for display */
   items?: string[]
   /** API endpoint that generated this event */
-  endpoint?: 'lint' | 'refine' | 'discover' | 'plan' | 'rewrite' | 'strategic-lint'
+  endpoint?: 'lint' | 'refine' | 'discover' | 'plan' | 'rewrite'
   /** Completeness scores per item (post-LLM) */
   scores?: { title: string; completeness_score: number; agent_ready: boolean }[]
   /** Average completeness score across all items */
