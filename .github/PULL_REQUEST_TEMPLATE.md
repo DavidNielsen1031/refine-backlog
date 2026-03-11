@@ -17,3 +17,6 @@ Closes #<!-- issue number -->
 
 ## Notes for reviewer
 <!-- Anything unusual, shortcuts taken, follow-ups needed -->
+
+---
+*Part of: [[products/speclint/BACKLOG|speclint Backlog]] · [[MEMORY|Memory]]*
