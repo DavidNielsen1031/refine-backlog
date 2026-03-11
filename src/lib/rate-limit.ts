@@ -18,7 +18,7 @@ function checkInMemoryFallback(ip: string): boolean {
 }
 
 const TIER_LIMITS = {
-  free: { maxItems: 5, maxRequestsPerDay: 3, maxRewritesPerDay: 1 },
+  free: { maxItems: 5, maxRequestsPerDay: 5, maxRewritesPerDay: 1 },
   lite: { maxItems: 5, maxRequestsPerDay: Infinity, maxRewritesPerDay: 10 },
   pro: { maxItems: 25, maxRequestsPerDay: Infinity, maxRewritesPerDay: 500 },
   team: { maxItems: 50, maxRequestsPerDay: Infinity, maxRewritesPerDay: 1000 },

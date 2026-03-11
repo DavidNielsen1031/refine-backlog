@@ -110,7 +110,7 @@ export function HeroSection() {
                 See Pricing
               </button>
             </div>
-            <p className="mt-4 text-xs text-zinc-600 font-mono">No signup · 3 requests/day free · open source</p>
+            <p className="mt-4 text-xs text-zinc-600 font-mono">No signup · 5 requests/day free · open source</p>
           </div>
 
           {/* Right: animated score visualization */}

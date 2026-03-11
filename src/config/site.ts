@@ -77,7 +77,8 @@ export const siteConfig = {
       description: "Score your first issues",
       features: [
         "5 items per request",
-        "3 requests per day",
+        "5 requests per day",
+        "1 rewrite preview per day",
         "completeness_score included",
         "No credit card required"
       ],
@@ -85,16 +86,30 @@ export const siteConfig = {
       popular: false
     },
     {
-      name: "Pro",
+      name: "Lite",
+      price: 9,
+      description: "Full rewrites, no limits on linting",
+      features: [
+        "Unlimited lint requests",
+        "5 items per request",
+        "10 full rewrites per day",
+        "Complete rewritten spec text"
+      ],
+      cta: "Upgrade to Lite",
+      popular: false
+    },
+    {
+      name: "Solo",
       price: 29,
       description: "For solo devs running agents",
       features: [
-        "Unlimited requests",
+        "Unlimited requests + rewrites",
         "25 items per request",
         "codebase_context (pass your tech stack)",
-        "Priority support"
+        "Agent profiles (Cursor, Codex, Claude Code)",
+        "Structured output"
       ],
-      cta: "Upgrade to Pro",
+      cta: "Upgrade to Solo",
       popular: true
     },
     {
@@ -102,9 +117,10 @@ export const siteConfig = {
       price: 79,
       description: "For small firms automating at scale",
       features: [
-        "Unlimited requests",
+        "Unlimited everything",
         "50 items per request",
-        "codebase_context included",
+        "Batch operations",
+        "Cross-spec context",
         "Dependency mapping (/api/plan)",
         "SLA"
       ],
@@ -124,7 +140,7 @@ export const siteConfig = {
     },
     {
       q: "How much does Speclint cost?",
-      a: "Speclint offers three plans: Free (5 items/request, 3 requests/day, no credit card), Pro at $29/month (unlimited requests, 25 items/request, codebase_context), and Team at $79/month (unlimited requests, 50 items/request, codebase_context, dependency mapping, SLA). Cancel anytime."
+      a: "Speclint offers four plans: Free (5 items/request, 5 requests/day, no credit card), Lite at $9/month (unlimited requests, 10 rewrites/day), Solo at $29/month (unlimited requests + rewrites, codebase_context, agent profiles), and Team at $79/month (50 items/request, batch ops, cross-spec context, SLA). Cancel anytime."
     },
     {
       q: "How do I install the GitHub Action?",

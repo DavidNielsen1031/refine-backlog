@@ -129,7 +129,7 @@ export default function GetKeyPage() {
               </p>
               {plan === 'free' && (
                 <p className="text-xs text-muted-foreground border-t border-border/30 pt-3">
-                  Free tier: 5 items/request, 3 requests/day.{' '}
+                  Free tier: 5 items/request, 5 requests/day.{' '}
                   <Link href="/pricing" className="text-emerald-400 hover:underline">Upgrade for more →</Link>
                 </p>
               )}

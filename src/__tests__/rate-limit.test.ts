@@ -64,9 +64,9 @@ describe('getMaxItems', () => {
 })
 
 describe('getTierLimits', () => {
-  it('free tier has 3 requests/day limit', () => {
+  it('free tier has 5 requests/day limit', () => {
     const limits = getTierLimits('free')
-    expect(limits.maxRequestsPerDay).toBe(3)
+    expect(limits.maxRequestsPerDay).toBe(5)
     expect(limits.maxItems).toBe(5)
   })
 

@@ -114,9 +114,10 @@ Agent capabilities: [speclint.ai/llms.txt](https://speclint.ai/llms.txt)
 
 ## Pricing
 
-- **Free:** 5 items/request, 3 requests/day — no signup required
-- **Pro ($9/mo):** 25 items/request, unlimited requests
-- **Team ($29/mo):** 50 items/request, unlimited requests
+- **Free:** 5 items/request, 5 requests/day, 1 rewrite preview/day — no signup required
+- **Lite ($9/mo):** 5 items/request, unlimited requests, 10 full rewrites/day
+- **Solo ($29/mo):** 25 items/request, unlimited requests + rewrites, codebase_context, agent profiles
+- **Team ($79/mo):** 50 items/request, unlimited everything, batch ops, cross-spec context, SLA
 
 Pass your license key via `x-license-key` header or the MCP server config.
 

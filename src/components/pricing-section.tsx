@@ -12,7 +12,7 @@ const PLANS = [
     per: null,
     description: "Kick the tires. No credit card.",
     features: [
-      "3 requests/day · 5 items per request",
+      "5 requests/day · 5 items per request",
       "All 5 scoring dimensions",
       "JSON response via /api/lint",
       "1 rewrite preview/day (250-char preview + score delta)",

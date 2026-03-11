@@ -78,7 +78,15 @@ const structuredData = {
           "name": "Free",
           "price": "0",
           "priceCurrency": "USD",
-          "description": "5 items per request, 3 requests per day, no credit card required"
+          "description": "5 items per request, 5 requests per day, 1 rewrite preview per day, no credit card required"
+        },
+        {
+          "@type": "Offer",
+          "name": "Lite",
+          "price": "9",
+          "priceCurrency": "USD",
+          "billingIncrement": "month",
+          "description": "Unlimited requests, 5 items per request, 10 full rewrites per day"
         },
         {
           "@type": "Offer",
@@ -86,7 +94,7 @@ const structuredData = {
           "price": "29",
           "priceCurrency": "USD",
           "billingIncrement": "month",
-          "description": "Unlimited requests, 25 items per request, codebase_context"
+          "description": "Unlimited requests + rewrites, 25 items per request, codebase_context, agent profiles"
         },
         {
           "@type": "Offer",
@@ -94,7 +102,7 @@ const structuredData = {
           "price": "79",
           "priceCurrency": "USD",
           "billingIncrement": "month",
-          "description": "Unlimited requests, 50 items per request, dependency mapping, SLA"
+          "description": "Unlimited requests, 50 items per request, batch ops, cross-spec context, SLA"
         }
       ]
     },
