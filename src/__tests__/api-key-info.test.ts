@@ -108,8 +108,8 @@ describe('GET /api/key-info', () => {
     vi.mocked(getLicenseData).mockResolvedValue({ customerId: 'cus_123', plan: 'team', status: 'active' })
     const res = await GET(makeRequest({ 'x-license-key': 'SK-INTERNAL-REDACTED' }))
     const data = await res.json()
-    // "SK-INTERNAL-REDACTED" → first 6 = "SK-INT", last 4 = "93BE"
-    expect(data.key).toBe('SK-INT...93BE')
+    // "SK-INTERNAL-REDACTED" → first 6 = "SK-INT", last 4 = "CTED"
+    expect(data.key).toBe('SK-INT...CTED')
     // Raw key must not be present in the response
     expect(data.key).not.toBe('SK-INTERNAL-REDACTED')
   })
