@@ -118,7 +118,7 @@ One `npx speclint` call (~2 seconds) saves 5-10 minutes of agent thrashing.
 
 ## Pricing
 
-- **Free:** 3 requests/day, 5 items per request, 1 rewrite preview/day — no signup required
+- **Free:** 5 requests/day, 5 items per request, 1 rewrite preview/day — no signup required
 - **Lite ($9/mo):** 10 full rewrites/day (complete rewritten spec, not just preview)
 - **Solo ($29/mo):** Unlimited lints + rewrites, codebase_context scoring, agent profiles
 - **Team ($79/mo):** Everything in Solo + 50-issue batch, cross-spec context, SLA
